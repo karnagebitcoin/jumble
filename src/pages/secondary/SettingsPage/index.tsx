@@ -49,20 +49,24 @@ const SettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
         </div>
         <ChevronRight />
       </SettingItem>
-      <SettingItem className="clickable" onClick={() => push(toTranslation())}>
-        <div className="flex items-center gap-4">
-          <Languages />
-          <div>{t('Translation')}</div>
-        </div>
-        <ChevronRight />
-      </SettingItem>
-      <SettingItem className="clickable" onClick={() => push(toWallet())}>
-        <div className="flex items-center gap-4">
-          <Wallet />
-          <div>{t('Wallet')}</div>
-        </div>
-        <ChevronRight />
-      </SettingItem>
+      {!!pubkey && (
+        <SettingItem className="clickable" onClick={() => push(toTranslation())}>
+          <div className="flex items-center gap-4">
+            <Languages />
+            <div>{t('Translation')}</div>
+          </div>
+          <ChevronRight />
+        </SettingItem>
+      )}
+      {!!pubkey && (
+        <SettingItem className="clickable" onClick={() => push(toWallet())}>
+          <div className="flex items-center gap-4">
+            <Wallet />
+            <div>{t('Wallet')}</div>
+          </div>
+          <ChevronRight />
+        </SettingItem>
+      )}
       {!!pubkey && (
         <SettingItem className="clickable" onClick={() => push(toPostSettings())}>
           <div className="flex items-center gap-4">

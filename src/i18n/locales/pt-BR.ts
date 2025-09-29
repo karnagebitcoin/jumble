@@ -425,6 +425,27 @@ export default {
     'Write relays and {{count}} other relays': 'Relays de escrita e {{count}} outros relays',
     '{{count}} relays': '{{count}} relays',
     'Republishing...': 'Republicando...',
-    'Trending Notes': 'Notas em tendência'
+    'Trending Notes': 'Notas em tendência',
+    'Connected to': 'Conectado a',
+    'Disconnect Wallet': 'Desconectar carteira',
+    'Are you absolutely sure?': 'Você tem certeza absoluta?',
+    'You will not be able to send zaps to others.': 'Você não poderá enviar zaps para outros.',
+    Disconnect: 'Desconectar',
+    'Start with a Rizful Vault': 'Comece com um Cofre Rizful',
+    'or other wallets': 'ou outras carteiras',
+    'Rizful Vault': 'Cofre Rizful',
+    'Rizful Vault connected!': 'Cofre Rizful conectado!',
+    'You can now use your Rizful Vault to zap your favorite notes and creators.':
+      'Você pode agora usar seu Cofre Rizful para zapear suas notas e criadores favoritos.',
+    'Your Lightning Address': 'Seu Endereço Lightning',
+    'New to Rizful?': 'Novo no Rizful?',
+    'Sign up for Rizful': 'Inscreva-se no Rizful',
+    'If you already have a Rizful account, you can skip this step.':
+      'Se você já tem uma conta Rizful, pode pular esta etapa.',
+    'Get your one-time code': 'Obtenha seu código único',
+    'Get code': 'Obter código',
+    'Connect to your Rizful Vault': 'Conecte-se ao seu Cofre Rizful',
+    'Paste your one-time code here': 'Cole seu código único aqui',
+    Connect: 'Conectar'
   }
 }
