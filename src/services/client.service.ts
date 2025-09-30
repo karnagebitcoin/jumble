@@ -144,9 +144,12 @@ class ClientService extends EventTarget {
   }
 
   async publishEvent(relayUrls: string[], event: NEvent) {
-    try {
-      const uniqueRelayUrls = Array.from(new Set(relayUrls))
-      const result = await Promise.any(
+    const uniqueRelayUrls = Array.from(new Set(relayUrls))
+    await new Promise<void>((resolve, reject) => {
+      let successCount = 0
+      let finishedCount = 0
+      const errors: { url: string; error: any }[] = []
+      Promise.allSettled(
         uniqueRelayUrls.map(async (url) => {
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const that = this
@@ -154,6 +157,10 @@ class ClientService extends EventTarget {
           relay.publishTimeout = 10_000 // 10s
           return relay
             .publish(event)
+            .then(() => {
+              this.trackEventSeenOn(event.id, relay)
+              successCount++
+            })
             .catch((error) => {
               if (
                 error instanceof Error &&
@@ -164,23 +171,32 @@ class ClientService extends EventTarget {
                   .auth((authEvt: EventTemplate) => that.signer!.signEvent(authEvt))
                   .then(() => relay.publish(event))
               } else {
-                throw error
+                errors.push({ url, error })
               }
             })
-            .then((reason) => {
-              this.trackEventSeenOn(event.id, relay)
-              return reason
+            .finally(() => {
+              // If one third of the relays have accepted the event, consider it a success
+              const isSuccess = successCount >= uniqueRelayUrls.length / 3
+              if (isSuccess) {
+                this.emitNewEvent(event)
+                resolve()
+              }
+              if (++finishedCount >= uniqueRelayUrls.length) {
+                reject(
+                  new AggregateError(
+                    errors.map(
+                      ({ url, error }) =>
+                        new Error(
+                          `${url}: ${error instanceof Error ? error.message : String(error)}`
+                        )
+                    )
+                  )
+                )
+              }
             })
         })
       )
-      this.emitNewEvent(event)
-      return result
-    } catch (error) {
-      if (error instanceof AggregateError) {
-        throw error.errors[0]
-      }
-      throw error
-    }
+    })
   }
 
   emitNewEvent(event: NEvent) {
