@@ -123,7 +123,8 @@ class ClientService extends EventTarget {
           kinds.RelayList,
           kinds.Contacts,
           ExtendedKind.FAVORITE_RELAYS,
-          ExtendedKind.BLOSSOM_SERVER_LIST
+          ExtendedKind.BLOSSOM_SERVER_LIST,
+          ExtendedKind.RELAY_REVIEW
         ].includes(event.kind)
       ) {
         _additionalRelayUrls.push(...BIG_RELAY_URLS)
