@@ -451,6 +451,9 @@ export default {
     'Get code': 'Получить код',
     'Connect to your Rizful Vault': 'Подключитесь к вашему Rizful Vault',
     'Paste your one-time code here': 'Вставьте ваш одноразовый код здесь',
-    Connect: 'Подключить'
+    Connect: 'Подключить',
+    'Set up your wallet to send and receive sats!':
+      'Настройте свой кошелёк, чтобы отправлять и получать саты!',
+    'Set up': 'Настроить'
   }
 }

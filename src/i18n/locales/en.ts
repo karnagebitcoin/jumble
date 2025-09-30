@@ -441,6 +441,8 @@ export default {
     'Get code': 'Get code',
     'Connect to your Rizful Vault': 'Connect to your Rizful Vault',
     'Paste your one-time code here': 'Paste your one-time code here',
-    Connect: 'Connect'
+    Connect: 'Connect',
+    'Set up your wallet to send and receive sats!': 'Set up your wallet to send and receive sats!',
+    'Set up': 'Set up'
   }
 }

@@ -446,6 +446,9 @@ export default {
     'Get code': 'कोड प्राप्त करें',
     'Connect to your Rizful Vault': 'अपने Rizful वॉल्ट से कनेक्ट करें',
     'Paste your one-time code here': 'अपना वन-टाइम कोड यहां पेस्ट करें',
-    Connect: 'कनेक्ट करें'
+    Connect: 'कनेक्ट करें',
+    'Set up your wallet to send and receive sats!':
+      'सैट्स भेजने और प्राप्त करने के लिए अपना वॉलेट सेट करें!',
+    'Set up': 'सेट करें'
   }
 }

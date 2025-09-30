@@ -440,6 +440,8 @@ export default {
     'Get code': 'รับรหัส',
     'Connect to your Rizful Vault': 'เชื่อมต่อกับ Rizful Vault ของคุณ',
     'Paste your one-time code here': 'วางรหัสใช้ครั้งเดียวของคุณที่นี่',
-    Connect: 'เชื่อมต่อ'
+    Connect: 'เชื่อมต่อ',
+    'Set up your wallet to send and receive sats!': 'ตั้งค่ากระเป๋าของคุณเพื่อส่งและรับ sats!',
+    'Set up': 'ตั้งค่า'
   }
 }

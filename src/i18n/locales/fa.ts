@@ -444,6 +444,9 @@ export default {
     'Get code': 'دریافت کد',
     'Connect to your Rizful Vault': 'اتصال به Rizful Vault خود',
     'Paste your one-time code here': 'کد یکبار مصرف خود را اینجا بچسبانید',
-    Connect: 'اتصال'
+    Connect: 'اتصال',
+    'Set up your wallet to send and receive sats!':
+      'کیف پولت را تنظیم کن تا ساتس ارسال و دریافت کنی!',
+    'Set up': 'تنظیم'
   }
 }

@@ -445,6 +445,9 @@ export default {
     'Get code': '코드 받기',
     'Connect to your Rizful Vault': 'Rizful Vault에 연결',
     'Paste your one-time code here': '여기에 일회용 코드를 붙여넣기',
-    Connect: '연결'
+    Connect: '연결',
+    'Set up your wallet to send and receive sats!':
+      '사츠를 보내고 받을 수 있도록 지갑을 설정하세요!',
+    'Set up': '설정하기'
   }
 }

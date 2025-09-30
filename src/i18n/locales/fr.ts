@@ -454,6 +454,9 @@ export default {
     'Get code': 'Obtenir le code',
     'Connect to your Rizful Vault': 'Connectez-vous à votre coffre Rizful',
     'Paste your one-time code here': 'Collez votre code à usage unique ici',
-    Connect: 'Connecter'
+    Connect: 'Connecter',
+    'Set up your wallet to send and receive sats!':
+      'Configurez votre portefeuille pour envoyer et recevoir des sats !',
+    'Set up': 'Configurer'
   }
 }

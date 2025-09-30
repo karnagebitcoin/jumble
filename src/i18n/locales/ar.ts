@@ -442,6 +442,8 @@ export default {
     'Get code': 'احصل على الرمز',
     'Connect to your Rizful Vault': 'الاتصال بمحفظة Rizful الخاصة بك',
     'Paste your one-time code here': 'الصق رمز الاستخدام مرة واحدة هنا',
-    Connect: 'اتصال'
+    Connect: 'اتصال',
+    'Set up your wallet to send and receive sats!': 'قم بإعداد محفظتك لإرسال واستقبال الساتس!',
+    'Set up': 'إعداد'
   }
 }

@@ -438,6 +438,8 @@ export default {
     'Get code': '获取代码',
     'Connect to your Rizful Vault': '连接到您的 Rizful 钱包',
     'Paste your one-time code here': '将您的一次性代码粘贴到此处',
-    Connect: '连接'
+    Connect: '连接',
+    'Set up your wallet to send and receive sats!': '设置你的钱包以发送和接收 sats！',
+    'Set up': '去设置'
   }
 }
