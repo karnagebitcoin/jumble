@@ -9,8 +9,6 @@ export default function VideoPlayer({ src, className }: { src: string; className
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!autoplay) return
-
     const video = videoRef.current
     const container = containerRef.current
 
@@ -18,7 +16,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && autoplay) {
           setTimeout(() => {
             if (isInViewport(container)) {
               mediaManager.autoPlay(video)

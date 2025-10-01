@@ -17,6 +17,7 @@ export default function AudioPlayer({ src, className }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0)
   const seekTimeoutRef = useRef<NodeJS.Timeout>()
   const isSeeking = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const audio = audioRef.current
@@ -44,6 +45,28 @@ export default function AudioPlayer({ src, className }: AudioPlayerProps) {
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('play', handlePlay)
+    }
+  }, [])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    const container = containerRef.current
+
+    if (!audio || !container) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          audio.pause()
+        }
+      },
+      { threshold: 1 }
+    )
+
+    observer.observe(container)
+
+    return () => {
+      observer.unobserve(container)
     }
   }, [])
 
@@ -80,6 +103,7 @@ export default function AudioPlayer({ src, className }: AudioPlayerProps) {
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         'flex items-center gap-3 py-2 pl-2 pr-4 border rounded-full max-w-md',
         className
