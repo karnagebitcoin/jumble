@@ -15,7 +15,9 @@ import {
   useRef,
   useState
 } from 'react'
+import BackgroundAudio from './components/BackgroundAudio'
 import BottomNavigationBar from './components/BottomNavigationBar'
+import CreateWalletGuideToast from './components/CreateWalletGuideToast'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import ExplorePage from './pages/primary/ExplorePage'
@@ -28,7 +30,6 @@ import { NotificationProvider } from './providers/NotificationProvider'
 import { useScreenSize } from './providers/ScreenSizeProvider'
 import { routes } from './routes'
 import modalManager from './services/modal-manager.service'
-import CreateWalletGuideToast from './components/CreateWalletGuideToast'
 
 export type TPrimaryPageName = keyof typeof PRIMARY_PAGE_MAP
 
@@ -385,6 +386,9 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
             </div>
             <TooManyRelaysAlertDialog />
             <CreateWalletGuideToast />
+            <div className="fixed bottom-4 right-4 z-30 w-96">
+              <BackgroundAudio />
+            </div>
           </NotificationProvider>
         </CurrentRelaysProvider>
       </SecondaryPageContext.Provider>
