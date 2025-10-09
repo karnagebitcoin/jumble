@@ -71,6 +71,7 @@ export default function YoutubeEmbeddedPlayer({
         })
       } catch (error) {
         console.error('Failed to initialize YouTube player:', error)
+        setError(true)
         return
       }
     }
@@ -101,18 +102,8 @@ export default function YoutubeEmbeddedPlayer({
   }
 
   if (!videoId && !initSuccess) {
-    return (
-      <a
-        href={url}
-        className="text-primary hover:underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {url}
-      </a>
-    )
+    return <ExternalLink url={url} />
   }
-
   return (
     <div
       className={cn(
