@@ -1,10 +1,12 @@
 import { cn, isInViewport } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import mediaManager from '@/services/media-manager.service'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import ExternalLink from '../ExternalLink'
 
 export default function VideoPlayer({ src, className }: { src: string; className?: string }) {
   const { autoplay } = useContentPolicy()
+  const [error, setError] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -38,6 +40,10 @@ export default function VideoPlayer({ src, className }: { src: string; className
     }
   }, [autoplay])
 
+  if (error) {
+    return <ExternalLink url={src} />
+  }
+
   return (
     <div ref={containerRef}>
       <video
@@ -51,6 +57,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
           mediaManager.play(event.currentTarget)
         }}
         muted
+        onError={() => setError(true)}
       />
     </div>
   )
