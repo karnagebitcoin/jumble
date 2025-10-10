@@ -13,7 +13,7 @@ export default function BottomNavigationBar() {
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}
     >
-      <BackgroundAudio />
+      <BackgroundAudio className="rounded-none border-x-0 border-t-0 border-b bg-background" />
       <div className="w-full flex justify-around items-center [&_svg]:size-4 [&_svg]:shrink-0">
         <HomeButton />
         <ExploreButton />

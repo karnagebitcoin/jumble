@@ -1,10 +1,8 @@
-import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import mediaManager from '@/services/media-manager.service'
 import { useEffect, useState } from 'react'
 import AudioPlayer from '../AudioPlayer'
 
-export default function BackgroundAudio() {
-  const { isSmallScreen } = useScreenSize()
+export default function BackgroundAudio({ className }: { className?: string }) {
   const [backgroundAudioSrc, setBackgroundAudioSrc] = useState<string | null>(null)
   const [backgroundAudio, setBackgroundAudio] = useState<React.ReactNode>(null)
 
@@ -13,15 +11,7 @@ export default function BackgroundAudio() {
       const { src, time } = (event as CustomEvent).detail
       if (backgroundAudioSrc === src) return
 
-      setBackgroundAudio(
-        <AudioPlayer
-          src={src}
-          className={isSmallScreen ? 'rounded-none border-none' : ''}
-          startTime={time}
-          autoPlay
-          isMinimized
-        />
-      )
+      setBackgroundAudio(<FloatingAudioPlayer src={src} time={time} className={className} />)
       setBackgroundAudioSrc(src)
     }
 
@@ -39,4 +29,16 @@ export default function BackgroundAudio() {
   }, [])
 
   return backgroundAudio
+}
+
+function FloatingAudioPlayer({
+  src,
+  time,
+  className
+}: {
+  src: string
+  time?: number
+  className?: string
+}) {
+  return <AudioPlayer src={src} className={className} startTime={time} autoPlay isMinimized />
 }

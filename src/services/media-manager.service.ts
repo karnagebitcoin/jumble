@@ -1,4 +1,8 @@
 import { YouTubePlayer } from '@/types/youtube'
+import { atom, getDefaultStore } from 'jotai'
+
+export const hasBackgroundAudioAtom = atom(false)
+const store = getDefaultStore()
 
 type Media = HTMLMediaElement | YouTubePlayer
 
@@ -6,7 +10,6 @@ class MediaManagerService extends EventTarget {
   static instance: MediaManagerService
 
   private currentMedia: Media | null = null
-  private hasBackgroundAudio = false
 
   constructor() {
     super()
@@ -39,7 +42,11 @@ class MediaManagerService extends EventTarget {
     ) {
       return
     }
-    if (this.hasBackgroundAudio && this.currentMedia && isMediaPlaying(this.currentMedia)) {
+    if (
+      store.get(hasBackgroundAudioAtom) &&
+      this.currentMedia &&
+      isMediaPlaying(this.currentMedia)
+    ) {
       return
     }
     this.play(media)
@@ -68,12 +75,12 @@ class MediaManagerService extends EventTarget {
 
   playAudioBackground(src: string, time: number = 0) {
     this.dispatchEvent(new CustomEvent('playAudioBackground', { detail: { src, time } }))
-    this.hasBackgroundAudio = true
+    store.set(hasBackgroundAudioAtom, true)
   }
 
   stopAudioBackground() {
     this.dispatchEvent(new Event('stopAudioBackground'))
-    this.hasBackgroundAudio = false
+    store.set(hasBackgroundAudioAtom, false)
   }
 }
 

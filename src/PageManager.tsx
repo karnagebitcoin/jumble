@@ -386,9 +386,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
             </div>
             <TooManyRelaysAlertDialog />
             <CreateWalletGuideToast />
-            <div className="fixed bottom-4 right-4 z-30 w-96">
-              <BackgroundAudio />
-            </div>
+            <BackgroundAudio className="fixed bottom-20 right-0 z-50 w-80 rounded-l-full rounded-r-none overflow-hidden shadow-lg border" />
           </NotificationProvider>
         </CurrentRelaysProvider>
       </SecondaryPageContext.Provider>
