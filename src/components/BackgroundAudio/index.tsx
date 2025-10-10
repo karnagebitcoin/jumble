@@ -11,7 +11,9 @@ export default function BackgroundAudio({ className }: { className?: string }) {
       const { src, time } = (event as CustomEvent).detail
       if (backgroundAudioSrc === src) return
 
-      setBackgroundAudio(<FloatingAudioPlayer src={src} time={time} className={className} />)
+      setBackgroundAudio(
+        <FloatingAudioPlayer key={src + time} src={src} time={time} className={className} />
+      )
       setBackgroundAudioSrc(src)
     }
 
