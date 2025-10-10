@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import AudioPlayer from '../AudioPlayer'
 import VideoPlayer from '../VideoPlayer'
+import ExternalLink from '../ExternalLink'
 
 export default function MediaPlayer({
   src,
@@ -77,7 +78,7 @@ export default function MediaPlayer({
   }
 
   if (!mediaType) {
-    return null
+    return <ExternalLink url={src} />
   }
 
   if (mediaType === 'video') {

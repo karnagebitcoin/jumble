@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import mediaManager from '@/services/media-manager.service'
 import { Minimize2, Pause, Play, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import ExternalLink from '../ExternalLink'
 
 interface AudioPlayerProps {
   src: string
@@ -24,6 +25,7 @@ export default function AudioPlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [error, setError] = useState(false)
   const seekTimeoutRef = useRef<NodeJS.Timeout>()
   const isSeeking = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -119,6 +121,10 @@ export default function AudioPlayer({
     }, 300)
   }
 
+  if (error) {
+    return <ExternalLink url={src} />
+  }
+
   return (
     <div
       ref={containerRef}
@@ -128,7 +134,7 @@ export default function AudioPlayer({
       )}
       onClick={(e) => e.stopPropagation()}
     >
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio ref={audioRef} src={src} preload="metadata" onError={() => setError(false)} />
 
       {/* Play/Pause Button */}
       <Button size="icon" className="rounded-full shrink-0" onClick={togglePlay}>

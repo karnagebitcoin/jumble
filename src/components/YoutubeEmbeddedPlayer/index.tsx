@@ -4,6 +4,7 @@ import mediaManager from '@/services/media-manager.service'
 import { YouTubePlayer } from '@/types/youtube'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import ExternalLink from '../ExternalLink'
 
 export default function YoutubeEmbeddedPlayer({
   url,
@@ -19,6 +20,7 @@ export default function YoutubeEmbeddedPlayer({
   const [display, setDisplay] = useState(autoLoadMedia)
   const { videoId, isShort } = useMemo(() => parseYoutubeUrl(url), [url])
   const [initSuccess, setInitSuccess] = useState(false)
+  const [error, setError] = useState(false)
   const playerRef = useRef<YouTubePlayer | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -63,11 +65,13 @@ export default function YoutubeEmbeddedPlayer({
             },
             onReady: () => {
               setInitSuccess(true)
-            }
+            },
+            onError: () => setError(true)
           }
         })
       } catch (error) {
         console.error('Failed to initialize YouTube player:', error)
+        setError(true)
         return
       }
     }
@@ -78,6 +82,10 @@ export default function YoutubeEmbeddedPlayer({
       }
     }
   }, [videoId, display, mustLoad])
+
+  if (error) {
+    return <ExternalLink url={url} />
+  }
 
   if (!mustLoad && !display) {
     return (
@@ -94,18 +102,8 @@ export default function YoutubeEmbeddedPlayer({
   }
 
   if (!videoId && !initSuccess) {
-    return (
-      <a
-        href={url}
-        className="text-primary hover:underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {url}
-      </a>
-    )
+    return <ExternalLink url={url} />
   }
-
   return (
     <div
       className={cn(
