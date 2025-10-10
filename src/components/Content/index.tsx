@@ -88,7 +88,7 @@ export default function Content({
       typeof lastNormalUrlNode?.data === 'string' ? lastNormalUrlNode.data : undefined
 
     return { nodes, allImages, emojiInfos, lastNormalUrl }
-  }, [event])
+  }, [event, translatedEvent, content])
 
   if (!nodes || nodes.length === 0) {
     return null
