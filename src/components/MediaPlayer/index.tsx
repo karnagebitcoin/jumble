@@ -52,6 +52,7 @@ export default function MediaPlayer({
     video.crossOrigin = 'anonymous'
 
     video.onloadedmetadata = () => {
+      setError(false)
       setMediaType(video.videoWidth > 0 || video.videoHeight > 0 ? 'video' : 'audio')
     }
 
