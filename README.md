@@ -1,7 +1,5 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./resources/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./resources/logo-light.svg">
     <img src="./resources/logo-light.svg" alt="Jumble Logo" width="400" />
   </picture>
   <p>logo designed by <a href="http://wolfertdan.com/">Daniel David</a></p>
@@ -9,23 +7,9 @@
 
 # Jumble
 
-A user-friendly Nostr client focused on relay feed browsing and relay discovery
+A user-friendly Nostr client for exploring relay feeds
 
-## Features
-
-- **Relay Feeds:** Explore content directly through relays without following specific users
-- **Relay-Friendly Design:** Minimized and simplified requests ensure efficient communication with relays
-- **Relay Sets:** Easily manage and switch between relay sets
-- **Clean Interface:** Enjoy a minimalist design and intuitive interactions
-
-## Screenshots
-
-<img src="./screenshots/01.png" alt="Jumble Screenshot 01" width="650" />
-<div> 
-  <img src="./screenshots/02.png" alt="Jumble Screenshot 02" width="200" />
-  <img src="./screenshots/03.png" alt="Jumble Screenshot 03" width="200" />
-  <img src="./screenshots/04.png" alt="Jumble Screenshot 04" width="200" />
-</div>
+Experience Jumble at [https://jumble.social](https://jumble.social)
 
 ## Run Locally
 
@@ -68,11 +52,9 @@ After finishing, access: http://localhost:8089
 
 If you like this project, you can buy me a coffee :)
 
-lightning: ⚡️ codytseng@getalby.com ⚡️
-
-bitcoin: bc1qx8kvutghdhejx7vuvatmvw2ghypdungu0qm7ds
-
-geyser: https://geyser.fund/project/jumble
+- **Lightning:** ⚡️ codytseng@getalby.com ⚡️
+- **Bitcoin:** bc1qwp2uqjd2dy32qfe39kehnlgx3hyey0h502fvht
+- **Geyser:** https://geyser.fund/project/jumble
 
 ## License
 
