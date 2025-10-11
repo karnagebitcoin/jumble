@@ -18,6 +18,7 @@ export default function MediaPlayer({
   const { autoLoadMedia } = useContentPolicy()
   const [display, setDisplay] = useState(autoLoadMedia)
   const [mediaType, setMediaType] = useState<'video' | 'audio' | null>(null)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (autoLoadMedia) {
@@ -51,17 +52,22 @@ export default function MediaPlayer({
     video.crossOrigin = 'anonymous'
 
     video.onloadedmetadata = () => {
+      setError(false)
       setMediaType(video.videoWidth > 0 || video.videoHeight > 0 ? 'video' : 'audio')
     }
 
     video.onerror = () => {
-      setMediaType(null)
+      setError(true)
     }
 
     return () => {
       video.src = ''
     }
   }, [src, display, mustLoad])
+
+  if (error) {
+    return <ExternalLink url={src} />
+  }
 
   if (!mustLoad && !display) {
     return (
@@ -78,7 +84,7 @@ export default function MediaPlayer({
   }
 
   if (!mediaType) {
-    return <ExternalLink url={src} />
+    return null
   }
 
   if (mediaType === 'video') {

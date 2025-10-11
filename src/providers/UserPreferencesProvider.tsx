@@ -5,6 +5,9 @@ import { createContext, useContext, useState } from 'react'
 type TUserPreferencesContext = {
   notificationListStyle: TNotificationStyle
   updateNotificationListStyle: (style: TNotificationStyle) => void
+
+  muteMedia: boolean
+  updateMuteMedia: (mute: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -21,6 +24,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [notificationListStyle, setNotificationListStyle] = useState(
     storage.getNotificationListStyle()
   )
+  const [muteMedia, setMuteMedia] = useState(true)
 
   const updateNotificationListStyle = (style: TNotificationStyle) => {
     setNotificationListStyle(style)
@@ -31,7 +35,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     <UserPreferencesContext.Provider
       value={{
         notificationListStyle,
-        updateNotificationListStyle
+        updateNotificationListStyle,
+        muteMedia,
+        updateMuteMedia: setMuteMedia
       }}
     >
       {children}
