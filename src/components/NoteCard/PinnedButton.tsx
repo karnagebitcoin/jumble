@@ -24,7 +24,7 @@ export default function PinnedButton({ event }: { event: NostrEvent }) {
 
   return (
     <Button
-      className="flex gap-1 text-sm text-muted-foreground items-center mb-1 px-4 py-0.5 h-fit hover:text-foreground"
+      className="flex gap-1 text-sm text-primary items-center mb-1 px-4 py-0.5 h-fit"
       variant="link"
       onClick={(e) => {
         e.stopPropagation()
