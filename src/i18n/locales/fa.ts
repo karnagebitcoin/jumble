@@ -447,6 +447,17 @@ export default {
     Connect: 'اتصال',
     'Set up your wallet to send and receive sats!':
       'کیف پولت را تنظیم کن تا ساتس ارسال و دریافت کنی!',
-    'Set up': 'تنظیم'
+    'Set up': 'تنظیم',
+    Pinned: 'پین شده',
+    Unpin: 'لغو پین',
+    Unpinning: 'در حال لغو پین...',
+    'Pinning...': 'در حال پین کردن...',
+    'Pinned!': 'پین شد!',
+    'Failed to pin: {{error}}': 'پین کردن ناموفق بود: {{error}}',
+    'Unpinning...': 'در حال لغو پین...',
+    'Unpinned!': 'لغو پین شد!',
+    'Failed to unpin: {{error}}': 'لغو پین ناموفق بود: {{error}}',
+    'Unpin from profile': 'لغو پین از پروفایل',
+    'Pin to profile': 'پین به پروفایل'
   }
 }

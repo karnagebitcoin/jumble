@@ -153,3 +153,5 @@ export const MEDIA_AUTO_LOAD_POLICY = {
   WIFI_ONLY: 'wifi-only',
   NEVER: 'never'
 } as const
+
+export const MAX_PINNED_NOTES = 10

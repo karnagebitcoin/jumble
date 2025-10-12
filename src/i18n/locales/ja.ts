@@ -448,6 +448,17 @@ export default {
     Connect: '接続',
     'Set up your wallet to send and receive sats!':
       'ウォレットを設定してサッツを送受信しましょう！',
-    'Set up': '設定する'
+    'Set up': '設定する',
+    Pinned: '固定済み',
+    Unpin: '固定解除',
+    Unpinning: '固定解除中',
+    'Pinning...': '固定中...',
+    'Pinned!': '固定されました！',
+    'Failed to pin: {{error}}': '固定に失敗しました: {{error}}',
+    'Unpinning...': '固定解除中...',
+    'Unpinned!': '固定が解除されました！',
+    'Failed to unpin: {{error}}': '固定解除に失敗しました: {{error}}',
+    'Unpin from profile': 'プロフィールから固定解除',
+    'Pin to profile': 'プロフィールに固定'
   }
 }

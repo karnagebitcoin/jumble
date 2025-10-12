@@ -457,6 +457,17 @@ export default {
     Connect: 'Connecter',
     'Set up your wallet to send and receive sats!':
       'Configurez votre portefeuille pour envoyer et recevoir des sats !',
-    'Set up': 'Configurer'
+    'Set up': 'Configurer',
+    Pinned: 'Épinglé',
+    Unpin: 'Retirer l’épingle',
+    Unpinning: 'Retrait de l’épingle',
+    'Pinning...': 'Épinglage en cours...',
+    'Pinned!': 'Épinglé !',
+    'Failed to pin: {{error}}': 'Échec de l’épinglage : {{error}}',
+    'Unpinning...': 'Retrait de l’épingle en cours...',
+    'Unpinned!': 'Retrait de l’épingle effectué !',
+    'Failed to unpin: {{error}}': 'Échec du retrait de l’épingle : {{error}}',
+    'Unpin from profile': 'Retirer l’épingle du profil',
+    'Pin to profile': 'Épingler au profil'
   }
 }

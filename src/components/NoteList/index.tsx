@@ -43,7 +43,8 @@ const NoteList = forwardRef(
       hideReplies = false,
       hideUntrustedNotes = false,
       areAlgoRelays = false,
-      showRelayCloseReason = false
+      showRelayCloseReason = false,
+      filteredEventHexIdSet = new Set<string>()
     }: {
       subRequests: TFeedSubRequest[]
       showKinds: number[]
@@ -52,6 +53,7 @@ const NoteList = forwardRef(
       hideUntrustedNotes?: boolean
       areAlgoRelays?: boolean
       showRelayCloseReason?: boolean
+      filteredEventHexIdSet?: Set<string>
     },
     ref
   ) => {
@@ -74,6 +76,7 @@ const NoteList = forwardRef(
 
     const shouldHideEvent = useCallback(
       (evt: Event) => {
+        if (filteredEventHexIdSet.has(evt.id)) return true
         if (isEventDeleted(evt)) return true
         if (hideReplies && isReplyNoteEvent(evt)) return true
         if (hideUntrustedNotes && !isUserTrusted(evt.pubkey)) return true
@@ -88,7 +91,7 @@ const NoteList = forwardRef(
 
         return false
       },
-      [hideReplies, hideUntrustedNotes, mutePubkeySet, isEventDeleted]
+      [hideReplies, hideUntrustedNotes, mutePubkeySet, filteredEventHexIdSet, isEventDeleted]
     )
 
     const filteredEvents = useMemo(() => {

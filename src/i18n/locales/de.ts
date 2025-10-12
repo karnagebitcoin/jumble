@@ -458,6 +458,17 @@ export default {
     Connect: 'Verbinden',
     'Set up your wallet to send and receive sats!':
       'Richte deine Wallet ein, um Sats zu senden und zu empfangen!',
-    'Set up': 'Einrichten'
+    'Set up': 'Einrichten',
+    Pinned: 'Angepinnt',
+    Unpin: 'Anheften aufheben',
+    Unpinning: 'Anheften wird aufgehoben',
+    'Pinning...': 'Wird angepinnt...',
+    'Pinned!': 'Angepinnt!',
+    'Failed to pin: {{error}}': 'Fehler beim Anpinnen: {{error}}',
+    'Unpinning...': 'Anheften wird aufgehoben...',
+    'Unpinned!': 'Anheften aufgehoben!',
+    'Failed to unpin: {{error}}': 'Fehler beim Anheften aufheben: {{error}}',
+    'Unpin from profile': 'Vom Profil lösen',
+    'Pin to profile': 'An Profil anheften'
   }
 }

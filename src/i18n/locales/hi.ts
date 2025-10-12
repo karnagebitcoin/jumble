@@ -449,6 +449,17 @@ export default {
     Connect: 'कनेक्ट करें',
     'Set up your wallet to send and receive sats!':
       'सैट्स भेजने और प्राप्त करने के लिए अपना वॉलेट सेट करें!',
-    'Set up': 'सेट करें'
+    'Set up': 'सेट करें',
+    Pinned: 'पिन किया गया',
+    Unpin: 'पिन हटाएं',
+    Unpinning: 'पिन हटाया जा रहा है',
+    'Pinning...': 'पिन कर रहे हैं...',
+    'Pinned!': 'पिन किया गया!',
+    'Failed to pin: {{error}}': 'पिन करने में असफल: {{error}}',
+    'Unpinning...': 'पिन हटाया जा रहा है...',
+    'Unpinned!': 'पिन हटा दिया गया!',
+    'Failed to unpin: {{error}}': 'पिन हटाने में असफल: {{error}}',
+    'Unpin from profile': 'प्रोफ़ाइल से पिन हटाएं',
+    'Pin to profile': 'प्रोफ़ाइल पर पिन करें'
   }
 }

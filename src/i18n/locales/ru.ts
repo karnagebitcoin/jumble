@@ -454,6 +454,17 @@ export default {
     Connect: 'Подключить',
     'Set up your wallet to send and receive sats!':
       'Настройте свой кошелёк, чтобы отправлять и получать саты!',
-    'Set up': 'Настроить'
+    'Set up': 'Настроить',
+    Pinned: 'Закреплено',
+    Unpin: 'Открепить',
+    Unpinning: 'Открепление',
+    'Pinning...': 'Закрепление...',
+    'Pinned!': 'Закреплено!',
+    'Failed to pin: {{error}}': 'Не удалось закрепить: {{error}}',
+    'Unpinning...': 'Открепление...',
+    'Unpinned!': 'Откреплено!',
+    'Failed to unpin: {{error}}': 'Не удалось открепить: {{error}}',
+    'Unpin from profile': 'Открепить из профиля',
+    'Pin to profile': 'Закрепить в профиле'
   }
 }

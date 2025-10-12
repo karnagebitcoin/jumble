@@ -452,6 +452,17 @@ export default {
     Connect: 'Connetti',
     'Set up your wallet to send and receive sats!':
       'Configura il tuo wallet per inviare e ricevere sats!',
-    'Set up': 'Configura'
+    'Set up': 'Configura',
+    Pinned: 'Fissato',
+    Unpin: 'Rimuovi fissaggio',
+    Unpinning: 'Rimozione fissaggio',
+    'Pinning...': 'Fissaggio in corso...',
+    'Pinned!': 'Fissato!',
+    'Failed to pin: {{error}}': 'Failed to pin: {{error}}',
+    'Unpinning...': 'Rimozione fissaggio in corso...',
+    'Unpinned!': 'Rimosso fissaggio!',
+    'Failed to unpin: {{error}}': 'Impossibile rimuovere il fissaggio: {{error}}',
+    'Unpin from profile': 'Rimuovi fissaggio dal profilo',
+    'Pin to profile': 'Fissa al profilo'
   }
 }
