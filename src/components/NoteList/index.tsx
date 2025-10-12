@@ -16,6 +16,7 @@ import client from '@/services/client.service'
 import { TFeedSubRequest } from '@/types'
 import dayjs from 'dayjs'
 import { Event } from 'nostr-tools'
+import { decode } from 'nostr-tools/nip19'
 import {
   forwardRef,
   useCallback,
@@ -29,6 +30,7 @@ import { useTranslation } from 'react-i18next'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import { toast } from 'sonner'
 import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
+import PinnedNoteCard from '../PinnedNoteCard'
 
 const LIMIT = 200
 const ALGO_LIMIT = 500
@@ -44,7 +46,7 @@ const NoteList = forwardRef(
       hideUntrustedNotes = false,
       areAlgoRelays = false,
       showRelayCloseReason = false,
-      filteredEventHexIdSet = new Set<string>()
+      pinnedEventIds = []
     }: {
       subRequests: TFeedSubRequest[]
       showKinds: number[]
@@ -53,7 +55,7 @@ const NoteList = forwardRef(
       hideUntrustedNotes?: boolean
       areAlgoRelays?: boolean
       showRelayCloseReason?: boolean
-      filteredEventHexIdSet?: Set<string>
+      pinnedEventIds?: string[]
     },
     ref
   ) => {
@@ -76,7 +78,19 @@ const NoteList = forwardRef(
 
     const shouldHideEvent = useCallback(
       (evt: Event) => {
-        if (filteredEventHexIdSet.has(evt.id)) return true
+        const pinnedEventHexIdSet = new Set()
+        pinnedEventIds.forEach((id) => {
+          try {
+            const { type, data } = decode(id)
+            if (type === 'nevent') {
+              pinnedEventHexIdSet.add(data.id)
+            }
+          } catch {
+            // ignore
+          }
+        })
+
+        if (pinnedEventHexIdSet.has(evt.id)) return true
         if (isEventDeleted(evt)) return true
         if (hideReplies && isReplyNoteEvent(evt)) return true
         if (hideUntrustedNotes && !isUserTrusted(evt.pubkey)) return true
@@ -91,7 +105,7 @@ const NoteList = forwardRef(
 
         return false
       },
-      [hideReplies, hideUntrustedNotes, mutePubkeySet, filteredEventHexIdSet, isEventDeleted]
+      [hideReplies, hideUntrustedNotes, mutePubkeySet, pinnedEventIds, isEventDeleted]
     )
 
     const filteredEvents = useMemo(() => {
@@ -284,6 +298,9 @@ const NoteList = forwardRef(
 
     const list = (
       <div className="min-h-screen">
+        {pinnedEventIds.map((id) => (
+          <PinnedNoteCard key={id} eventId={id} className="w-full" />
+        ))}
         {filteredEvents.map((event) => (
           <NoteCard
             key={event.id}

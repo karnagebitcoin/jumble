@@ -2,7 +2,6 @@ import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import Tabs from '@/components/Tabs'
 import { BIG_RELAY_URLS, MAX_PINNED_NOTES } from '@/constants'
-import { useFetchEvent } from '@/hooks'
 import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
@@ -12,7 +11,6 @@ import storage from '@/services/local-storage.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
 import { NostrEvent } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import NoteCard, { NoteCardLoadingSkeleton } from '../NoteCard'
 import { RefreshButton } from '../RefreshButton'
 
 export default function ProfileFeed({
@@ -28,7 +26,6 @@ export default function ProfileFeed({
   const [listMode, setListMode] = useState<TNoteListMode>(() => storage.getNoteListMode())
   const [subRequests, setSubRequests] = useState<TFeedSubRequest[]>([])
   const [pinnedEventIds, setPinnedEventIds] = useState<string[]>([])
-  const [pinnedEventHexIdSet, setPinnedEventHexIdSet] = useState<Set<string>>(new Set())
   const tabs = useMemo(() => {
     const _tabs = [
       { value: 'posts', label: 'Notes' },
@@ -43,7 +40,6 @@ export default function ProfileFeed({
   }, [myPubkey, pubkey])
   const supportTouch = useMemo(() => isTouchDevice(), [])
   const noteListRef = useRef<TNoteListRef>(null)
-  const topRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const initPinnedEventIds = async () => {
@@ -73,7 +69,6 @@ export default function ProfileFeed({
           })
           .filter(Boolean) as string[]) ?? []
       setPinnedEventIds(ids)
-      setPinnedEventHexIdSet(hexIdSet)
     }
     initPinnedEventIds()
   }, [pubkey, myPubkey, myPinListEvent])
@@ -125,12 +120,12 @@ export default function ProfileFeed({
 
   const handleListModeChange = (mode: TNoteListMode) => {
     setListMode(mode)
-    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    noteListRef.current?.scrollToTop('smooth')
   }
 
   const handleShowKindsChange = (newShowKinds: number[]) => {
     setTemporaryShowKinds(newShowKinds)
-    topRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
+    noteListRef.current?.scrollToTop('instant')
   }
 
   return (
@@ -149,32 +144,14 @@ export default function ProfileFeed({
           </>
         }
       />
-      <div ref={topRef} className="scroll-mt-[calc(6rem+1px)]" />
-      {pinnedEventIds.map((eventId) => (
-        <PinnedNote key={eventId} eventId={eventId} />
-      ))}
       <NoteList
         ref={noteListRef}
         subRequests={subRequests}
         showKinds={temporaryShowKinds}
         hideReplies={listMode === 'posts'}
         filterMutedNotes={false}
-        filteredEventHexIdSet={pinnedEventHexIdSet}
+        pinnedEventIds={listMode === 'you' ? [] : pinnedEventIds}
       />
     </>
   )
-}
-
-function PinnedNote({ eventId }: { eventId: string }) {
-  const { event, isFetching } = useFetchEvent(eventId)
-
-  if (isFetching) {
-    return <NoteCardLoadingSkeleton />
-  }
-
-  if (!event) {
-    return null
-  }
-
-  return <NoteCard event={event} className="w-full" pinned />
 }
