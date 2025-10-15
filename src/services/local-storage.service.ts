@@ -8,6 +8,7 @@ import {
   FONT_SIZES,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
+  PRIMARY_COLORS,
   SUPPORTED_KINDS,
   StorageKey
 } from '@/constants'
@@ -211,7 +212,7 @@ class LocalStorageService {
     }
 
     const primaryColor = window.localStorage.getItem(StorageKey.PRIMARY_COLOR)
-    if (primaryColor && ['PURPLE', 'BLUE', 'GREEN', 'RED', 'ORANGE', 'PINK', 'YELLOW', 'TEAL'].includes(primaryColor)) {
+    if (primaryColor && Object.keys(PRIMARY_COLORS).includes(primaryColor)) {
       this.primaryColor = primaryColor as TPrimaryColor
     }
 
