@@ -61,7 +61,7 @@ const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
         </div>
       ) : (
         <div className="px-4 pt-3">
-          <Button className="bg-foreground hover:bg-foreground/90" onClick={() => launchModal()}>
+          <Button onClick={() => launchModal()}>
             {t('Connect a Wallet')}
           </Button>
         </div>
