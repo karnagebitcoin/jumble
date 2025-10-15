@@ -162,45 +162,45 @@ export const DEFAULT_FONT_SIZE = 14
 export const PRIMARY_COLORS = {
   PURPLE: {
     name: 'Purple',
-    light: '259 43% 56%',
-    dark: '259 43% 56%',
-    hover: '259 43% 65%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    light: '271 91% 65%',
+    dark: '271 91% 65%',
+    hover: '271 91% 75%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   BLUE: {
     name: 'Blue',
     light: '221 83% 53%',
     dark: '217 91% 60%',
     hover: '221 83% 63%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   GREEN: {
     name: 'Green',
     light: '142 76% 36%',
     dark: '142 71% 45%',
     hover: '142 76% 46%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   RED: {
     name: 'Red',
     light: '0 72% 51%',
     dark: '0 84% 60%',
     hover: '0 72% 61%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   ORANGE: {
     name: 'Orange',
     light: '25 95% 53%',
     dark: '24 94% 50%',
     hover: '25 95% 63%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   PINK: {
     name: 'Pink',
     light: '326 78% 50%',
     dark: '326 78% 60%',
     hover: '326 78% 60%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
   YELLOW: {
     name: 'Yellow',
@@ -214,7 +214,7 @@ export const PRIMARY_COLORS = {
     light: '173 80% 40%',
     dark: '173 58% 39%',
     hover: '173 80% 50%',
-    foreground: { light: '0 0% 98%', dark: '240 5.9% 10%' }
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   }
 } as const
 
