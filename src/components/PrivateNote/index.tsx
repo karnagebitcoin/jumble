@@ -2,6 +2,8 @@ import Note from '@/components/Note'
 import { useFetchEvent } from '@/hooks'
 import { usePrivateNote } from '@/hooks/usePrivateNote'
 import { cn } from '@/lib/utils'
+import { toNote } from '@/lib/link'
+import { useSecondaryPage } from '@/PageManager'
 import { PrivateNote as TPrivateNote } from '@/services/private-notes.service'
 import { StickyNote, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -13,6 +15,7 @@ interface PrivateNoteProps {
 
 export default function PrivateNote({ pubkey }: PrivateNoteProps) {
   const { t } = useTranslation()
+  const { push } = useSecondaryPage()
   const { note, updateNote } = usePrivateNote(pubkey)
   const [isEditing, setIsEditing] = useState(false)
   const [editText, setEditText] = useState('')
@@ -135,8 +138,11 @@ export default function PrivateNote({ pubkey }: PrivateNoteProps) {
             <span>{t('Pinned note:')}</span>
           </div>
           <div
-            className="border border-yellow-600 dark:border-yellow-600 rounded-md p-2"
-            onClick={(e) => e.stopPropagation()}
+            className="border border-yellow-600 dark:border-yellow-600 rounded-md p-2 bg-transparent text-gray-800 dark:text-yellow-700 cursor-pointer hover:bg-yellow-50 dark:hover:bg-yellow-200/20 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation()
+              push(toNote(pinnedEvent))
+            }}
           >
             <Note event={pinnedEvent} size="small" hideParentNotePreview={true} compactMedia={true} />
           </div>
