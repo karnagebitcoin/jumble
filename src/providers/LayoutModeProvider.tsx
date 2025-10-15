@@ -1,5 +1,4 @@
 import { DEFAULT_LAYOUT_MODE, LAYOUT_MODE, StorageKey } from '@/constants'
-import localStorageService from '@/services/local-storage.service'
 import { TLayoutMode } from '@/types'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
@@ -11,14 +10,13 @@ interface ILayoutModeContext {
 const LayoutModeContext = createContext<ILayoutModeContext | undefined>(undefined)
 
 export function LayoutModeProvider({ children }: { children: ReactNode }) {
-  const [layoutMode, _setLayoutMode] = useState<TLayoutMode>(
-    () =>
-      (localStorageService.get(StorageKey.LAYOUT_MODE) as TLayoutMode) ||
-      DEFAULT_LAYOUT_MODE
-  )
+  const [layoutMode, _setLayoutMode] = useState<TLayoutMode>(() => {
+    const stored = window.localStorage.getItem(StorageKey.LAYOUT_MODE)
+    return (stored as TLayoutMode) || DEFAULT_LAYOUT_MODE
+  })
 
   useEffect(() => {
-    localStorageService.set(StorageKey.LAYOUT_MODE, layoutMode)
+    window.localStorage.setItem(StorageKey.LAYOUT_MODE, layoutMode)
   }, [layoutMode])
 
   const setLayoutMode = (mode: TLayoutMode) => {
