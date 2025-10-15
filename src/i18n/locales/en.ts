@@ -98,6 +98,7 @@ export default {
     edit: 'edit',
     Languages: 'Languages',
     Theme: 'Theme',
+    'Primary color': 'Primary color',
     System: 'System',
     Light: 'Light',
     Dark: 'Dark',

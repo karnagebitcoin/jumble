@@ -13,7 +13,7 @@ export default function RelaysButton() {
       onClick={() => navigate('explore')}
       active={current === 'explore'}
     >
-      <Compass strokeWidth={3} />
+      <Compass strokeWidth={1.3} />
     </SidebarItem>
   )
 }

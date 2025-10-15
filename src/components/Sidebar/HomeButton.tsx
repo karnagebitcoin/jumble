@@ -7,7 +7,7 @@ export default function HomeButton() {
 
   return (
     <SidebarItem title="Home" onClick={() => navigate('home')} active={current === 'home'}>
-      <Home strokeWidth={3} />
+      <Home strokeWidth={1.3} />
     </SidebarItem>
   )
 }

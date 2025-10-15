@@ -8,7 +8,7 @@ export default function SettingsButton() {
 
   return (
     <SidebarItem title="Settings" onClick={() => push(toSettings())}>
-      <Settings strokeWidth={3} />
+      <Settings strokeWidth={1.3} />
     </SidebarItem>
   )
 }

@@ -13,7 +13,7 @@ export default function ProfileButton() {
       onClick={() => checkLogin(() => navigate('profile'))}
       active={current === 'profile'}
     >
-      <UserRound strokeWidth={3} />
+      <UserRound strokeWidth={1.3} />
     </SidebarItem>
   )
 }

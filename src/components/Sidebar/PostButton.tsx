@@ -22,7 +22,7 @@ export default function PostButton() {
         variant="default"
         className="bg-primary xl:justify-center gap-2"
       >
-        <PencilLine strokeWidth={3} />
+        <PencilLine strokeWidth={1.3} />
       </SidebarItem>
       <PostEditor open={open} setOpen={setOpen} />
     </div>

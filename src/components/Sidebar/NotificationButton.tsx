@@ -16,7 +16,7 @@ export default function NotificationsButton() {
       active={current === 'notifications'}
     >
       <div className="relative">
-        <Bell strokeWidth={3} />
+        <Bell strokeWidth={1.3} />
         {hasNewNotification && (
           <div className="absolute -top-1 right-0 w-2 h-2 ring-2 ring-background bg-primary rounded-full" />
         )}

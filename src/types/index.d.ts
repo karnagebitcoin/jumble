@@ -74,6 +74,8 @@ export type TConfig = {
 export type TThemeSetting = 'light' | 'dark' | 'system'
 export type TTheme = 'light' | 'dark'
 
+export type TPrimaryColor = 'PURPLE' | 'BLUE' | 'GREEN' | 'RED' | 'ORANGE' | 'PINK' | 'YELLOW' | 'TEAL'
+
 export type TDraftEvent = Pick<Event, 'content' | 'created_at' | 'kind' | 'tags'>
 
 export type TNip07 = {

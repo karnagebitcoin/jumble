@@ -1,6 +1,7 @@
 import {
   DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
+  DEFAULT_PRIMARY_COLOR,
   ExtendedKind,
   FONT_SIZES,
   MEDIA_AUTO_LOAD_POLICY,
@@ -18,6 +19,7 @@ import {
   TMediaUploadServiceConfig,
   TNoteListMode,
   TNotificationStyle,
+  TPrimaryColor,
   TRelaySet,
   TThemeSetting,
   TTranslationServiceConfig
@@ -51,6 +53,7 @@ class LocalStorageService {
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
   private fontSize: number = DEFAULT_FONT_SIZE
+  private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -202,6 +205,11 @@ class LocalStorageService {
       if (FONT_SIZES.includes(fontSize as any)) {
         this.fontSize = fontSize
       }
+    }
+
+    const primaryColor = window.localStorage.getItem(StorageKey.PRIMARY_COLOR)
+    if (primaryColor && ['PURPLE', 'BLUE', 'GREEN', 'RED', 'ORANGE', 'PINK', 'YELLOW', 'TEAL'].includes(primaryColor)) {
+      this.primaryColor = primaryColor as TPrimaryColor
     }
 
     // Clean up deprecated data
@@ -498,6 +506,15 @@ class LocalStorageService {
     }
     this.fontSize = fontSize
     window.localStorage.setItem(StorageKey.FONT_SIZE, fontSize.toString())
+  }
+
+  getPrimaryColor() {
+    return this.primaryColor
+  }
+
+  setPrimaryColor(color: TPrimaryColor) {
+    this.primaryColor = color
+    window.localStorage.setItem(StorageKey.PRIMARY_COLOR, color)
   }
 }
 

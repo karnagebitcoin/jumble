@@ -11,7 +11,7 @@ export default function SearchButton() {
       onClick={() => navigate('search')}
       active={current === 'search' && display}
     >
-      <Search strokeWidth={3} />
+      <Search strokeWidth={1.3} />
     </SidebarItem>
   )
 }

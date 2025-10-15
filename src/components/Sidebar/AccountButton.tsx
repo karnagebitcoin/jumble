@@ -46,7 +46,8 @@ function ProfileButton() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="clickable shadow-none p-2 xl:px-2 xl:py-2 w-12 h-12 xl:w-full xl:h-auto flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 text-lg font-semibold"
+          className="clickable shadow-none p-2 xl:px-2 xl:py-2 w-12 h-12 xl:w-full xl:h-auto flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 font-semibold"
+          style={{ fontSize: 'var(--font-size, 14px)' }}
         >
           <div className="flex gap-2 items-center flex-1 w-0">
             <Avatar className="w-8 h-8">
@@ -55,7 +56,7 @@ function ProfileButton() {
                 <img src={defaultAvatar} />
               </AvatarFallback>
             </Avatar>
-            <div className="truncate font-semibold text-lg">{username}</div>
+            <div className="truncate font-semibold">{username}</div>
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -93,7 +94,7 @@ function LoginButton() {
 
   return (
     <SidebarItem onClick={() => checkLogin()} title="Login">
-      <LogIn strokeWidth={3} />
+      <LogIn strokeWidth={1.3} />
     </SidebarItem>
   )
 }
