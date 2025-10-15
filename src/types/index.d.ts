@@ -74,7 +74,7 @@ export type TConfig = {
 export type TThemeSetting = 'light' | 'dark' | 'system'
 export type TTheme = 'light' | 'dark'
 
-export type TPrimaryColor = 'PURPLE' | 'BLUE' | 'GREEN' | 'RED' | 'ORANGE' | 'PINK' | 'YELLOW' | 'TEAL'
+export type TPrimaryColor = 'RED' | 'ORANGE' | 'AMBER' | 'YELLOW' | 'LIME' | 'GREEN' | 'EMERALD' | 'TEAL' | 'CYAN' | 'SKY' | 'BLUE' | 'INDIGO' | 'VIOLET' | 'PURPLE' | 'FUCHSIA' | 'PINK' | 'ROSE'
 
 export type TLayoutMode = 'boxed' | 'full-width'
 

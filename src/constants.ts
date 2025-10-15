@@ -165,27 +165,6 @@ export const BUTTON_RADIUS_VALUES = [0, 2, 4, 6, 8, 12, 16, 9999] as const
 export const DEFAULT_BUTTON_RADIUS = 6
 
 export const PRIMARY_COLORS = {
-  PURPLE: {
-    name: 'Purple',
-    light: '271 91% 65%',
-    dark: '271 91% 65%',
-    hover: '271 91% 75%',
-    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
-  },
-  BLUE: {
-    name: 'Blue',
-    light: '221 83% 53%',
-    dark: '217 91% 60%',
-    hover: '221 83% 63%',
-    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
-  },
-  GREEN: {
-    name: 'Green',
-    light: '142 76% 36%',
-    dark: '142 71% 45%',
-    hover: '142 76% 46%',
-    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
-  },
   RED: {
     name: 'Red',
     light: '0 72% 51%',
@@ -200,12 +179,12 @@ export const PRIMARY_COLORS = {
     hover: '25 95% 63%',
     foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   },
-  PINK: {
-    name: 'Pink',
-    light: '326 78% 50%',
-    dark: '326 78% 60%',
-    hover: '326 78% 60%',
-    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  AMBER: {
+    name: 'Amber',
+    light: '38 92% 50%',
+    dark: '38 92% 50%',
+    hover: '38 92% 60%',
+    foreground: { light: '240 5.9% 10%', dark: '240 5.9% 10%' }
   },
   YELLOW: {
     name: 'Yellow',
@@ -214,11 +193,95 @@ export const PRIMARY_COLORS = {
     hover: '45 93% 57%',
     foreground: { light: '240 5.9% 10%', dark: '240 5.9% 10%' }
   },
+  LIME: {
+    name: 'Lime',
+    light: '84 81% 44%',
+    dark: '84 81% 44%',
+    hover: '84 81% 54%',
+    foreground: { light: '240 5.9% 10%', dark: '240 5.9% 10%' }
+  },
+  GREEN: {
+    name: 'Green',
+    light: '142 76% 36%',
+    dark: '142 71% 45%',
+    hover: '142 76% 46%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  EMERALD: {
+    name: 'Emerald',
+    light: '160 84% 39%',
+    dark: '160 84% 39%',
+    hover: '160 84% 49%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
   TEAL: {
     name: 'Teal',
     light: '173 80% 40%',
     dark: '173 58% 39%',
     hover: '173 80% 50%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  CYAN: {
+    name: 'Cyan',
+    light: '189 94% 43%',
+    dark: '189 94% 43%',
+    hover: '189 94% 53%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  SKY: {
+    name: 'Sky',
+    light: '199 89% 48%',
+    dark: '199 89% 48%',
+    hover: '199 89% 58%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  BLUE: {
+    name: 'Blue',
+    light: '221 83% 53%',
+    dark: '217 91% 60%',
+    hover: '221 83% 63%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  INDIGO: {
+    name: 'Indigo',
+    light: '239 84% 67%',
+    dark: '239 84% 67%',
+    hover: '239 84% 77%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  VIOLET: {
+    name: 'Violet',
+    light: '258 90% 66%',
+    dark: '258 90% 66%',
+    hover: '258 90% 76%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  PURPLE: {
+    name: 'Purple',
+    light: '271 91% 65%',
+    dark: '271 91% 65%',
+    hover: '271 91% 75%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  FUCHSIA: {
+    name: 'Fuchsia',
+    light: '292 84% 61%',
+    dark: '292 84% 61%',
+    hover: '292 84% 71%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  PINK: {
+    name: 'Pink',
+    light: '326 78% 50%',
+    dark: '326 78% 60%',
+    hover: '326 78% 60%',
+    foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
+  },
+  ROSE: {
+    name: 'Rose',
+    light: '350 89% 60%',
+    dark: '350 89% 60%',
+    hover: '350 89% 70%',
     foreground: { light: '0 0% 100%', dark: '0 0% 100%' }
   }
 } as const
