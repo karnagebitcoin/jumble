@@ -8,6 +8,7 @@ import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
+import { FontSizeProvider } from '@/providers/FontSizeProvider'
 import { KindFilterProvider } from '@/providers/KindFilterProvider'
 import { MediaUploadServiceProvider } from '@/providers/MediaUploadServiceProvider'
 import { MuteListProvider } from '@/providers/MuteListProvider'
@@ -25,42 +26,44 @@ import { PageManager } from './PageManager'
 export default function App(): JSX.Element {
   return (
     <ThemeProvider>
-      <ContentPolicyProvider>
-        <ScreenSizeProvider>
-          <DeletedEventProvider>
-            <NostrProvider>
-              <ZapProvider>
-                <TranslationServiceProvider>
-                  <FavoriteRelaysProvider>
-                    <FollowListProvider>
-                      <MuteListProvider>
-                        <UserTrustProvider>
-                          <BookmarksProvider>
-                            <PinListProvider>
-                              <FeedProvider>
-                                <ReplyProvider>
-                                  <MediaUploadServiceProvider>
-                                    <KindFilterProvider>
-                                      <UserPreferencesProvider>
-                                        <PageManager />
-                                        <Toaster />
-                                      </UserPreferencesProvider>
-                                    </KindFilterProvider>
-                                  </MediaUploadServiceProvider>
-                                </ReplyProvider>
-                              </FeedProvider>
-                            </PinListProvider>
-                          </BookmarksProvider>
-                        </UserTrustProvider>
-                      </MuteListProvider>
-                    </FollowListProvider>
-                  </FavoriteRelaysProvider>
-                </TranslationServiceProvider>
-              </ZapProvider>
-            </NostrProvider>
-          </DeletedEventProvider>
-        </ScreenSizeProvider>
-      </ContentPolicyProvider>
+      <FontSizeProvider>
+        <ContentPolicyProvider>
+          <ScreenSizeProvider>
+            <DeletedEventProvider>
+              <NostrProvider>
+                <ZapProvider>
+                  <TranslationServiceProvider>
+                    <FavoriteRelaysProvider>
+                      <FollowListProvider>
+                        <MuteListProvider>
+                          <UserTrustProvider>
+                            <BookmarksProvider>
+                              <PinListProvider>
+                                <FeedProvider>
+                                  <ReplyProvider>
+                                    <MediaUploadServiceProvider>
+                                      <KindFilterProvider>
+                                        <UserPreferencesProvider>
+                                          <PageManager />
+                                          <Toaster />
+                                        </UserPreferencesProvider>
+                                      </KindFilterProvider>
+                                    </MediaUploadServiceProvider>
+                                  </ReplyProvider>
+                                </FeedProvider>
+                              </PinListProvider>
+                            </BookmarksProvider>
+                          </UserTrustProvider>
+                        </MuteListProvider>
+                      </FollowListProvider>
+                    </FavoriteRelaysProvider>
+                  </TranslationServiceProvider>
+                </ZapProvider>
+              </NostrProvider>
+            </DeletedEventProvider>
+          </ScreenSizeProvider>
+        </ContentPolicyProvider>
+      </FontSizeProvider>
     </ThemeProvider>
   )
 }

@@ -48,6 +48,7 @@ export const StorageKey = {
   NOTIFICATION_LIST_STYLE: 'notificationListStyle',
   MEDIA_AUTO_LOAD_POLICY: 'mediaAutoLoadPolicy',
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
+  FONT_SIZE: 'fontSize',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -153,5 +154,8 @@ export const MEDIA_AUTO_LOAD_POLICY = {
   WIFI_ONLY: 'wifi-only',
   NEVER: 'never'
 } as const
+
+export const FONT_SIZES = [10, 12, 14, 16, 18, 20] as const
+export const DEFAULT_FONT_SIZE = 14
 
 export const MAX_PINNED_NOTES = 10

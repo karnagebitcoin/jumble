@@ -1,6 +1,8 @@
 import {
+  DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
   ExtendedKind,
+  FONT_SIZES,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
   SUPPORTED_KINDS,
@@ -48,6 +50,7 @@ class LocalStorageService {
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
+  private fontSize: number = DEFAULT_FONT_SIZE
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -192,6 +195,14 @@ class LocalStorageService {
     this.shownCreateWalletGuideToastPubkeys = shownCreateWalletGuideToastPubkeysStr
       ? new Set(JSON.parse(shownCreateWalletGuideToastPubkeysStr))
       : new Set()
+
+    const fontSizeStr = window.localStorage.getItem(StorageKey.FONT_SIZE)
+    if (fontSizeStr) {
+      const fontSize = parseInt(fontSizeStr)
+      if (FONT_SIZES.includes(fontSize as any)) {
+        this.fontSize = fontSize
+      }
+    }
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -475,6 +486,18 @@ class LocalStorageService {
       StorageKey.SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS,
       JSON.stringify(Array.from(this.shownCreateWalletGuideToastPubkeys))
     )
+  }
+
+  getFontSize() {
+    return this.fontSize
+  }
+
+  setFontSize(fontSize: number) {
+    if (!FONT_SIZES.includes(fontSize as any)) {
+      return
+    }
+    this.fontSize = fontSize
+    window.localStorage.setItem(StorageKey.FONT_SIZE, fontSize.toString())
   }
 }
 
