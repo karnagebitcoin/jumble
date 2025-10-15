@@ -10,6 +10,7 @@ import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
 import { FontSizeProvider } from '@/providers/FontSizeProvider'
 import { KindFilterProvider } from '@/providers/KindFilterProvider'
+import { LayoutModeProvider } from '@/providers/LayoutModeProvider'
 import { MediaUploadServiceProvider } from '@/providers/MediaUploadServiceProvider'
 import { MuteListProvider } from '@/providers/MuteListProvider'
 import { NostrProvider } from '@/providers/NostrProvider'
@@ -29,42 +30,44 @@ export default function App(): JSX.Element {
     <ThemeProvider>
       <PrimaryColorProvider>
         <FontSizeProvider>
-          <ContentPolicyProvider>
-            <ScreenSizeProvider>
-              <DeletedEventProvider>
-                <NostrProvider>
-                  <ZapProvider>
-                    <TranslationServiceProvider>
-                      <FavoriteRelaysProvider>
-                        <FollowListProvider>
-                          <MuteListProvider>
-                            <UserTrustProvider>
-                              <BookmarksProvider>
-                                <PinListProvider>
-                                  <FeedProvider>
-                                    <ReplyProvider>
-                                      <MediaUploadServiceProvider>
-                                        <KindFilterProvider>
-                                          <UserPreferencesProvider>
-                                            <PageManager />
-                                            <Toaster />
-                                          </UserPreferencesProvider>
-                                        </KindFilterProvider>
-                                      </MediaUploadServiceProvider>
-                                    </ReplyProvider>
-                                  </FeedProvider>
-                                </PinListProvider>
-                              </BookmarksProvider>
-                            </UserTrustProvider>
-                          </MuteListProvider>
-                        </FollowListProvider>
-                      </FavoriteRelaysProvider>
-                    </TranslationServiceProvider>
-                  </ZapProvider>
-                </NostrProvider>
-              </DeletedEventProvider>
-            </ScreenSizeProvider>
-          </ContentPolicyProvider>
+          <LayoutModeProvider>
+            <ContentPolicyProvider>
+              <ScreenSizeProvider>
+                <DeletedEventProvider>
+                  <NostrProvider>
+                    <ZapProvider>
+                      <TranslationServiceProvider>
+                        <FavoriteRelaysProvider>
+                          <FollowListProvider>
+                            <MuteListProvider>
+                              <UserTrustProvider>
+                                <BookmarksProvider>
+                                  <PinListProvider>
+                                    <FeedProvider>
+                                      <ReplyProvider>
+                                        <MediaUploadServiceProvider>
+                                          <KindFilterProvider>
+                                            <UserPreferencesProvider>
+                                              <PageManager />
+                                              <Toaster />
+                                            </UserPreferencesProvider>
+                                          </KindFilterProvider>
+                                        </MediaUploadServiceProvider>
+                                      </ReplyProvider>
+                                    </FeedProvider>
+                                  </PinListProvider>
+                                </BookmarksProvider>
+                              </UserTrustProvider>
+                            </MuteListProvider>
+                          </FollowListProvider>
+                        </FavoriteRelaysProvider>
+                      </TranslationServiceProvider>
+                    </ZapProvider>
+                  </NostrProvider>
+                </DeletedEventProvider>
+              </ScreenSizeProvider>
+            </ContentPolicyProvider>
+          </LayoutModeProvider>
         </FontSizeProvider>
       </PrimaryColorProvider>
     </ThemeProvider>

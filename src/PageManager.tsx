@@ -1,8 +1,10 @@
 import Sidebar from '@/components/Sidebar'
+import { LAYOUT_MODE } from '@/constants'
 import { cn } from '@/lib/utils'
 import NoteListPage from '@/pages/primary/NoteListPage'
 import HomePage from '@/pages/secondary/HomePage'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
+import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { TPageRef } from '@/types'
 import {
   cloneElement,
@@ -104,6 +106,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
   ])
   const [secondaryStack, setSecondaryStack] = useState<TStackItem[]>([])
   const { isSmallScreen } = useScreenSize()
+  const { layoutMode } = useLayoutMode()
   const ignorePopStateRef = useRef(false)
 
   useEffect(() => {
@@ -299,7 +302,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         >
           <CurrentRelaysProvider>
             <NotificationProvider>
-              <div className="max-w-screen-xl mx-auto">
+              <div className={cn(layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl mx-auto")}>
                 {!!secondaryStack.length &&
                   secondaryStack.map((item, index) => (
                     <div
@@ -352,7 +355,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
           <NotificationProvider>
             <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background justify-center">
               <Sidebar />
-              <div className="grid grid-cols-2 gap-2 w-full max-w-screen-xl pr-2 py-2">
+              <div className={cn("grid grid-cols-2 gap-2 w-full pr-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
                 <div className="rounded-lg shadow-lg bg-background overflow-hidden">
                   {primaryPages.map(({ name, element, props }) => (
                     <div

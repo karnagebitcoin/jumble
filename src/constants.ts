@@ -50,6 +50,7 @@ export const StorageKey = {
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
   FONT_SIZE: 'fontSize',
   PRIMARY_COLOR: 'primaryColor',
+  LAYOUT_MODE: 'layoutMode',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -221,3 +222,10 @@ export const PRIMARY_COLORS = {
 export const DEFAULT_PRIMARY_COLOR = 'PURPLE'
 
 export const MAX_PINNED_NOTES = 10
+
+export const LAYOUT_MODE = {
+  BOXED: 'boxed',
+  FULL_WIDTH: 'full-width'
+} as const
+
+export const DEFAULT_LAYOUT_MODE = 'boxed'
