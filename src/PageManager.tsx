@@ -299,28 +299,30 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         >
           <CurrentRelaysProvider>
             <NotificationProvider>
-              {!!secondaryStack.length &&
-                secondaryStack.map((item, index) => (
+              <div className="max-w-screen-xl mx-auto">
+                {!!secondaryStack.length &&
+                  secondaryStack.map((item, index) => (
+                    <div
+                      key={item.index}
+                      style={{
+                        display: index === secondaryStack.length - 1 ? 'block' : 'none'
+                      }}
+                    >
+                      {item.component}
+                    </div>
+                  ))}
+                {primaryPages.map(({ name, element, props }) => (
                   <div
-                    key={item.index}
+                    key={name}
                     style={{
-                      display: index === secondaryStack.length - 1 ? 'block' : 'none'
+                      display:
+                        secondaryStack.length === 0 && currentPrimaryPage === name ? 'block' : 'none'
                     }}
                   >
-                    {item.component}
+                    {props ? cloneElement(element as React.ReactElement, props) : element}
                   </div>
                 ))}
-              {primaryPages.map(({ name, element, props }) => (
-                <div
-                  key={name}
-                  style={{
-                    display:
-                      secondaryStack.length === 0 && currentPrimaryPage === name ? 'block' : 'none'
-                  }}
-                >
-                  {props ? cloneElement(element as React.ReactElement, props) : element}
-                </div>
-              ))}
+              </div>
               <BottomNavigationBar />
               <TooManyRelaysAlertDialog />
               <CreateWalletGuideToast />
@@ -348,9 +350,9 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
       >
         <CurrentRelaysProvider>
           <NotificationProvider>
-            <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background">
+            <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background justify-center">
               <Sidebar />
-              <div className="grid grid-cols-2 gap-2 w-full pr-2 py-2">
+              <div className="grid grid-cols-2 gap-2 w-full max-w-screen-xl pr-2 py-2">
                 <div className="rounded-lg shadow-lg bg-background overflow-hidden">
                   {primaryPages.map(({ name, element, props }) => (
                     <div
