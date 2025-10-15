@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': 'آدرس رله نامعتبر',
     'Add a new relay': 'افزودن رله جدید',
     back: 'بازگشت',
+    close: 'بستن',
     'Lost in the void': 'گم شده در خلاء',
     'Carry me home': 'مرا به خانه ببر',
     'no replies': 'پاسخی وجود ندارد',

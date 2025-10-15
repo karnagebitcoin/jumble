@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': '無効なリレイURL',
     'Add a new relay': '新しいリレイを追加',
     back: '戻る',
+    close: '閉じる',
     'Lost in the void': '虚無の中へ',
     'Carry me home': '家まで送って',
     'no replies': '返信がありません',

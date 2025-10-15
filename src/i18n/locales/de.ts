@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'Ungültige Relay-URL',
     'Add a new relay': 'Neues Relay hinzufügen',
     back: 'Zurück',
+    close: 'Schließen',
     'Lost in the void': 'Verloren im Nichts',
     'Carry me home': 'Bring mich nach Hause',
     'no replies': 'keine Antworten',

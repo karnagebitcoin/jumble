@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': '无效的服务器地址',
     'Add a new relay': '添加新的服务器',
     back: '返回',
+    close: '关闭',
     'Lost in the void': '迷失在虚空中',
     'Carry me home': '带我回家',
     'no replies': '暂无回复',

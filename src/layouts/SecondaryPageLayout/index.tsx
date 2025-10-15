@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSecondaryPage } from '@/PageManager'
 import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, X } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -118,6 +118,8 @@ export function SecondaryPageTitlebar({
   hideBottomBorder?: boolean
   titlebar?: React.ReactNode
 }): JSX.Element {
+  const { isSmallScreen } = useScreenSize()
+
   if (titlebar) {
     return (
       <Titlebar className="p-1" hideBottomBorder={hideBottomBorder}>
@@ -139,7 +141,10 @@ export function SecondaryPageTitlebar({
           <BackButton>{title}</BackButton>
         </div>
       )}
-      <div className="flex-shrink-0">{controls}</div>
+      <div className="flex-shrink-0 flex items-center gap-1">
+        {controls}
+        {!isSmallScreen && <CloseButton />}
+      </div>
     </Titlebar>
   )
 }
@@ -158,6 +163,22 @@ function BackButton({ children }: { children?: React.ReactNode }) {
     >
       <ChevronLeft />
       <div className="truncate text-lg font-semibold">{children}</div>
+    </Button>
+  )
+}
+
+function CloseButton() {
+  const { t } = useTranslation()
+  const { pop } = useSecondaryPage()
+
+  return (
+    <Button
+      variant="ghost"
+      size="titlebar-icon"
+      title={t('close')}
+      onClick={() => pop()}
+    >
+      <X />
     </Button>
   )
 }

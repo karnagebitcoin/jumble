@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': 'Nieprawidłowy URL transmitera',
     'Add a new relay': 'Dodaj nowy transmiter',
     back: 'z powrotem',
+    close: 'zamknij',
     'Lost in the void': 'Zagubiony w przestrzeni',
     'Carry me home': 'Na stronę główną',
     'no replies': 'Brak komentarzy',

@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': '유효하지 않은 릴레이 주소',
     'Add a new relay': '새 릴레이 추가',
     back: '뒤로',
+    close: '닫기',
     'Lost in the void': '공허 속에서 길을 잃음',
     'Carry me home': '집으로 데려다줘',
     'no replies': '답글 없음',

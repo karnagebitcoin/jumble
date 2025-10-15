@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'عنوان URL للريلاي غير صالح',
     'Add a new relay': 'إضافة ريلاي جديدة',
     back: 'عودة',
+    close: 'إغلاق',
     'Lost in the void': 'ضائع في الفراغ',
     'Carry me home': 'أعدني إلى المنزل',
     'no replies': 'لا توجد ردود',

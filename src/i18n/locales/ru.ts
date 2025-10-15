@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'неверный URL ретранслятора',
     'Add a new relay': 'Добавить новый ретранслятор',
     back: 'назад',
+    close: 'закрыть',
     'Lost in the void': 'Потерялся в пустоте',
     'Carry me home': 'Отведи меня домой',
     'no replies': 'нет ответов',

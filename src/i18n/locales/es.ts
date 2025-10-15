@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'URL del relé inválida',
     'Add a new relay': 'Agregar un nuevo relé',
     back: 'atrás',
+    close: 'cerrar',
     'Lost in the void': 'Perdido en el vacío',
     'Carry me home': 'Llévame a casa',
     'no replies': 'sin respuestas',

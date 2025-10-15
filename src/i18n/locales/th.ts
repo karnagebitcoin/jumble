@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': 'URL รีเลย์ไม่ถูกต้อง',
     'Add a new relay': 'เพิ่มรีเลย์ใหม่',
     back: 'ย้อนกลับ',
+    close: 'ปิด',
     'Lost in the void': 'หลงอยู่ในความว่างเปล่า',
     'Carry me home': 'พาฉันกลับบ้าน',
     'no replies': 'ไม่มีการตอบกลับ',
