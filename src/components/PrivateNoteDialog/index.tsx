@@ -39,18 +39,20 @@ export default function PrivateNoteDialog({
   }, [open, pubkey])
 
   const handleSave = () => {
+    const existingNote = privateNotesService.getNote(pubkey)
     const note: PrivateNote = {
       text: text.trim(),
-      noteEventId: noteEventId
+      // Preserve existing noteEventId if not providing a new one
+      noteEventId: noteEventId || existingNote?.noteEventId
     }
-    
+
     if (note.text || note.noteEventId) {
       privateNotesService.setNote(pubkey, note)
       onSave?.(note)
     } else {
       privateNotesService.deleteNote(pubkey)
     }
-    
+
     onOpenChange(false)
   }
 

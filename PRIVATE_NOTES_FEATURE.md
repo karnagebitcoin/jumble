@@ -23,13 +23,16 @@ The private notes feature allows users to attach personal, local-only notes to a
 - Private notes appear at the top of user profiles
 - Styled as a manila yellow sticky note with handwriting font (Kalam)
 - Shows up to 2 lines of text (truncated with "..." if longer)
-- Includes a small indicator if a note event is pinned
+- If a note event is pinned, it displays below the text in a compact view
+- The pinned note is fully interactive (you can click through to the full note)
 
 ### 4. **Inline Editing**
-- Click anywhere on the sticky note to edit it
-- Type or modify your note
+- Click on the text area of the sticky note to edit it
+- Type or modify your note text
 - Click outside the note to auto-save
 - Changes are instantly saved to localStorage
+- Editing text preserves the pinned note event
+- The pinned note section is not editable (only the text above it)
 
 ### 5. **Delete Notes**
 - Click the X button on the sticky note to delete it
@@ -61,8 +64,10 @@ The private notes feature allows users to attach personal, local-only notes to a
 1. **Remember Context**: "Met at Bitcoin conference 2024"
 2. **Trust Markers**: "Friend of Alice, verified developer"
 3. **Reminders**: "Ask about their nostr relay project"
-4. **Reference Notes**: Pin a specific insightful note they wrote
+4. **Reference Notes**: Pin a specific insightful note they wrote + add context
 5. **Personal Tags**: "Photography enthusiast, speaks French"
+6. **Evidence**: Pin a problematic note for reference + add why it matters
+7. **Highlights**: Pin their best work + your thoughts on it
 
 ## Privacy
 
