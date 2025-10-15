@@ -1,4 +1,6 @@
 import {
+  BUTTON_RADIUS_VALUES,
+  DEFAULT_BUTTON_RADIUS,
   DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
   DEFAULT_PRIMARY_COLOR,
@@ -54,6 +56,7 @@ class LocalStorageService {
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
   private fontSize: number = DEFAULT_FONT_SIZE
   private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
+  private buttonRadius: number = DEFAULT_BUTTON_RADIUS
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -210,6 +213,14 @@ class LocalStorageService {
     const primaryColor = window.localStorage.getItem(StorageKey.PRIMARY_COLOR)
     if (primaryColor && ['PURPLE', 'BLUE', 'GREEN', 'RED', 'ORANGE', 'PINK', 'YELLOW', 'TEAL'].includes(primaryColor)) {
       this.primaryColor = primaryColor as TPrimaryColor
+    }
+
+    const buttonRadiusStr = window.localStorage.getItem(StorageKey.BUTTON_RADIUS)
+    if (buttonRadiusStr) {
+      const buttonRadius = parseInt(buttonRadiusStr)
+      if (BUTTON_RADIUS_VALUES.includes(buttonRadius as any)) {
+        this.buttonRadius = buttonRadius
+      }
     }
 
     // Clean up deprecated data
@@ -515,6 +526,18 @@ class LocalStorageService {
   setPrimaryColor(color: TPrimaryColor) {
     this.primaryColor = color
     window.localStorage.setItem(StorageKey.PRIMARY_COLOR, color)
+  }
+
+  getButtonRadius() {
+    return this.buttonRadius
+  }
+
+  setButtonRadius(radius: number) {
+    if (!BUTTON_RADIUS_VALUES.includes(radius as any)) {
+      return
+    }
+    this.buttonRadius = radius
+    window.localStorage.setItem(StorageKey.BUTTON_RADIUS, radius.toString())
   }
 }
 

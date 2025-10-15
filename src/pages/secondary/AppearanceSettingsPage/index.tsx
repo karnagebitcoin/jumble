@@ -1,8 +1,16 @@
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
-import { FONT_SIZES, LAYOUT_MODE, NOTIFICATION_LIST_STYLE, PRIMARY_COLORS } from '@/constants'
+import { Slider } from '@/components/ui/slider'
+import {
+  BUTTON_RADIUS_VALUES,
+  FONT_SIZES,
+  LAYOUT_MODE,
+  NOTIFICATION_LIST_STYLE,
+  PRIMARY_COLORS
+} from '@/constants'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn } from '@/lib/utils'
+import { useButtonRadius } from '@/providers/ButtonRadiusProvider'
 import { useFontSize } from '@/providers/FontSizeProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
@@ -21,6 +29,7 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
   const { primaryColor, setPrimaryColor } = usePrimaryColor()
   const { layoutMode, setLayoutMode } = useLayoutMode()
   const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
+  const { buttonRadius, setButtonRadius } = useButtonRadius()
 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('Appearance')}>
@@ -70,6 +79,34 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 )}
               </button>
             ))}
+          </div>
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3">
+          <div className="w-full">
+            <Label className="text-base font-normal">{t('Button radius')}</Label>
+            <div className="text-sm text-muted-foreground">
+              {buttonRadius === 9999
+                ? t('Fully rounded')
+                : buttonRadius === 0
+                  ? t('Square corners')
+                  : `${buttonRadius}px`}
+            </div>
+          </div>
+          <div className="w-full px-2">
+            <Slider
+              min={0}
+              max={BUTTON_RADIUS_VALUES.length - 1}
+              step={1}
+              value={[BUTTON_RADIUS_VALUES.indexOf(buttonRadius as any)]}
+              onValueChange={(value) => {
+                setButtonRadius(BUTTON_RADIUS_VALUES[value[0]])
+              }}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>{t('Square')}</span>
+              <span>{t('Round')}</span>
+            </div>
           </div>
         </SettingItem>
         <SettingItem>

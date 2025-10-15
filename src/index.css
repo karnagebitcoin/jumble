@@ -34,6 +34,10 @@
     font-size: var(--font-size, 14px);
   }
 
+  button {
+    border-radius: var(--button-radius, 6px);
+  }
+
   .clickable {
     cursor: pointer;
     transition: background-color 0.2s ease;
