@@ -52,6 +52,7 @@ export const StorageKey = {
   PRIMARY_COLOR: 'primaryColor',
   LAYOUT_MODE: 'layoutMode',
   BUTTON_RADIUS: 'buttonRadius',
+  PRIVATE_NOTES: 'privateNotes',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated

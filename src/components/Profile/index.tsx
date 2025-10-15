@@ -2,6 +2,7 @@ import Collapsible from '@/components/Collapsible'
 import FollowButton from '@/components/FollowButton'
 import Nip05 from '@/components/Nip05'
 import NpubQrCode from '@/components/NpubQrCode'
+import PrivateNote from '@/components/PrivateNote'
 import ProfileAbout from '@/components/ProfileAbout'
 import ProfileBanner from '@/components/ProfileBanner'
 import ProfileOptions from '@/components/ProfileOptions'
@@ -133,6 +134,7 @@ export default function Profile({ id }: { id?: string }) {
             )}
           </div>
           <div className="pt-2">
+            {!isSelf && <PrivateNote pubkey={pubkey} />}
             <div className="flex gap-2 items-center">
               <div className="text-xl font-semibold truncate select-text">{username}</div>
               {isFollowingYou && (

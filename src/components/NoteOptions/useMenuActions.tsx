@@ -17,6 +17,7 @@ import {
   Pin,
   PinOff,
   SatelliteDish,
+  StickyNote,
   Trash2,
   TriangleAlert
 } from 'lucide-react'
@@ -48,6 +49,7 @@ interface UseMenuActionsProps {
   showSubMenuActions: (subMenu: SubMenuAction[], title: string) => void
   setIsRawEventDialogOpen: (open: boolean) => void
   setIsReportDialogOpen: (open: boolean) => void
+  setIsPrivateNoteDialogOpen?: (open: boolean) => void
   isSmallScreen: boolean
 }
 
@@ -57,6 +59,7 @@ export function useMenuActions({
   showSubMenuActions,
   setIsRawEventDialogOpen,
   setIsReportDialogOpen,
+  setIsPrivateNoteDialogOpen,
   isSmallScreen
 }: UseMenuActionsProps) {
   const { t } = useTranslation()
@@ -220,6 +223,18 @@ export function useMenuActions({
       })
     }
 
+    if (pubkey && event.pubkey !== pubkey && setIsPrivateNoteDialogOpen) {
+      actions.push({
+        icon: StickyNote,
+        label: t('Pin to profile'),
+        onClick: () => {
+          closeDrawer()
+          setIsPrivateNoteDialogOpen(true)
+        },
+        separator: true
+      })
+    }
+
     if (pubkey && event.pubkey !== pubkey) {
       actions.push({
         icon: TriangleAlert,
@@ -229,7 +244,7 @@ export function useMenuActions({
           closeDrawer()
           setIsReportDialogOpen(true)
         },
-        separator: true
+        separator: !setIsPrivateNoteDialogOpen
       })
     }
 
