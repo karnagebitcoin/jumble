@@ -38,7 +38,8 @@ export default function Note({
   size = 'normal',
   className,
   hideParentNotePreview = false,
-  showFull = false
+  showFull = false,
+  compactMedia = false
 }: {
   event: Event
   originalNoteId?: string
@@ -46,6 +47,7 @@ export default function Note({
   className?: string
   hideParentNotePreview?: boolean
   showFull?: boolean
+  compactMedia?: boolean
 }) {
   const { push } = useSecondaryPage()
   const { isSmallScreen } = useScreenSize()
@@ -89,20 +91,20 @@ export default function Note({
   } else if (event.kind === ExtendedKind.POLL) {
     content = (
       <>
-        <Content className="mt-2" event={event} />
+        <Content className="mt-2" event={event} compactMedia={compactMedia} />
         <Poll className="mt-2" event={event} />
       </>
     )
   } else if (event.kind === ExtendedKind.VOICE || event.kind === ExtendedKind.VOICE_COMMENT) {
     content = <AudioPlayer className="mt-2" src={event.content} />
   } else if (event.kind === ExtendedKind.PICTURE) {
-    content = <PictureNote className="mt-2" event={event} />
+    content = <PictureNote className="mt-2" event={event} compactMedia={compactMedia} />
   } else if (event.kind === ExtendedKind.VIDEO || event.kind === ExtendedKind.SHORT_VIDEO) {
-    content = <VideoNote className="mt-2" event={event} />
+    content = <VideoNote className="mt-2" event={event} compactMedia={compactMedia} />
   } else if (event.kind === ExtendedKind.RELAY_REVIEW) {
     content = <RelayReview className="mt-2" event={event} />
   } else {
-    content = <Content className="mt-2" event={event} />
+    content = <Content className="mt-2" event={event} compactMedia={compactMedia} />
   }
 
   return (

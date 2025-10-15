@@ -15,13 +15,15 @@ export default function ImageGallery({
   images,
   start = 0,
   end = images.length,
-  mustLoad = false
+  mustLoad = false,
+  compactMedia = false
 }: {
   className?: string
   images: TImetaInfo[]
   start?: number
   end?: number
   mustLoad?: boolean
+  compactMedia?: boolean
 }) {
   const id = useMemo(() => `image-gallery-${randomString()}`, [])
   const { autoLoadMedia } = useContentPolicy()
@@ -49,16 +51,32 @@ export default function ImageGallery({
       <ImageWithLightbox
         key={i}
         image={image}
-        className="max-h-[80vh] sm:max-h-[50vh] object-contain"
+        className={compactMedia ? "w-20 h-20 object-cover" : "max-h-[80vh] sm:max-h-[50vh] object-contain"}
         classNames={{
-          wrapper: cn('w-fit max-w-full', className)
+          wrapper: cn(compactMedia ? 'w-20 h-20' : 'w-fit max-w-full', className)
         }}
       />
     ))
   }
 
   let imageContent: ReactNode | null = null
-  if (displayImages.length === 1) {
+  if (compactMedia) {
+    imageContent = (
+      <div className="flex flex-wrap gap-2">
+        {displayImages.map((image, i) => (
+          <Image
+            key={i}
+            className="w-20 h-20 cursor-zoom-in object-cover rounded"
+            classNames={{
+              errorPlaceholder: 'w-20 h-20'
+            }}
+            image={image}
+            onClick={(e) => handlePhotoClick(e, i)}
+          />
+        ))}
+      </div>
+    )
+  } else if (displayImages.length === 1) {
     imageContent = (
       <Image
         key={0}
@@ -99,7 +117,7 @@ export default function ImageGallery({
   }
 
   return (
-    <div className={cn(displayImages.length === 1 ? 'w-fit max-w-full' : 'w-full', className)}>
+    <div className={cn(compactMedia ? 'w-full' : (displayImages.length === 1 ? 'w-fit max-w-full' : 'w-full'), className)}>
       {imageContent}
       {index >= 0 &&
         createPortal(

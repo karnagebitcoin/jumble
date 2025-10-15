@@ -34,12 +34,14 @@ export default function Content({
   event,
   content,
   className,
-  mustLoadMedia
+  mustLoadMedia,
+  compactMedia = false
 }: {
   event?: Event
   content?: string
   className?: string
   mustLoadMedia?: boolean
+  compactMedia?: boolean
 }) {
   const translatedEvent = useTranslatedEvent(event?.id)
   const { nodes, allImages, lastNormalUrl, emojiInfos } = useMemo(() => {
@@ -113,12 +115,13 @@ export default function Content({
               start={start}
               end={end}
               mustLoad={mustLoadMedia}
+              compactMedia={compactMedia}
             />
           )
         }
         if (node.type === 'media') {
           return (
-            <MediaPlayer className="mt-2" key={index} src={node.data} mustLoad={mustLoadMedia} />
+            <MediaPlayer className="mt-2" key={index} src={node.data} mustLoad={mustLoadMedia} compactMedia={compactMedia} />
           )
         }
         if (node.type === 'url') {

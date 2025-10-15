@@ -129,16 +129,16 @@ export default function PrivateNote({ pubkey }: PrivateNoteProps) {
         </div>
       </div>
       {note?.noteEventId && pinnedEvent && (
-        <div className="border-t border-yellow-300 dark:border-yellow-400 mx-3 pt-2 pb-3">
+        <div className="border-t border-yellow-600 dark:border-yellow-600 mx-3 pt-2 pb-3">
           <div className="text-xs text-yellow-700 dark:text-yellow-800 mb-2 flex items-center gap-1">
             <StickyNote className="size-3" />
             <span>{t('Pinned note:')}</span>
           </div>
           <div
-            className="bg-white/50 dark:bg-black/20 rounded-md overflow-hidden"
+            className="border border-yellow-600 dark:border-yellow-600 rounded-md p-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <Note event={pinnedEvent} size="small" hideParentNotePreview={true} />
+            <Note event={pinnedEvent} size="small" hideParentNotePreview={true} compactMedia={true} />
           </div>
         </div>
       )}
