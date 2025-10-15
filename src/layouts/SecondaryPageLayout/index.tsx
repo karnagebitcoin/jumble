@@ -169,14 +169,14 @@ function BackButton({ children }: { children?: React.ReactNode }) {
 
 function CloseButton() {
   const { t } = useTranslation()
-  const { pop } = useSecondaryPage()
+  const { clear } = useSecondaryPage()
 
   return (
     <Button
       variant="ghost"
       size="titlebar-icon"
       title={t('close')}
-      onClick={() => pop()}
+      onClick={() => clear()}
     >
       <X />
     </Button>

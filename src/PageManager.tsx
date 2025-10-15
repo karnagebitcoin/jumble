@@ -44,6 +44,7 @@ type TPrimaryPageContext = {
 type TSecondaryPageContext = {
   push: (url: string) => void
   pop: () => void
+  clear: () => void
   currentIndex: number
 }
 
@@ -295,6 +296,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
           value={{
             push: pushSecondaryPage,
             pop: popSecondaryPage,
+            clear: clearSecondaryPages,
             currentIndex: secondaryStack.length
               ? secondaryStack[secondaryStack.length - 1].index
               : 0
@@ -348,6 +350,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         value={{
           push: pushSecondaryPage,
           pop: popSecondaryPage,
+          clear: clearSecondaryPages,
           currentIndex: secondaryStack.length ? secondaryStack[secondaryStack.length - 1].index : 0
         }}
       >
