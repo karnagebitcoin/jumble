@@ -22,7 +22,7 @@ export default function Explore() {
         <div className="p-4 max-md:border-b">
           <Skeleton className="h-6 w-20" />
         </div>
-        <div className="grid md:px-4 md:grid-cols-2 md:gap-2">
+        <div className="md:px-4 space-y-2">
           <RelaySimpleInfoSkeleton className="h-auto px-4 py-3 md:rounded-lg md:border" />
         </div>
       </div>
@@ -50,7 +50,7 @@ function RelayCollection({ collection }: { collection: TAwesomeRelayCollection }
       >
         {collection.name}
       </div>
-      <div className="grid md:px-4 md:grid-cols-2 md:gap-3">
+      <div className="md:px-4 space-y-2">
         {collection.relays.map((url) => (
           <RelayItem key={url} url={url} />
         ))}
@@ -64,7 +64,7 @@ function RelayItem({ url }: { url: string }) {
   const { relayInfo, isFetching } = useFetchRelayInfo(url)
 
   if (isFetching) {
-    return <RelaySimpleInfoSkeleton className="h-auto px-4 py-3 border-b md:rounded-lg md:border" />
+    return <RelaySimpleInfoSkeleton className="h-auto px-4 py-2 border-b md:rounded-lg md:border" />
   }
 
   if (!relayInfo) {
@@ -74,8 +74,9 @@ function RelayItem({ url }: { url: string }) {
   return (
     <RelaySimpleInfo
       key={relayInfo.url}
-      className="clickable h-auto px-4 py-3 border-b md:rounded-lg md:border"
+      className="clickable h-auto px-4 py-2 border-b md:rounded-lg md:border"
       relayInfo={relayInfo}
+      compact
       onClick={(e) => {
         e.stopPropagation()
         push(toRelay(relayInfo.url))

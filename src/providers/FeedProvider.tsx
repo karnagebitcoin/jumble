@@ -46,14 +46,21 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      let feedInfo: TFeedInfo = {
-        feedType: 'relay',
-        id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
-      }
+      let feedInfo: TFeedInfo
       if (pubkey) {
+        // For logged in users, check stored feed or default to following
         const storedFeedInfo = storage.getFeedInfo(pubkey)
         if (storedFeedInfo) {
           feedInfo = storedFeedInfo
+        } else {
+          // Default to following feed for logged in users
+          feedInfo = { feedType: 'following' }
+        }
+      } else {
+        // For logged out users, default to a relay feed
+        feedInfo = {
+          feedType: 'relay',
+          id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
         }
       }
 
