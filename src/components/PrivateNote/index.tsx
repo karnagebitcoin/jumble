@@ -144,7 +144,13 @@ export default function PrivateNote({ pubkey }: PrivateNoteProps) {
               push(toNote(pinnedEvent))
             }}
           >
-            <Note event={pinnedEvent} size="small" hideParentNotePreview={true} compactMedia={true} />
+            <Note
+              event={pinnedEvent}
+              size="small"
+              hideParentNotePreview={true}
+              compactMedia={true}
+              metadataClassName="text-yellow-700 dark:text-yellow-700"
+            />
           </div>
         </div>
       )}

@@ -39,7 +39,8 @@ export default function Note({
   className,
   hideParentNotePreview = false,
   showFull = false,
-  compactMedia = false
+  compactMedia = false,
+  metadataClassName
 }: {
   event: Event
   originalNoteId?: string
@@ -48,6 +49,7 @@ export default function Note({
   hideParentNotePreview?: boolean
   showFull?: boolean
   compactMedia?: boolean
+  metadataClassName?: string
 }) {
   const { push } = useSecondaryPage()
   const { isSmallScreen } = useScreenSize()
@@ -121,7 +123,7 @@ export default function Note({
               />
               <ClientTag event={event} />
             </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className={cn("flex items-center gap-1 text-sm", metadataClassName || "text-muted-foreground")}>
               <Nip05 pubkey={event.pubkey} append="·" />
               <FormattedTimestamp
                 timestamp={event.created_at}
