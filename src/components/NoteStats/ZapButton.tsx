@@ -48,6 +48,15 @@ export default function ZapButton({ event }: { event: Event }) {
       }
       if (zapping) return
 
+      // Play zap sound IMMEDIATELY when button is pressed
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        const audio = new Audio(`/sounds/${zapSound}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
+      }
+
       setZapping(true)
       const zapResult = await lightning.zap(pubkey, event, defaultZapSats, defaultZapComment)
       // user canceled
@@ -61,14 +70,6 @@ export default function ZapButton({ event }: { event: Event }) {
         defaultZapSats,
         defaultZapComment
       )
-      // Play zap sound if enabled
-      if (zapSound !== ZAP_SOUNDS.NONE) {
-        const audio = new Audio(`/sounds/${zapSound}.mp3`)
-        audio.volume = 0.5
-        audio.play().catch(() => {
-          // Ignore errors (e.g., autoplay policy restrictions)
-        })
-      }
     } catch (error) {
       toast.error(`${t('Zap failed')}: ${(error as Error).message}`)
     } finally {

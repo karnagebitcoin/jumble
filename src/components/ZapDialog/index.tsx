@@ -180,6 +180,16 @@ function ZapDialogContent({
       if (!pubkey) {
         throw new Error('You need to be logged in to zap')
       }
+
+      // Play zap sound IMMEDIATELY when zap button is pressed
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        const audio = new Audio(`/sounds/${zapSound}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
+      }
+
       setZapping(true)
       const zapResult = await lightning.zap(pubkey, event ?? recipient, sats, comment, () =>
         setOpen(false)
@@ -190,14 +200,6 @@ function ZapDialogContent({
       }
       if (event) {
         noteStatsService.addZap(pubkey, event.id, zapResult.invoice, sats, comment)
-      }
-      // Play zap sound if enabled
-      if (zapSound !== ZAP_SOUNDS.NONE) {
-        const audio = new Audio(`/sounds/${zapSound}.mp3`)
-        audio.volume = 0.5
-        audio.play().catch(() => {
-          // Ignore errors (e.g., autoplay policy restrictions)
-        })
       }
     } catch (error) {
       toast.error(`${t('Zap failed')}: ${(error as Error).message}`)
