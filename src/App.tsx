@@ -10,6 +10,7 @@ import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
+import { FontFamilyProvider } from '@/providers/FontFamilyProvider'
 import { FontSizeProvider } from '@/providers/FontSizeProvider'
 import { KindFilterProvider } from '@/providers/KindFilterProvider'
 import { LayoutModeProvider } from '@/providers/LayoutModeProvider'
@@ -36,11 +37,12 @@ export default function App(): JSX.Element {
       <PageThemeProvider>
         <PrimaryColorProvider>
           <FontSizeProvider>
-            <ButtonRadiusProvider>
-              <LayoutModeProvider>
-                <CompactSidebarProvider>
-                  <ContentPolicyProvider>
-                    <ScreenSizeProvider>
+            <FontFamilyProvider>
+              <ButtonRadiusProvider>
+                <LayoutModeProvider>
+                  <CompactSidebarProvider>
+                    <ContentPolicyProvider>
+                      <ScreenSizeProvider>
                 <DeletedEventProvider>
                   <NostrProvider>
                     <ZapProvider>
@@ -78,13 +80,14 @@ export default function App(): JSX.Element {
                   </NostrProvider>
                     </DeletedEventProvider>
                   </ScreenSizeProvider>
-                </ContentPolicyProvider>
-              </CompactSidebarProvider>
-            </LayoutModeProvider>
-        </ButtonRadiusProvider>
-      </FontSizeProvider>
-    </PrimaryColorProvider>
-  </PageThemeProvider>
-</ThemeProvider>
+                  </ContentPolicyProvider>
+                </CompactSidebarProvider>
+              </LayoutModeProvider>
+            </ButtonRadiusProvider>
+          </FontFamilyProvider>
+        </FontSizeProvider>
+      </PrimaryColorProvider>
+    </PageThemeProvider>
+  </ThemeProvider>
   )
 }

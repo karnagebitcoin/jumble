@@ -468,6 +468,14 @@ export default {
     'Zap Sound': 'Zap Sound',
     None: 'None',
     'Zap Sound 1': 'Zap Sound 1',
-    'Electric Zap': 'Electric Zap'
+    'Electric Zap': 'Electric Zap',
+    'Font family': 'Font family',
+    'Font size': 'Font size',
+    'Primary color': 'Primary color',
+    'Button radius': 'Button radius',
+    'Fully rounded': 'Fully rounded',
+    'Square corners': 'Square corners',
+    Square: 'Square',
+    Round: 'Round'
   }
 }

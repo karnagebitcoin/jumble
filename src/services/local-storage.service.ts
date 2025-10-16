@@ -1,11 +1,13 @@
 import {
   BUTTON_RADIUS_VALUES,
   DEFAULT_BUTTON_RADIUS,
+  DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
   DEFAULT_PAGE_THEME,
   DEFAULT_PRIMARY_COLOR,
   ExtendedKind,
+  FONT_FAMILIES,
   FONT_SIZES,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
@@ -21,6 +23,7 @@ import {
   TAccount,
   TAccountPointer,
   TFeedInfo,
+  TFontFamily,
   TMediaAutoLoadPolicy,
   TMediaUploadServiceConfig,
   TNoteListMode,
@@ -60,6 +63,7 @@ class LocalStorageService {
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
   private fontSize: number = DEFAULT_FONT_SIZE
+  private fontFamily: TFontFamily = DEFAULT_FONT_FAMILY
   private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
   private buttonRadius: number = DEFAULT_BUTTON_RADIUS
   private pageTheme: TPageTheme = DEFAULT_PAGE_THEME
@@ -218,6 +222,11 @@ class LocalStorageService {
       if (FONT_SIZES.includes(fontSize as any)) {
         this.fontSize = fontSize
       }
+    }
+
+    const fontFamily = window.localStorage.getItem(StorageKey.FONT_FAMILY)
+    if (fontFamily && Object.keys(FONT_FAMILIES).includes(fontFamily)) {
+      this.fontFamily = fontFamily as TFontFamily
     }
 
     const primaryColor = window.localStorage.getItem(StorageKey.PRIMARY_COLOR)
@@ -552,6 +561,18 @@ class LocalStorageService {
     }
     this.fontSize = fontSize
     window.localStorage.setItem(StorageKey.FONT_SIZE, fontSize.toString())
+  }
+
+  getFontFamily() {
+    return this.fontFamily
+  }
+
+  setFontFamily(fontFamily: TFontFamily) {
+    if (!Object.keys(FONT_FAMILIES).includes(fontFamily)) {
+      return
+    }
+    this.fontFamily = fontFamily
+    window.localStorage.setItem(StorageKey.FONT_FAMILY, fontFamily)
   }
 
   getPrimaryColor() {

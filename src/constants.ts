@@ -58,6 +58,7 @@ export const StorageKey = {
   COMPACT_SIDEBAR: 'compactSidebar',
   ENABLED_WIDGETS: 'enabledWidgets',
   ZAP_SOUND: 'zapSound',
+  FONT_FAMILY: 'fontFamily',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -166,6 +167,35 @@ export const MEDIA_AUTO_LOAD_POLICY = {
 
 export const FONT_SIZES = [10, 12, 14, 16, 18, 20] as const
 export const DEFAULT_FONT_SIZE = 14
+
+export const FONT_FAMILIES = {
+  DEFAULT: {
+    name: 'Default',
+    value: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  SYSTEM: {
+    name: 'System',
+    value: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif'
+  },
+  IBM_PLEX_SANS: {
+    name: 'IBM Plex Sans',
+    value: '"IBM Plex Sans", system-ui, sans-serif'
+  },
+  LATO: {
+    name: 'Lato',
+    value: 'Lato, system-ui, sans-serif'
+  },
+  OUTFIT: {
+    name: 'Outfit',
+    value: 'Outfit, system-ui, sans-serif'
+  },
+  ROBOTO: {
+    name: 'Roboto',
+    value: 'Roboto, system-ui, sans-serif'
+  }
+} as const
+
+export const DEFAULT_FONT_FAMILY = 'DEFAULT'
 
 export const ZAP_SOUNDS = {
   NONE: 'none',

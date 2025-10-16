@@ -4,6 +4,7 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import {
   BUTTON_RADIUS_VALUES,
+  FONT_FAMILIES,
   FONT_SIZES,
   LAYOUT_MODE,
   NOTIFICATION_LIST_STYLE,
@@ -13,13 +14,14 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn } from '@/lib/utils'
 import { useButtonRadius } from '@/providers/ButtonRadiusProvider'
 import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
+import { useFontFamily } from '@/providers/FontFamilyProvider'
 import { useFontSize } from '@/providers/FontSizeProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
 import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
 import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
-import { TPrimaryColor } from '@/types'
+import { TFontFamily, TPrimaryColor } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
 import { Check, Moon, Sun, Monitor } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
@@ -30,6 +32,7 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
   const { themeSetting, setThemeSetting } = useTheme()
   const { pageTheme, setPageTheme } = usePageTheme()
   const { fontSize, setFontSize } = useFontSize()
+  const { fontFamily, setFontFamily } = useFontFamily()
   const { primaryColor, setPrimaryColor } = usePrimaryColor()
   const { layoutMode, setLayoutMode } = useLayoutMode()
   const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
@@ -161,6 +164,26 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
               <span>{t('Round')}</span>
             </div>
           </div>
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="font-family" className="text-base font-normal">
+            {t('Font family')}
+          </Label>
+          <Select
+            value={fontFamily}
+            onValueChange={(value) => setFontFamily(value as TFontFamily)}
+          >
+            <SelectTrigger id="font-family" className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(FONT_FAMILIES).map(([key, config]) => (
+                <SelectItem key={key} value={key}>
+                  {config.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="font-size" className="text-base font-normal">

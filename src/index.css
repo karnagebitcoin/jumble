@@ -9,12 +9,13 @@
   }
 
   html {
-    @apply font-sans antialiased;
+    @apply antialiased;
     --bc-color-brand: hsl(var(--primary));
     --bc-color-brand-dark: hsl(var(--primary));
     --bc-brand-mix: 100%;
     --bc-color-brand-button-text: hsl(var(--primary-foreground));
     --bc-color-brand-button-text-dark: hsl(var(--primary-foreground));
+    --font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   input,
@@ -31,6 +32,7 @@
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     user-select: none;
+    font-family: var(--font-family);
     font-size: var(--font-size, 14px);
   }
 
