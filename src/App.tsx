@@ -15,6 +15,7 @@ import { LayoutModeProvider } from '@/providers/LayoutModeProvider'
 import { MediaUploadServiceProvider } from '@/providers/MediaUploadServiceProvider'
 import { MuteListProvider } from '@/providers/MuteListProvider'
 import { NostrProvider } from '@/providers/NostrProvider'
+import { PageThemeProvider } from '@/providers/PageThemeProvider'
 import { PinListProvider } from '@/providers/PinListProvider'
 import { PrimaryColorProvider } from '@/providers/PrimaryColorProvider'
 import { ReplyProvider } from '@/providers/ReplyProvider'
@@ -30,11 +31,12 @@ import { PageManager } from './PageManager'
 export default function App(): JSX.Element {
   return (
     <ThemeProvider>
-      <PrimaryColorProvider>
-        <FontSizeProvider>
-          <ButtonRadiusProvider>
-            <LayoutModeProvider>
-            <ContentPolicyProvider>
+      <PageThemeProvider>
+        <PrimaryColorProvider>
+          <FontSizeProvider>
+            <ButtonRadiusProvider>
+              <LayoutModeProvider>
+                <ContentPolicyProvider>
               <ScreenSizeProvider>
                 <DeletedEventProvider>
                   <NostrProvider>
@@ -73,9 +75,10 @@ export default function App(): JSX.Element {
               </ScreenSizeProvider>
             </ContentPolicyProvider>
           </LayoutModeProvider>
-          </ButtonRadiusProvider>
-        </FontSizeProvider>
-      </PrimaryColorProvider>
-    </ThemeProvider>
+        </ButtonRadiusProvider>
+      </FontSizeProvider>
+    </PrimaryColorProvider>
+  </PageThemeProvider>
+</ThemeProvider>
   )
 }

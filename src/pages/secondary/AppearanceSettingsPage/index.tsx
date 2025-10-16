@@ -6,6 +6,7 @@ import {
   FONT_SIZES,
   LAYOUT_MODE,
   NOTIFICATION_LIST_STYLE,
+  PAGE_THEMES,
   PRIMARY_COLORS
 } from '@/constants'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
@@ -13,41 +14,96 @@ import { cn } from '@/lib/utils'
 import { useButtonRadius } from '@/providers/ButtonRadiusProvider'
 import { useFontSize } from '@/providers/FontSizeProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { usePageTheme } from '@/providers/PageThemeProvider'
 import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
 import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
-import { TPrimaryColor } from '@/types'
+import { TPageTheme, TPrimaryColor } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
-import { Check } from 'lucide-react'
+import { Check, Moon, Sun, Monitor } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { themeSetting, setThemeSetting } = useTheme()
+  const { pageTheme, setPageTheme } = usePageTheme()
   const { fontSize, setFontSize } = useFontSize()
   const { primaryColor, setPrimaryColor } = usePrimaryColor()
   const { layoutMode, setLayoutMode } = useLayoutMode()
   const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
   const { buttonRadius, setButtonRadius } = useButtonRadius()
 
+  const getThemeIcon = (theme: string) => {
+    switch (theme) {
+      case 'light':
+        return <Sun className="w-5 h-5" />
+      case 'dark':
+        return <Moon className="w-5 h-5" />
+      case 'system':
+        return <Monitor className="w-5 h-5" />
+      default:
+        return null
+    }
+  }
+
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('Appearance')}>
       <div className="space-y-4 mt-3">
-        <SettingItem>
-          <Label htmlFor="theme" className="text-base font-normal">
-            {t('Theme')}
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
+            {t('Light / Dark Mode')}
           </Label>
-          <Select defaultValue="system" value={themeSetting} onValueChange={setThemeSetting}>
-            <SelectTrigger id="theme" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="system">{t('System')}</SelectItem>
-              <SelectItem value="light">{t('Light')}</SelectItem>
-              <SelectItem value="dark">{t('Dark')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-3 gap-3 w-full">
+            {(['system', 'light', 'dark'] as const).map((theme) => (
+              <button
+                key={theme}
+                onClick={() => setThemeSetting(theme)}
+                className={cn(
+                  'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                  themeSetting === theme
+                    ? 'border-primary'
+                    : 'border-border hover:border-muted-foreground/30'
+                )}
+              >
+                <div className="flex items-center justify-center w-8 h-8">
+                  {getThemeIcon(theme)}
+                </div>
+                <span className="text-xs font-medium capitalize">{t(theme)}</span>
+                {themeSetting === theme && (
+                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
+            {t('Page Theme')}
+          </Label>
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {Object.entries(PAGE_THEMES).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => setPageTheme(config.value as TPageTheme)}
+                className={cn(
+                  'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                  pageTheme === config.value
+                    ? 'border-primary'
+                    : 'border-border hover:border-muted-foreground/30'
+                )}
+              >
+                <div className="text-xs font-medium">{config.name}</div>
+                {pageTheme === config.value && (
+                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         </SettingItem>
         <SettingItem className="flex-col items-start gap-3">
           <Label className="text-base font-normal">

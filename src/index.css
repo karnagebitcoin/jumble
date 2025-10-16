@@ -141,6 +141,15 @@
   .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(1.5);
   }
+
+  /* Page Theme: Pure Black */
+  .dark.page-theme-pure-black {
+    --surface-background: 0 0% 0%;
+    --background: 0 0% 0%;
+    --card: 0 0% 0%;
+    --popover: 0 0% 0%;
+    --border: 0 0% 15%;
+  }
 }
 
 @keyframes progressFill {

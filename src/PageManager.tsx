@@ -5,6 +5,7 @@ import NoteListPage from '@/pages/primary/NoteListPage'
 import HomePage from '@/pages/secondary/HomePage'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { usePageTheme } from '@/providers/PageThemeProvider'
 import { TPageRef } from '@/types'
 import {
   cloneElement,
@@ -96,6 +97,7 @@ export function useSecondaryPage() {
 }
 
 export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
+  const { pageTheme } = usePageTheme()
   const [currentPrimaryPage, setCurrentPrimaryPage] = useState<TPrimaryPageName>('home')
   const [primaryPages, setPrimaryPages] = useState<
     { name: TPrimaryPageName; element: ReactNode; props?: any }[]
@@ -357,9 +359,17 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         <CurrentRelaysProvider>
           <NotificationProvider>
             <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background justify-center">
-              <Sidebar />
+              <div className={cn(
+                "shrink-0",
+                pageTheme === 'pure-black' && "border-r border-neutral-900"
+              )}>
+                <Sidebar />
+              </div>
               <div className={cn("grid grid-cols-2 gap-2 w-full pr-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
-                <div className="rounded-lg shadow-lg bg-background overflow-hidden">
+                <div className={cn(
+                  "rounded-lg shadow-lg bg-background overflow-hidden",
+                  pageTheme === 'pure-black' && "border border-neutral-900"
+                )}>
                   {primaryPages.map(({ name, element, props }) => (
                     <div
                       key={name}
@@ -479,6 +489,7 @@ function HomePageWrapper({
   children: ReactNode
   secondaryStackLength: number
 }) {
+  const { pageTheme } = usePageTheme()
   const [dismissedState, setDismissedState] = useState(false)
 
   useEffect(() => {
@@ -508,7 +519,8 @@ function HomePageWrapper({
     <div
       className={cn(
         'rounded-lg shadow-lg overflow-hidden',
-        isTransparent ? 'bg-transparent shadow-none' : 'bg-background'
+        isTransparent ? 'bg-transparent shadow-none' : 'bg-background',
+        pageTheme === 'pure-black' && !isTransparent && 'border border-neutral-900'
       )}
     >
       {children}

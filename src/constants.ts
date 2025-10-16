@@ -52,6 +52,7 @@ export const StorageKey = {
   PRIMARY_COLOR: 'primaryColor',
   LAYOUT_MODE: 'layoutMode',
   BUTTON_RADIUS: 'buttonRadius',
+  PAGE_THEME: 'pageTheme',
   PRIVATE_NOTES: 'privateNotes',
   TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
@@ -298,3 +299,16 @@ export const LAYOUT_MODE = {
 } as const
 
 export const DEFAULT_LAYOUT_MODE = 'boxed'
+
+export const PAGE_THEMES = {
+  DEFAULT: {
+    name: 'Default',
+    value: 'default'
+  },
+  PURE_BLACK: {
+    name: 'Pure Black',
+    value: 'pure-black'
+  }
+} as const
+
+export const DEFAULT_PAGE_THEME = 'default'

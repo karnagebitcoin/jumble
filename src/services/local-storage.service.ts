@@ -3,6 +3,7 @@ import {
   DEFAULT_BUTTON_RADIUS,
   DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
+  DEFAULT_PAGE_THEME,
   DEFAULT_PRIMARY_COLOR,
   ExtendedKind,
   FONT_SIZES,
@@ -22,6 +23,7 @@ import {
   TMediaUploadServiceConfig,
   TNoteListMode,
   TNotificationStyle,
+  TPageTheme,
   TPrimaryColor,
   TRelaySet,
   TThemeSetting,
@@ -58,6 +60,7 @@ class LocalStorageService {
   private fontSize: number = DEFAULT_FONT_SIZE
   private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
   private buttonRadius: number = DEFAULT_BUTTON_RADIUS
+  private pageTheme: TPageTheme = DEFAULT_PAGE_THEME
   private trendingNotesDismissed: boolean = false
 
   constructor() {
@@ -223,6 +226,11 @@ class LocalStorageService {
       if (BUTTON_RADIUS_VALUES.includes(buttonRadius as any)) {
         this.buttonRadius = buttonRadius
       }
+    }
+
+    const pageTheme = window.localStorage.getItem(StorageKey.PAGE_THEME)
+    if (pageTheme && ['default', 'pure-black'].includes(pageTheme)) {
+      this.pageTheme = pageTheme as TPageTheme
     }
 
     this.trendingNotesDismissed =
@@ -543,6 +551,15 @@ class LocalStorageService {
     }
     this.buttonRadius = radius
     window.localStorage.setItem(StorageKey.BUTTON_RADIUS, radius.toString())
+  }
+
+  getPageTheme() {
+    return this.pageTheme
+  }
+
+  setPageTheme(pageTheme: TPageTheme) {
+    this.pageTheme = pageTheme
+    window.localStorage.setItem(StorageKey.PAGE_THEME, pageTheme)
   }
 
   getTrendingNotesDismissed() {
