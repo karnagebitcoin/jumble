@@ -19,6 +19,7 @@ import SearchPage from './pages/secondary/SearchPage'
 import SettingsPage from './pages/secondary/SettingsPage'
 import TranslationPage from './pages/secondary/TranslationPage'
 import WalletPage from './pages/secondary/WalletPage'
+import WidgetsSettingsPage from './pages/secondary/WidgetsSettingsPage'
 
 const ROUTES = [
   { path: '/notes', element: <NoteListPage /> },
@@ -36,6 +37,7 @@ const ROUTES = [
   { path: '/settings/posts', element: <PostSettingsPage /> },
   { path: '/settings/general', element: <GeneralSettingsPage /> },
   { path: '/settings/appearance', element: <AppearanceSettingsPage /> },
+  { path: '/settings/widgets', element: <WidgetsSettingsPage /> },
   { path: '/settings/translation', element: <TranslationPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },
   { path: '/mutes', element: <MuteListPage /> },

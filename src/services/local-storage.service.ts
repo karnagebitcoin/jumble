@@ -63,6 +63,7 @@ class LocalStorageService {
   private pageTheme: TPageTheme = DEFAULT_PAGE_THEME
   private trendingNotesDismissed: boolean = false
   private compactSidebar: boolean = false
+  private enabledWidgets: string[] = []
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -239,6 +240,15 @@ class LocalStorageService {
 
     this.compactSidebar =
       window.localStorage.getItem(StorageKey.COMPACT_SIDEBAR) === 'true'
+
+    const enabledWidgetsStr = window.localStorage.getItem(StorageKey.ENABLED_WIDGETS)
+    if (enabledWidgetsStr) {
+      this.enabledWidgets = JSON.parse(enabledWidgetsStr)
+    } else {
+      // Default to trending notes enabled
+      this.enabledWidgets = ['trending-notes']
+      window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
+    }
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -582,6 +592,15 @@ class LocalStorageService {
   setCompactSidebar(compact: boolean) {
     this.compactSidebar = compact
     window.localStorage.setItem(StorageKey.COMPACT_SIDEBAR, compact.toString())
+  }
+
+  getEnabledWidgets() {
+    return this.enabledWidgets
+  }
+
+  setEnabledWidgets(widgets: string[]) {
+    this.enabledWidgets = widgets
+    window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(widgets))
   }
 }
 

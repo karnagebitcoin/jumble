@@ -1,13 +1,15 @@
-import CompactTrendingNotes from '@/components/TrendingNotes/CompactTrendingNotes'
+import Widgets from '@/components/Widgets'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useTrendingNotesDismissed } from '@/providers/TrendingNotesDismissedProvider'
-import { TrendingUp } from 'lucide-react'
+import { useWidgets } from '@/providers/WidgetsProvider'
+import { LayoutGrid } from 'lucide-react'
 import { forwardRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { trendingNotesDismissed, setTrendingNotesDismissed } = useTrendingNotesDismissed()
+  const { enabledWidgets } = useWidgets()
 
   // Reset the dismissed state when the HomePage is shown (on page refresh or navigation back to home)
   useEffect(() => {
@@ -28,8 +30,8 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     setTrendingNotesDismissed(true)
   }
 
-  // If dismissed, render an invisible placeholder to maintain layout
-  if (trendingNotesDismissed) {
+  // If dismissed or no widgets enabled, render an invisible placeholder to maintain layout
+  if (trendingNotesDismissed || enabledWidgets.length === 0) {
     return <div className="h-full w-full bg-transparent" ref={ref} />
   }
 
@@ -39,8 +41,8 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
       index={index}
       title={
         <>
-          <TrendingUp />
-          <div>{t('Trending Notes')}</div>
+          <LayoutGrid />
+          <div>{t('Widgets')}</div>
         </>
       }
       hideBackButton
@@ -49,7 +51,7 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
       onClose={handleClose}
     >
       <div className="px-4 pt-4">
-        <CompactTrendingNotes />
+        <Widgets />
       </div>
     </SecondaryPageLayout>
   )

@@ -26,6 +26,7 @@ import { TranslationServiceProvider } from '@/providers/TranslationServiceProvid
 import { TrendingNotesDismissedProvider } from '@/providers/TrendingNotesDismissedProvider'
 import { UserPreferencesProvider } from '@/providers/UserPreferencesProvider'
 import { UserTrustProvider } from '@/providers/UserTrustProvider'
+import { WidgetsProvider } from '@/providers/WidgetsProvider'
 import { ZapProvider } from '@/providers/ZapProvider'
 import { PageManager } from './PageManager'
 
@@ -56,8 +57,10 @@ export default function App(): JSX.Element {
                                           <KindFilterProvider>
                                             <UserPreferencesProvider>
                                               <TrendingNotesDismissedProvider>
-                                                <PageManager />
-                                                <Toaster />
+                                                <WidgetsProvider>
+                                                  <PageManager />
+                                                  <Toaster />
+                                                </WidgetsProvider>
                                               </TrendingNotesDismissedProvider>
                                             </UserPreferencesProvider>
                                           </KindFilterProvider>
