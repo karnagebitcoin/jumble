@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ZAP_SOUNDS } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useZap } from '@/providers/ZapProvider'
@@ -136,7 +137,7 @@ function ZapDialogContent({
 }) {
   const { t, i18n } = useTranslation()
   const { pubkey } = useNostr()
-  const { defaultZapSats, defaultZapComment } = useZap()
+  const { defaultZapSats, defaultZapComment, zapSound } = useZap()
   const [sats, setSats] = useState(defaultAmount ?? defaultZapSats)
   const [comment, setComment] = useState(defaultComment ?? defaultZapComment)
   const [zapping, setZapping] = useState(false)
@@ -189,6 +190,14 @@ function ZapDialogContent({
       }
       if (event) {
         noteStatsService.addZap(pubkey, event.id, zapResult.invoice, sats, comment)
+      }
+      // Play zap sound if enabled
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        const audio = new Audio(`/sounds/${zapSound}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
       }
     } catch (error) {
       toast.error(`${t('Zap failed')}: ${(error as Error).message}`)

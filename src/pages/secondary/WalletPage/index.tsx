@@ -19,6 +19,7 @@ import DefaultZapAmountInput from './DefaultZapAmountInput'
 import DefaultZapCommentInput from './DefaultZapCommentInput'
 import LightningAddressInput from './LightningAddressInput'
 import QuickZapSwitch from './QuickZapSwitch'
+import ZapSoundSelect from './ZapSoundSelect'
 
 const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
@@ -57,6 +58,7 @@ const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
           <DefaultZapAmountInput />
           <DefaultZapCommentInput />
           <QuickZapSwitch />
+          <ZapSoundSelect />
           <LightningAddressInput />
         </div>
       ) : (

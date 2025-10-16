@@ -11,7 +11,9 @@ import {
   NOTIFICATION_LIST_STYLE,
   PRIMARY_COLORS,
   SUPPORTED_KINDS,
-  StorageKey
+  StorageKey,
+  TZapSound,
+  ZAP_SOUNDS
 } from '@/constants'
 import { isSameAccount } from '@/lib/account'
 import { randomString } from '@/lib/random'
@@ -64,6 +66,7 @@ class LocalStorageService {
   private trendingNotesDismissed: boolean = false
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
+  private zapSound: TZapSound = ZAP_SOUNDS.NONE
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -248,6 +251,11 @@ class LocalStorageService {
       // Default to trending notes enabled
       this.enabledWidgets = ['trending-notes']
       window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
+    }
+
+    const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
+    if (zapSound && Object.values(ZAP_SOUNDS).includes(zapSound as TZapSound)) {
+      this.zapSound = zapSound as TZapSound
     }
 
     // Clean up deprecated data
@@ -601,6 +609,15 @@ class LocalStorageService {
   setEnabledWidgets(widgets: string[]) {
     this.enabledWidgets = widgets
     window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(widgets))
+  }
+
+  getZapSound() {
+    return this.zapSound
+  }
+
+  setZapSound(sound: TZapSound) {
+    this.zapSound = sound
+    window.localStorage.setItem(StorageKey.ZAP_SOUND, sound)
   }
 }
 

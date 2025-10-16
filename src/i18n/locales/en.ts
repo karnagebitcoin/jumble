@@ -464,6 +464,10 @@ export default {
     'Unpinned!': 'Unpinned!',
     'Failed to unpin: {{error}}': 'Failed to unpin: {{error}}',
     'Unpin from profile': 'Unpin from profile',
-    'Pin to profile': 'Pin to profile'
+    'Pin to profile': 'Pin to profile',
+    'Zap Sound': 'Zap Sound',
+    None: 'None',
+    'Zap Sound 1': 'Zap Sound 1',
+    'Electric Zap': 'Electric Zap'
   }
 }

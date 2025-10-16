@@ -1,3 +1,4 @@
+import { TZapSound } from '@/constants'
 import lightningService from '@/services/lightning.service'
 import storage from '@/services/local-storage.service'
 import { onConnected, onDisconnected } from '@getalby/bitcoin-connect-react'
@@ -14,6 +15,8 @@ type TZapContext = {
   updateDefaultComment: (comment: string) => void
   quickZap: boolean
   updateQuickZap: (quickZap: boolean) => void
+  zapSound: TZapSound
+  updateZapSound: (sound: TZapSound) => void
 }
 
 const ZapContext = createContext<TZapContext | undefined>(undefined)
@@ -30,6 +33,7 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
   const [defaultZapSats, setDefaultZapSats] = useState<number>(storage.getDefaultZapSats())
   const [defaultZapComment, setDefaultZapComment] = useState<string>(storage.getDefaultZapComment())
   const [quickZap, setQuickZap] = useState<boolean>(storage.getQuickZap())
+  const [zapSound, setZapSound] = useState<TZapSound>(storage.getZapSound())
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [provider, setProvider] = useState<WebLNProvider | null>(null)
   const [walletInfo, setWalletInfo] = useState<GetInfoResponse | null>(null)
@@ -69,6 +73,11 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
     setQuickZap(quickZap)
   }
 
+  const updateZapSound = (sound: TZapSound) => {
+    storage.setZapSound(sound)
+    setZapSound(sound)
+  }
+
   return (
     <ZapContext.Provider
       value={{
@@ -80,7 +89,9 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
         defaultZapComment,
         updateDefaultComment,
         quickZap,
-        updateQuickZap
+        updateQuickZap,
+        zapSound,
+        updateZapSound
       }}
     >
       {children}
