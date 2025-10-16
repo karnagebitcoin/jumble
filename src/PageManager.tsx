@@ -479,12 +479,12 @@ function HomePageWrapper({
   children: ReactNode
   secondaryStackLength: number
 }) {
-  const [isTransparent, setIsTransparent] = useState(false)
+  const [dismissedState, setDismissedState] = useState(false)
 
   useEffect(() => {
     // Listen for custom event from HomePage
     const handleTrendingNotesDismissed = (e: CustomEvent) => {
-      setIsTransparent(e.detail.dismissed)
+      setDismissedState(e.detail.dismissed)
     }
 
     window.addEventListener(
@@ -499,12 +499,10 @@ function HomePageWrapper({
     }
   }, [])
 
-  // Reset transparency when navigating away from home
-  useEffect(() => {
-    if (secondaryStackLength > 0) {
-      setIsTransparent(false)
-    }
-  }, [secondaryStackLength])
+  // Show transparent background when:
+  // 1. We're on the home page (secondaryStackLength === 0)
+  // 2. AND the trending notes have been dismissed
+  const isTransparent = secondaryStackLength === 0 && dismissedState
 
   return (
     <div
