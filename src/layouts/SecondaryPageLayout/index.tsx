@@ -19,7 +19,9 @@ const SecondaryPageLayout = forwardRef(
       hideBackButton = false,
       hideTitlebarBottomBorder = false,
       displayScrollToTopButton = false,
-      titlebar
+      titlebar,
+      showCloseButton = false,
+      onClose
     }: {
       children?: React.ReactNode
       index?: number
@@ -29,6 +31,8 @@ const SecondaryPageLayout = forwardRef(
       hideTitlebarBottomBorder?: boolean
       displayScrollToTopButton?: boolean
       titlebar?: React.ReactNode
+      showCloseButton?: boolean
+      onClose?: () => void
     },
     ref
   ) => {
@@ -72,6 +76,8 @@ const SecondaryPageLayout = forwardRef(
               hideBackButton={hideBackButton}
               hideBottomBorder={hideTitlebarBottomBorder}
               titlebar={titlebar}
+              showCloseButton={showCloseButton}
+              onClose={onClose}
             />
             {children}
           </div>
@@ -93,6 +99,8 @@ const SecondaryPageLayout = forwardRef(
             hideBackButton={hideBackButton}
             hideBottomBorder={hideTitlebarBottomBorder}
             titlebar={titlebar}
+            showCloseButton={showCloseButton}
+            onClose={onClose}
           />
           {children}
           <div className="h-4" />
@@ -110,13 +118,17 @@ export function SecondaryPageTitlebar({
   controls,
   hideBackButton = false,
   hideBottomBorder = false,
-  titlebar
+  titlebar,
+  showCloseButton = false,
+  onClose
 }: {
   title?: React.ReactNode
   controls?: React.ReactNode
   hideBackButton?: boolean
   hideBottomBorder?: boolean
   titlebar?: React.ReactNode
+  showCloseButton?: boolean
+  onClose?: () => void
 }): JSX.Element {
   const { isSmallScreen } = useScreenSize()
 
@@ -143,7 +155,7 @@ export function SecondaryPageTitlebar({
       )}
       <div className="flex-shrink-0 flex items-center gap-1">
         {controls}
-        {!isSmallScreen && <CloseButton />}
+        {(!isSmallScreen || showCloseButton) && <CloseButton onClose={onClose} />}
       </div>
     </Titlebar>
   )
@@ -167,7 +179,7 @@ function BackButton({ children }: { children?: React.ReactNode }) {
   )
 }
 
-function CloseButton() {
+function CloseButton({ onClose }: { onClose?: () => void }) {
   const { t } = useTranslation()
   const { clear } = useSecondaryPage()
 
@@ -176,7 +188,13 @@ function CloseButton() {
       variant="ghost"
       size="titlebar-icon"
       title={t('close')}
-      onClick={() => clear()}
+      onClick={() => {
+        if (onClose) {
+          onClose()
+        } else {
+          clear()
+        }
+      }}
     >
       <X />
     </Button>

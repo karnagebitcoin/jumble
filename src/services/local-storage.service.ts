@@ -58,6 +58,7 @@ class LocalStorageService {
   private fontSize: number = DEFAULT_FONT_SIZE
   private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
   private buttonRadius: number = DEFAULT_BUTTON_RADIUS
+  private trendingNotesDismissed: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -223,6 +224,9 @@ class LocalStorageService {
         this.buttonRadius = buttonRadius
       }
     }
+
+    this.trendingNotesDismissed =
+      window.localStorage.getItem(StorageKey.TRENDING_NOTES_DISMISSED) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -539,6 +543,15 @@ class LocalStorageService {
     }
     this.buttonRadius = radius
     window.localStorage.setItem(StorageKey.BUTTON_RADIUS, radius.toString())
+  }
+
+  getTrendingNotesDismissed() {
+    return this.trendingNotesDismissed
+  }
+
+  setTrendingNotesDismissed(dismissed: boolean) {
+    this.trendingNotesDismissed = dismissed
+    window.localStorage.setItem(StorageKey.TRENDING_NOTES_DISMISSED, dismissed.toString())
   }
 }
 
