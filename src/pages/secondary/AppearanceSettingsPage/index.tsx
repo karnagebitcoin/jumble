@@ -6,7 +6,6 @@ import {
   FONT_SIZES,
   LAYOUT_MODE,
   NOTIFICATION_LIST_STYLE,
-  PAGE_THEMES,
   PRIMARY_COLORS
 } from '@/constants'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
@@ -18,7 +17,7 @@ import { usePageTheme } from '@/providers/PageThemeProvider'
 import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
 import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
-import { TPageTheme, TPrimaryColor } from '@/types'
+import { TPrimaryColor } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
 import { Check, Moon, Sun, Monitor } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
@@ -40,10 +39,21 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
         return <Sun className="w-5 h-5" />
       case 'dark':
         return <Moon className="w-5 h-5" />
+      case 'pure-black':
+        return <Moon className="w-5 h-5 fill-current" />
       case 'system':
         return <Monitor className="w-5 h-5" />
       default:
         return null
+    }
+  }
+
+  const getThemeLabel = (theme: string) => {
+    switch (theme) {
+      case 'pure-black':
+        return 'Pure Black'
+      default:
+        return t(theme)
     }
   }
 
@@ -52,16 +62,25 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
       <div className="space-y-4 mt-3">
         <SettingItem className="flex-col items-start gap-3">
           <Label className="text-base font-normal">
-            {t('Light / Dark Mode')}
+            {t('Theme')}
           </Label>
-          <div className="grid grid-cols-3 gap-3 w-full">
-            {(['system', 'light', 'dark'] as const).map((theme) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
+            {(['system', 'light', 'dark', 'pure-black'] as const).map((theme) => (
               <button
                 key={theme}
-                onClick={() => setThemeSetting(theme)}
+                onClick={() => {
+                  if (theme === 'pure-black') {
+                    setThemeSetting('dark')
+                    setPageTheme('pure-black')
+                  } else {
+                    setThemeSetting(theme)
+                    setPageTheme('default')
+                  }
+                }}
                 className={cn(
                   'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
-                  themeSetting === theme
+                  (theme === 'pure-black' && pageTheme === 'pure-black') ||
+                  (theme !== 'pure-black' && themeSetting === theme && pageTheme === 'default')
                     ? 'border-primary'
                     : 'border-border hover:border-muted-foreground/30'
                 )}
@@ -69,34 +88,9 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 <div className="flex items-center justify-center w-8 h-8">
                   {getThemeIcon(theme)}
                 </div>
-                <span className="text-xs font-medium capitalize">{t(theme)}</span>
-                {themeSetting === theme && (
-                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
-                    <Check className="w-3 h-3" />
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </SettingItem>
-        <SettingItem className="flex-col items-start gap-3">
-          <Label className="text-base font-normal">
-            {t('Page Theme')}
-          </Label>
-          <div className="grid grid-cols-2 gap-3 w-full">
-            {Object.entries(PAGE_THEMES).map(([key, config]) => (
-              <button
-                key={key}
-                onClick={() => setPageTheme(config.value as TPageTheme)}
-                className={cn(
-                  'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
-                  pageTheme === config.value
-                    ? 'border-primary'
-                    : 'border-border hover:border-muted-foreground/30'
-                )}
-              >
-                <div className="text-xs font-medium">{config.name}</div>
-                {pageTheme === config.value && (
+                <span className="text-xs font-medium capitalize">{getThemeLabel(theme)}</span>
+                {((theme === 'pure-black' && pageTheme === 'pure-black') ||
+                  (theme !== 'pure-black' && themeSetting === theme && pageTheme === 'default')) && (
                   <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
                     <Check className="w-3 h-3" />
                   </div>

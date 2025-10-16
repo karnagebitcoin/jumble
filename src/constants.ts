@@ -300,15 +300,4 @@ export const LAYOUT_MODE = {
 
 export const DEFAULT_LAYOUT_MODE = 'boxed'
 
-export const PAGE_THEMES = {
-  DEFAULT: {
-    name: 'Default',
-    value: 'default'
-  },
-  PURE_BLACK: {
-    name: 'Pure Black',
-    value: 'pure-black'
-  }
-} as const
-
 export const DEFAULT_PAGE_THEME = 'default'
