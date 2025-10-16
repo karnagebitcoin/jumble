@@ -372,7 +372,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                     </div>
                   ))}
                 </div>
-                <div className="rounded-lg shadow-lg bg-background overflow-hidden">
+                <HomePageWrapper secondaryStackLength={secondaryStack.length}>
                   {secondaryStack.map((item, index) => (
                     <div
                       key={item.index}
@@ -389,7 +389,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                   >
                     <HomePage />
                   </div>
-                </div>
+                </HomePageWrapper>
               </div>
             </div>
             <TooManyRelaysAlertDialog />
@@ -470,4 +470,50 @@ function pushNewPageToStack(
     newStack[lastCachedIndex].component = null
   }
   return { newStack, newItem }
+}
+
+function HomePageWrapper({
+  children,
+  secondaryStackLength
+}: {
+  children: ReactNode
+  secondaryStackLength: number
+}) {
+  const [isTransparent, setIsTransparent] = useState(false)
+
+  useEffect(() => {
+    // Listen for custom event from HomePage
+    const handleTrendingNotesDismissed = (e: CustomEvent) => {
+      setIsTransparent(e.detail.dismissed)
+    }
+
+    window.addEventListener(
+      'trendingNotesDismissed',
+      handleTrendingNotesDismissed as EventListener
+    )
+    return () => {
+      window.removeEventListener(
+        'trendingNotesDismissed',
+        handleTrendingNotesDismissed as EventListener
+      )
+    }
+  }, [])
+
+  // Reset transparency when navigating away from home
+  useEffect(() => {
+    if (secondaryStackLength > 0) {
+      setIsTransparent(false)
+    }
+  }, [secondaryStackLength])
+
+  return (
+    <div
+      className={cn(
+        'rounded-lg shadow-lg overflow-hidden',
+        isTransparent ? 'bg-transparent shadow-none' : 'bg-background'
+      )}
+    >
+      {children}
+    </div>
+  )
 }

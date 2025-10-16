@@ -17,13 +17,20 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     }
   }, [])
 
+  // Dispatch event when dismissed state changes
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('trendingNotesDismissed', { detail: { dismissed: trendingNotesDismissed } })
+    )
+  }, [trendingNotesDismissed])
+
   const handleClose = () => {
     setTrendingNotesDismissed(true)
   }
 
   // If dismissed, render an invisible placeholder to maintain layout
   if (trendingNotesDismissed) {
-    return <div className="h-full w-full" ref={ref} />
+    return <div className="h-full w-full bg-transparent" ref={ref} />
   }
 
   return (
