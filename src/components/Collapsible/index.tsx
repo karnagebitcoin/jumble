@@ -58,9 +58,11 @@ export default function Collapsible({
       {children}
       {shouldCollapse && !expanded && (
         <div className="absolute bottom-0 h-40 w-full bg-gradient-to-b from-transparent to-background/90 flex items-end justify-center pb-4">
-          <div className="bg-background rounded-md">
+          <div
+            className="bg-secondary"
+            style={{ borderRadius: 'var(--button-radius, 6px)' }}
+          >
             <Button
-              className="bg-foreground hover:bg-foreground/80"
               onClick={(e) => {
                 e.stopPropagation()
                 setExpanded(!expanded)
