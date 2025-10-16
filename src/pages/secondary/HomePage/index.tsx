@@ -21,6 +21,11 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     setTrendingNotesDismissed(true)
   }
 
+  // If dismissed, render an invisible placeholder to maintain layout
+  if (trendingNotesDismissed) {
+    return <div className="h-full w-full" ref={ref} />
+  }
+
   return (
     <SecondaryPageLayout
       ref={ref}
@@ -36,13 +41,9 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
       showCloseButton
       onClose={handleClose}
     >
-      {!trendingNotesDismissed ? (
-        <div className="px-4 pt-4">
-          <CompactTrendingNotes />
-        </div>
-      ) : (
-        <div className="h-full" />
-      )}
+      <div className="px-4 pt-4">
+        <CompactTrendingNotes />
+      </div>
     </SecondaryPageLayout>
   )
 })
