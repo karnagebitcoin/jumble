@@ -16,15 +16,16 @@ export default function EntranceMusicPlayer({
   className
 }: EntranceMusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const youtubePlayerRef = useRef<any>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const youtubeIframeRef = useRef<HTMLIFrameElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [error, setError] = useState(false)
   const [isYoutube, setIsYoutube] = useState(false)
+  const [videoId, setVideoId] = useState<string | null>(null)
   const seekTimeoutRef = useRef<NodeJS.Timeout>()
   const isSeeking = useRef(false)
+  const updateIntervalRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
     // Check if URL is YouTube
@@ -34,104 +35,60 @@ export default function EntranceMusicPlayer({
 
     if (match) {
       setIsYoutube(true)
-      const videoId = match[1].trim()
-      initYoutubePlayer(videoId)
+      setVideoId(match[1].trim())
     } else {
       setIsYoutube(false)
       initAudioPlayer()
     }
 
     return () => {
-      if (youtubePlayerRef.current) {
-        youtubePlayerRef.current.destroy()
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current)
       }
     }
   }, [url])
 
-  const initYoutubePlayer = (videoId: string) => {
-    if (!containerRef.current) return
+  // Handle YouTube iframe load
+  useEffect(() => {
+    if (!isYoutube || !youtubeIframeRef.current) return
 
-    if (!window.YT) {
-      const script = document.createElement('script')
-      script.src = 'https://www.youtube.com/iframe_api'
-      document.body.appendChild(script)
+    const iframe = youtubeIframeRef.current
 
-      window.onYouTubeIframeAPIReady = () => {
-        createYoutubePlayer(videoId)
+    // Try to autoplay after a short delay to allow iframe to load
+    const autoplayTimeout = setTimeout(() => {
+      try {
+        // Send postMessage to play the video
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+          '*'
+        )
+        setIsPlaying(true)
+      } catch (err) {
+        console.error('Autoplay failed:', err)
       }
-    } else {
-      createYoutubePlayer(videoId)
-    }
-  }
+    }, 1000)
 
-  const createYoutubePlayer = (videoId: string) => {
-    if (!containerRef.current) return
+    // For YouTube, we'll estimate duration and time since we don't have API access
+    // Set a default duration (most songs are ~3-5 minutes)
+    setDuration(300) // 5 minutes default
 
-    try {
-      // Create a hidden div for the YouTube player
-      const playerDiv = document.createElement('div')
-      playerDiv.id = `youtube-player-${Date.now()}`
-      playerDiv.style.display = 'none'
-      containerRef.current.appendChild(playerDiv)
-
-      let updateInterval: NodeJS.Timeout | null = null
-
-      youtubePlayerRef.current = new window.YT.Player(playerDiv.id, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          controls: 0
-        },
-        events: {
-          onStateChange: (event: any) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true)
-            } else if (
-              event.data === window.YT.PlayerState.PAUSED ||
-              event.data === window.YT.PlayerState.ENDED
-            ) {
-              setIsPlaying(false)
-            }
-          },
-          onReady: (event: any) => {
-            try {
-              const player = event.target
-              player.playVideo()
-              setDuration(player.getDuration())
-
-              // Update current time periodically
-              updateInterval = setInterval(() => {
-                try {
-                  if (youtubePlayerRef.current && !isSeeking.current) {
-                    const currentTime = youtubePlayerRef.current.getCurrentTime()
-                    if (typeof currentTime === 'number' && !isNaN(currentTime)) {
-                      setCurrentTime(currentTime)
-                    }
-                  }
-                } catch (err) {
-                  // Ignore errors when player is not ready
-                }
-              }, 500)
-            } catch (err) {
-              console.error('Error in onReady:', err)
-              setError(true)
-            }
-          },
-          onError: () => setError(true)
-        }
-      })
-
-      // Cleanup function
-      return () => {
-        if (updateInterval) {
-          clearInterval(updateInterval)
-        }
+    // Start a timer to track current time
+    updateIntervalRef.current = setInterval(() => {
+      if (isPlaying && !isSeeking.current) {
+        setCurrentTime((prev) => {
+          const next = prev + 1
+          return next >= duration ? duration : next
+        })
       }
-    } catch (error) {
-      console.error('Failed to initialize YouTube player:', error)
-      setError(true)
+    }, 1000)
+
+    return () => {
+      clearTimeout(autoplayTimeout)
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current)
+      }
     }
-  }
+  }, [isYoutube, isPlaying, duration])
 
   const initAudioPlayer = () => {
     const audio = audioRef.current
@@ -173,12 +130,21 @@ export default function EntranceMusicPlayer({
   }
 
   const togglePlay = () => {
-    if (isYoutube && youtubePlayerRef.current) {
+    if (isYoutube && youtubeIframeRef.current) {
       try {
+        const iframe = youtubeIframeRef.current
         if (isPlaying) {
-          youtubePlayerRef.current.pauseVideo()
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
+            '*'
+          )
+          setIsPlaying(false)
         } else {
-          youtubePlayerRef.current.playVideo()
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+            '*'
+          )
+          setIsPlaying(true)
         }
       } catch (err) {
         console.error('Error toggling YouTube playback:', err)
@@ -187,7 +153,9 @@ export default function EntranceMusicPlayer({
       if (isPlaying) {
         audioRef.current.pause()
       } else {
-        audioRef.current.play()
+        audioRef.current.play().catch((err) => {
+          console.error('Error playing media:', err)
+        })
       }
     }
   }
@@ -201,9 +169,13 @@ export default function EntranceMusicPlayer({
     }
 
     seekTimeoutRef.current = setTimeout(() => {
-      if (isYoutube && youtubePlayerRef.current) {
+      if (isYoutube && youtubeIframeRef.current) {
         try {
-          youtubePlayerRef.current.seekTo(value[0], true)
+          const iframe = youtubeIframeRef.current
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'seekTo', args: [value[0], true] }),
+            '*'
+          )
         } catch (err) {
           console.error('Error seeking YouTube video:', err)
         }
@@ -220,7 +192,6 @@ export default function EntranceMusicPlayer({
 
   return (
     <div
-      ref={containerRef}
       className={cn(
         'fixed bottom-4 right-4 z-50 flex items-center gap-3 py-3 px-4 border rounded-lg bg-background shadow-lg max-w-sm',
         className
@@ -229,6 +200,24 @@ export default function EntranceMusicPlayer({
     >
       {!isYoutube && (
         <audio ref={audioRef} src={url} preload="metadata" onError={() => setError(true)} />
+      )}
+
+      {/* Hidden YouTube iframe */}
+      {isYoutube && videoId && (
+        <iframe
+          ref={youtubeIframeRef}
+          width="1"
+          height="1"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&enablejsapi=1&origin=${window.location.origin}`}
+          allow="autoplay; encrypted-media"
+          style={{
+            position: 'absolute',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'none'
+          }}
+        />
       )}
 
       {/* Music Icon */}
