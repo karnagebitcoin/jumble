@@ -41,7 +41,7 @@ function ExplorePageTitlebar() {
     <div className="flex gap-2 justify-between h-full">
       <div className="flex gap-2 items-center h-full pl-3">
         <Compass />
-        <div className="text-lg font-semibold">{t('Explore')}</div>
+        <div className="text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{t('Explore')}</div>
       </div>
       <Button
         variant="ghost"

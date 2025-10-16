@@ -104,6 +104,7 @@ export default function Tabs({
               onClick={() => {
                 onTabChange?.(tab.value)
               }}
+              style={{ fontSize: 'var(--font-size, 14px)' }}
             >
               {t(tab.label)}
             </div>

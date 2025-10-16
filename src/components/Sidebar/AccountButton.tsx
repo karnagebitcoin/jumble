@@ -56,7 +56,7 @@ function ProfileButton() {
                 <img src={defaultAvatar} />
               </AvatarFallback>
             </Avatar>
-            <div className="truncate font-medium">{username}</div>
+            <div className="truncate font-medium max-xl:hidden">{username}</div>
           </div>
         </Button>
       </DropdownMenuTrigger>

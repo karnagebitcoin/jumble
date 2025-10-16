@@ -25,7 +25,7 @@ function RelayPageTitlebar({ url }: { url?: string }) {
   return (
     <div className="flex items-center gap-2 px-3 h-full">
       <Server />
-      <div className="text-lg font-semibold truncate">{simplifyUrl(url ?? '')}</div>
+      <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{simplifyUrl(url ?? '')}</div>
     </div>
   )
 }

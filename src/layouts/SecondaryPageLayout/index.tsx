@@ -145,7 +145,7 @@ export function SecondaryPageTitlebar({
       hideBottomBorder={hideBottomBorder}
     >
       {hideBackButton ? (
-        <div className="flex gap-2 items-center pl-3 w-fit truncate text-lg font-semibold">
+        <div className="flex gap-2 items-center pl-3 w-fit truncate text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
           {title}
         </div>
       ) : (
@@ -174,7 +174,7 @@ function BackButton({ children }: { children?: React.ReactNode }) {
       onClick={() => pop()}
     >
       <ChevronLeft />
-      <div className="truncate text-lg font-semibold">{children}</div>
+      <div className="truncate text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{children}</div>
     </Button>
   )
 }

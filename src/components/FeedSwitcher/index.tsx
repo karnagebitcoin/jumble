@@ -110,6 +110,7 @@ function FeedSwitcherItem({
     <div
       className={`w-full border rounded-lg p-4 ${isActive ? 'border-primary bg-primary/5' : 'clickable'}`}
       onClick={onClick}
+      style={{ fontSize: 'var(--font-size, 14px)' }}
     >
       <div className="flex justify-between items-center">
         <div className="font-semibold flex-1">{children}</div>

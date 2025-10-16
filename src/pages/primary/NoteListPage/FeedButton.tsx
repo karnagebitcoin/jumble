@@ -89,7 +89,7 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
         ) : (
           <Server />
         )}
-        <div className="text-lg font-semibold truncate">{title}</div>
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{title}</div>
         <ChevronDown />
       </div>
     )
