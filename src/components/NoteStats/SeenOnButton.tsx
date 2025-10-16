@@ -33,7 +33,7 @@ export default function SeenOnButton({ event }: { event: Event }) {
 
   const trigger = (
     <button
-      className="flex gap-1 items-center text-muted-foreground enabled:hover:text-primary pl-3 h-full opacity-0 group-hover:opacity-100 transition-opacity"
+      className="flex gap-1 items-center text-muted-foreground enabled:hover:text-primary pl-3 h-full opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity"
       title={t('Seen on')}
       disabled={relays.length === 0}
       onClick={() => {
