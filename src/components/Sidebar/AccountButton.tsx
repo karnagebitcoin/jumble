@@ -38,7 +38,7 @@ function ProfileButtonContent({ username, avatar, defaultAvatar }: { username: s
       variant="ghost"
       className={cn(
         "clickable shadow-none p-2 w-12 h-12 flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 font-medium transition-all duration-300",
-        compactSidebar ? "" : "xl:px-2 xl:py-2 xl:w-full xl:h-auto"
+        compactSidebar ? "opacity-50 hover:opacity-100" : "xl:px-2 xl:py-2 xl:w-full xl:h-auto"
       )}
       style={{ fontSize: 'var(--font-size, 14px)' }}
     >
