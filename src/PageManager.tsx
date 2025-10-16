@@ -447,7 +447,8 @@ function isCurrentPage(stack: TStackItem[], url: string) {
   return currentPage.url === url
 }
 
-function findAndCreateComponent(url: string, index: number) {
+function findAndCreateComponent(url: string | undefined, index: number) {
+  if (!url) return {}
   const path = url.split('?')[0].split('#')[0]
   for (const { matcher, element } of routes) {
     const match = matcher(path)
