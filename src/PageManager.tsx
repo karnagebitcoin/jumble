@@ -176,13 +176,25 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         const currentItem = pre[pre.length - 1] as TStackItem | undefined
         const currentIndex = currentItem?.index
         if (!state) {
-          if (window.location.pathname + window.location.search + window.location.hash !== '/') {
-            // Just change the URL
-            return pre
+          const currentUrl = window.location.pathname + window.location.search + window.location.hash
+          if (currentUrl !== '/') {
+            // State is null but URL is not root - this shouldn't happen normally
+            // Clear the stack and let the system navigate to the URL
+            return []
           } else {
             // Back to root
             state = { index: -1, url: '/' }
           }
+        }
+
+        // Ensure state has a valid URL
+        if (!state.url) {
+          const currentUrl = window.location.pathname + window.location.search + window.location.hash
+          if (currentUrl === '/') {
+            return []
+          }
+          // Try to use the current URL from the browser
+          state.url = currentUrl
         }
 
         // Go forward
@@ -196,20 +208,22 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         }
 
         // Go back
-        const newStack = pre.filter((item) => item.index <= state!.index)
+        const newStack = pre.filter((item) => item.index <= state.index)
         const topItem = newStack[newStack.length - 1] as TStackItem | undefined
         if (!topItem) {
           // Create a new stack item if it's not exist (e.g. when the user refreshes the page, the stack will be empty)
-          const { component, ref } = findAndCreateComponent(state.url, state.index)
-          if (component) {
-            newStack.push({
-              index: state.index,
-              url: state.url,
-              component,
-              ref
-            })
+          if (state.url) {
+            const { component, ref } = findAndCreateComponent(state.url, state.index)
+            if (component) {
+              newStack.push({
+                index: state.index,
+                url: state.url,
+                component,
+                ref
+              })
+            }
           }
-        } else if (!topItem.component) {
+        } else if (!topItem.component && topItem.url) {
           // Load the component if it's not cached
           const { component, ref } = findAndCreateComponent(topItem.url, state.index)
           if (component) {
@@ -463,10 +477,12 @@ function findAndCreateComponent(url: string | undefined, index: number) {
 
 function pushNewPageToStack(
   stack: TStackItem[],
-  url: string,
+  url: string | undefined,
   maxStackSize = 5,
   specificIndex?: number
 ) {
+  if (!url) return { newStack: stack, newItem: null }
+
   const currentItem = stack[stack.length - 1]
   const currentIndex = specificIndex ?? (currentItem ? currentItem.index + 1 : 0)
 
