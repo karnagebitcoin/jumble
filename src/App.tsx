@@ -4,6 +4,7 @@ import './index.css'
 import { Toaster } from '@/components/ui/sonner'
 import { BookmarksProvider } from '@/providers/BookmarksProvider'
 import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
+import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
 import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
@@ -36,8 +37,9 @@ export default function App(): JSX.Element {
           <FontSizeProvider>
             <ButtonRadiusProvider>
               <LayoutModeProvider>
-                <ContentPolicyProvider>
-              <ScreenSizeProvider>
+                <CompactSidebarProvider>
+                  <ContentPolicyProvider>
+                    <ScreenSizeProvider>
                 <DeletedEventProvider>
                   <NostrProvider>
                     <ZapProvider>
@@ -71,10 +73,11 @@ export default function App(): JSX.Element {
                       </TranslationServiceProvider>
                     </ZapProvider>
                   </NostrProvider>
-                </DeletedEventProvider>
-              </ScreenSizeProvider>
-            </ContentPolicyProvider>
-          </LayoutModeProvider>
+                    </DeletedEventProvider>
+                  </ScreenSizeProvider>
+                </ContentPolicyProvider>
+              </CompactSidebarProvider>
+            </LayoutModeProvider>
         </ButtonRadiusProvider>
       </FontSizeProvider>
     </PrimaryColorProvider>

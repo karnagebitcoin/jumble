@@ -55,6 +55,7 @@ export const StorageKey = {
   PAGE_THEME: 'pageTheme',
   PRIVATE_NOTES: 'privateNotes',
   TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
+  COMPACT_SIDEBAR: 'compactSidebar',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated

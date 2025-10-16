@@ -62,6 +62,7 @@ class LocalStorageService {
   private buttonRadius: number = DEFAULT_BUTTON_RADIUS
   private pageTheme: TPageTheme = DEFAULT_PAGE_THEME
   private trendingNotesDismissed: boolean = false
+  private compactSidebar: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -235,6 +236,9 @@ class LocalStorageService {
 
     this.trendingNotesDismissed =
       window.localStorage.getItem(StorageKey.TRENDING_NOTES_DISMISSED) === 'true'
+
+    this.compactSidebar =
+      window.localStorage.getItem(StorageKey.COMPACT_SIDEBAR) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -569,6 +573,15 @@ class LocalStorageService {
   setTrendingNotesDismissed(dismissed: boolean) {
     this.trendingNotesDismissed = dismissed
     window.localStorage.setItem(StorageKey.TRENDING_NOTES_DISMISSED, dismissed.toString())
+  }
+
+  getCompactSidebar() {
+    return this.compactSidebar
+  }
+
+  setCompactSidebar(compact: boolean) {
+    this.compactSidebar = compact
+    window.localStorage.setItem(StorageKey.COMPACT_SIDEBAR, compact.toString())
   }
 }
 

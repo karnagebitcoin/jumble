@@ -1,6 +1,7 @@
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import {
   BUTTON_RADIUS_VALUES,
   FONT_SIZES,
@@ -11,6 +12,7 @@ import {
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn } from '@/lib/utils'
 import { useButtonRadius } from '@/providers/ButtonRadiusProvider'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { useFontSize } from '@/providers/FontSizeProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
@@ -32,6 +34,7 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
   const { layoutMode, setLayoutMode } = useLayoutMode()
   const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
   const { buttonRadius, setButtonRadius } = useButtonRadius()
+  const { compactSidebar, setCompactSidebar } = useCompactSidebar()
 
   const getThemeIcon = (theme: string) => {
     switch (theme) {
@@ -201,6 +204,19 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
               <SelectItem value={LAYOUT_MODE.FULL_WIDTH}>{t('Full width')}</SelectItem>
             </SelectContent>
           </Select>
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="compact-sidebar" className="text-base font-normal">
+            <div>{t('Compact sidebar')}</div>
+            <div className="text-muted-foreground">
+              {t('Show only icons in the sidebar')}
+            </div>
+          </Label>
+          <Switch
+            id="compact-sidebar"
+            checked={compactSidebar}
+            onCheckedChange={setCompactSidebar}
+          />
         </SettingItem>
         <SettingItem>
           <Label htmlFor="notification-list-style" className="text-base font-normal">

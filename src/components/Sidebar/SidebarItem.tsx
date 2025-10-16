@@ -1,5 +1,6 @@
 import { Button, ButtonProps } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,11 +9,15 @@ const SidebarItem = forwardRef<
   ButtonProps & { title: string; description?: string; active?: boolean }
 >(({ children, title, description, className, active, ...props }, ref) => {
   const { t } = useTranslation()
+  const { compactSidebar } = useCompactSidebar()
 
   return (
     <Button
       className={cn(
-        'flex shadow-none items-center transition-colors duration-500 bg-transparent w-12 h-12 xl:w-full xl:h-auto p-3 m-0 xl:py-2 xl:px-3 rounded-lg xl:justify-start gap-4 font-medium [&_svg]:size-full xl:[&_svg]:size-4 [&_svg]:stroke-[1.3]',
+        'flex shadow-none items-center transition-colors duration-500 bg-transparent w-12 h-12 p-3 m-0 rounded-lg gap-4 font-medium [&_svg]:stroke-[1.3]',
+        compactSidebar
+          ? '[&_svg]:size-full'
+          : 'xl:w-full xl:h-auto xl:py-2 xl:px-3 xl:justify-start [&_svg]:size-full xl:[&_svg]:size-4',
         active && 'text-primary hover:text-primary bg-primary/10 hover:bg-primary/10',
         className
       )}
@@ -23,7 +28,7 @@ const SidebarItem = forwardRef<
       {...props}
     >
       {children}
-      <div className="max-xl:hidden">{t(description ?? title)}</div>
+      <div className={cn(compactSidebar ? "hidden" : "max-xl:hidden")}>{t(description ?? title)}</div>
     </Button>
   )
 })

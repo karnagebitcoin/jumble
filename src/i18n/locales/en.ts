@@ -232,6 +232,8 @@ export default {
     'Full width': 'Full width',
     'Content is centered with max width': 'Content is centered with max width',
     'Content spans full screen width': 'Content spans full screen width',
+    'Compact sidebar': 'Compact sidebar',
+    'Show only icons in the sidebar': 'Show only icons in the sidebar',
     Autoplay: 'Autoplay',
     'Enable video autoplay on this device': 'Enable video autoplay on this device',
     'Paste or drop media files to upload': 'Paste or drop media files to upload',
