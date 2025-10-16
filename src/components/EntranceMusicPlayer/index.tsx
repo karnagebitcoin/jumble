@@ -74,6 +74,8 @@ export default function EntranceMusicPlayer({
       playerDiv.style.display = 'none'
       containerRef.current.appendChild(playerDiv)
 
+      let updateInterval: NodeJS.Timeout | null = null
+
       youtubePlayerRef.current = new window.YT.Player(playerDiv.id, {
         videoId: videoId,
         playerVars: {
@@ -92,21 +94,39 @@ export default function EntranceMusicPlayer({
             }
           },
           onReady: (event: any) => {
-            event.target.playVideo()
-            setDuration(event.target.getDuration())
+            try {
+              const player = event.target
+              player.playVideo()
+              setDuration(player.getDuration())
 
-            // Update current time
-            const interval = setInterval(() => {
-              if (youtubePlayerRef.current && !isSeeking.current) {
-                setCurrentTime(youtubePlayerRef.current.getCurrentTime())
-              }
-            }, 500)
-
-            return () => clearInterval(interval)
+              // Update current time periodically
+              updateInterval = setInterval(() => {
+                try {
+                  if (youtubePlayerRef.current && !isSeeking.current) {
+                    const currentTime = youtubePlayerRef.current.getCurrentTime()
+                    if (typeof currentTime === 'number' && !isNaN(currentTime)) {
+                      setCurrentTime(currentTime)
+                    }
+                  }
+                } catch (err) {
+                  // Ignore errors when player is not ready
+                }
+              }, 500)
+            } catch (err) {
+              console.error('Error in onReady:', err)
+              setError(true)
+            }
           },
           onError: () => setError(true)
         }
       })
+
+      // Cleanup function
+      return () => {
+        if (updateInterval) {
+          clearInterval(updateInterval)
+        }
+      }
     } catch (error) {
       console.error('Failed to initialize YouTube player:', error)
       setError(true)
@@ -117,10 +137,6 @@ export default function EntranceMusicPlayer({
     const audio = audioRef.current
     if (!audio) return
 
-    audio.play().catch((err) => {
-      console.error('Failed to autoplay:', err)
-    })
-
     const updateTime = () => {
       if (!isSeeking.current) {
         setCurrentTime(audio.currentTime)
@@ -130,12 +146,21 @@ export default function EntranceMusicPlayer({
     const handleEnded = () => setIsPlaying(false)
     const handlePause = () => setIsPlaying(false)
     const handlePlay = () => setIsPlaying(true)
+    const handleCanPlay = () => {
+      // Auto-play once the audio is ready
+      audio.play().catch((err) => {
+        console.error('Failed to autoplay:', err)
+        // If autoplay fails, just set playing state to false
+        setIsPlaying(false)
+      })
+    }
 
     audio.addEventListener('timeupdate', updateTime)
     audio.addEventListener('loadedmetadata', updateDuration)
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('pause', handlePause)
     audio.addEventListener('play', handlePlay)
+    audio.addEventListener('canplay', handleCanPlay)
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime)
@@ -143,15 +168,20 @@ export default function EntranceMusicPlayer({
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('canplay', handleCanPlay)
     }
   }
 
   const togglePlay = () => {
     if (isYoutube && youtubePlayerRef.current) {
-      if (isPlaying) {
-        youtubePlayerRef.current.pauseVideo()
-      } else {
-        youtubePlayerRef.current.playVideo()
+      try {
+        if (isPlaying) {
+          youtubePlayerRef.current.pauseVideo()
+        } else {
+          youtubePlayerRef.current.playVideo()
+        }
+      } catch (err) {
+        console.error('Error toggling YouTube playback:', err)
       }
     } else if (audioRef.current) {
       if (isPlaying) {
@@ -172,7 +202,11 @@ export default function EntranceMusicPlayer({
 
     seekTimeoutRef.current = setTimeout(() => {
       if (isYoutube && youtubePlayerRef.current) {
-        youtubePlayerRef.current.seekTo(value[0], true)
+        try {
+          youtubePlayerRef.current.seekTo(value[0], true)
+        } catch (err) {
+          console.error('Error seeking YouTube video:', err)
+        }
       } else if (audioRef.current) {
         audioRef.current.currentTime = value[0]
       }
