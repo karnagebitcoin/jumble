@@ -448,6 +448,17 @@ export default {
     Connect: '연결',
     'Set up your wallet to send and receive sats!':
       '사츠를 보내고 받을 수 있도록 지갑을 설정하세요!',
-    'Set up': '설정하기'
+    'Set up': '설정하기',
+    Pinned: '고정됨',
+    Unpin: '고정 해제',
+    Unpinning: '고정 해제 중',
+    'Pinning...': '고정 중...',
+    'Pinned!': '고정됨!',
+    'Failed to pin: {{error}}': '고정 실패: {{error}}',
+    'Unpinning...': '고정 해제 중...',
+    'Unpinned!': '고정 해제됨!',
+    'Failed to unpin: {{error}}': '고정 해제 실패: {{error}}',
+    'Unpin from profile': '프로필에서 고정 해제',
+    'Pin to profile': '프로필에 고정'
   }
 }

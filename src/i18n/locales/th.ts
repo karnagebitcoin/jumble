@@ -442,6 +442,17 @@ export default {
     'Paste your one-time code here': 'วางรหัสใช้ครั้งเดียวของคุณที่นี่',
     Connect: 'เชื่อมต่อ',
     'Set up your wallet to send and receive sats!': 'ตั้งค่ากระเป๋าของคุณเพื่อส่งและรับ sats!',
-    'Set up': 'ตั้งค่า'
+    'Set up': 'ตั้งค่า',
+    Pinned: 'ปักหมุดแล้ว',
+    Unpin: 'ยกเลิกปักหมุด',
+    Unpinning: 'กำลังยกเลิกปักหมุด',
+    'Pinning...': 'กำลังปักหมุด...',
+    'Pinned!': 'ปักหมุดแล้ว!',
+    'Failed to pin: {{error}}': 'ไม่สามารถปักหมุดได้: {{error}}',
+    'Unpinning...': 'กำลังยกเลิกปักหมุด...',
+    'Unpinned!': 'ยกเลิกปักหมุดแล้ว!',
+    'Failed to unpin: {{error}}': 'ไม่สามารถยกเลิกปักหมุดได้: {{error}}',
+    'Unpin from profile': 'ยกเลิกปักหมุดจากโปรไฟล์',
+    'Pin to profile': 'ปักหมุดไปที่โปรไฟล์'
   }
 }

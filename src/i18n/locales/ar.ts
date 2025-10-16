@@ -444,6 +444,17 @@ export default {
     'Paste your one-time code here': 'الصق رمز الاستخدام مرة واحدة هنا',
     Connect: 'اتصال',
     'Set up your wallet to send and receive sats!': 'قم بإعداد محفظتك لإرسال واستقبال الساتس!',
-    'Set up': 'إعداد'
+    'Set up': 'إعداد',
+    Pinned: 'مثبت',
+    Unpin: 'إلغاء التثبيت',
+    Unpinning: 'جارٍ إلغاء التثبيت',
+    'Pinning...': 'جارٍ التثبيت...',
+    'Pinned!': 'تم التثبيت!',
+    'Failed to pin: {{error}}': 'فشل في التثبيت: {{error}}',
+    'Unpinning...': 'جارٍ إلغاء التثبيت...',
+    'Unpinned!': 'تم إلغاء التثبيت!',
+    'Failed to unpin: {{error}}': 'فشل في إلغاء التثبيت: {{error}}',
+    'Unpin from profile': 'إلغاء التثبيت من الملف الشخصي',
+    'Pin to profile': 'تثبيت في الملف الشخصي'
   }
 }

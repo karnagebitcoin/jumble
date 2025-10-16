@@ -440,6 +440,17 @@ export default {
     'Paste your one-time code here': '将您的一次性代码粘贴到此处',
     Connect: '连接',
     'Set up your wallet to send and receive sats!': '设置你的钱包以发送和接收 sats！',
-    'Set up': '去设置'
+    'Set up': '去设置',
+    Pinned: '已置顶',
+    Unpin: '取消置顶',
+    Unpinning: '取消置顶中',
+    'Pinning...': '置顶中...',
+    'Pinned!': '已置顶！',
+    'Failed to pin: {{error}}': '置顶失败: {{error}}',
+    'Unpinning...': '取消置顶中...',
+    'Unpinned!': '已取消置顶！',
+    'Failed to unpin: {{error}}': '取消置顶失败: {{error}}',
+    'Unpin from profile': '从个人资料取消置顶',
+    'Pin to profile': '置顶到个人资料'
   }
 }

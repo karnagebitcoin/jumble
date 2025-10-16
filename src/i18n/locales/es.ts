@@ -452,6 +452,17 @@ export default {
     Connect: 'Conectar',
     'Set up your wallet to send and receive sats!':
       '¡Configura tu billetera para enviar y recibir sats!',
-    'Set up': 'Configurar'
+    'Set up': 'Configurar',
+    Pinned: 'Fijado',
+    Unpin: 'Desfijar',
+    Unpinning: 'Desfijando',
+    'Pinning...': 'Fijando...',
+    'Pinned!': '¡Fijado!',
+    'Failed to pin: {{error}}': 'Error al fijar: {{error}}',
+    'Unpinning...': 'Desfijando...',
+    'Unpinned!': '¡Desfijado!',
+    'Failed to unpin: {{error}}': 'Error al desfijar: {{error}}',
+    'Unpin from profile': 'Desfijar del perfil',
+    'Pin to profile': 'Fijar al perfil'
   }
 }

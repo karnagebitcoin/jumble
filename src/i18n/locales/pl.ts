@@ -452,6 +452,17 @@ export default {
     Connect: 'Połącz',
     'Set up your wallet to send and receive sats!':
       'Skonfiguruj swój portfel, aby wysyłać i odbierać satsy!',
-    'Set up': 'Skonfiguruj'
+    'Set up': 'Skonfiguruj',
+    Pinned: 'Przypięte',
+    Unpin: 'Odpiń',
+    Unpinning: 'Odpinanie',
+    'Pinning...': 'Przypinanie...',
+    'Pinned!': 'Przypięte!',
+    'Failed to pin: {{error}}': 'Nie udało się przypiąć: {{error}}',
+    'Unpinning...': 'Odpinanie...',
+    'Unpinned!': 'Odpięte!',
+    'Failed to unpin: {{error}}': 'Nie udało się przypiąć: {{error}}',
+    'Unpin from profile': 'Odpiń z profilu',
+    'Pin to profile': 'Przypnij do profilu'
   }
 }
