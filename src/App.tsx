@@ -7,6 +7,7 @@ import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
 import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
 import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
+import { EntranceMusicProvider } from '@/providers/EntranceMusicProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
@@ -42,52 +43,54 @@ export default function App(): JSX.Element {
                 <LayoutModeProvider>
                   <CompactSidebarProvider>
                     <ContentPolicyProvider>
-                      <ScreenSizeProvider>
-                <DeletedEventProvider>
-                  <NostrProvider>
-                    <ZapProvider>
-                      <TranslationServiceProvider>
-                        <FavoriteRelaysProvider>
-                          <FollowListProvider>
-                            <MuteListProvider>
-                              <UserTrustProvider>
-                                <BookmarksProvider>
-                                  <PinListProvider>
-                                    <FeedProvider>
-                                      <ReplyProvider>
-                                        <MediaUploadServiceProvider>
-                                          <KindFilterProvider>
-                                            <UserPreferencesProvider>
-                                              <TrendingNotesDismissedProvider>
-                                                <WidgetsProvider>
-                                                  <PageManager />
-                                                  <Toaster />
-                                                </WidgetsProvider>
-                                              </TrendingNotesDismissedProvider>
-                                            </UserPreferencesProvider>
-                                          </KindFilterProvider>
-                                        </MediaUploadServiceProvider>
-                                      </ReplyProvider>
-                                    </FeedProvider>
-                                  </PinListProvider>
-                                </BookmarksProvider>
-                              </UserTrustProvider>
-                            </MuteListProvider>
-                          </FollowListProvider>
-                        </FavoriteRelaysProvider>
-                      </TranslationServiceProvider>
-                    </ZapProvider>
-                  </NostrProvider>
-                    </DeletedEventProvider>
-                  </ScreenSizeProvider>
-                  </ContentPolicyProvider>
-                </CompactSidebarProvider>
-              </LayoutModeProvider>
-            </ButtonRadiusProvider>
-          </FontFamilyProvider>
-        </FontSizeProvider>
-      </PrimaryColorProvider>
-    </PageThemeProvider>
-  </ThemeProvider>
+                      <EntranceMusicProvider>
+                        <ScreenSizeProvider>
+                          <DeletedEventProvider>
+                            <NostrProvider>
+                              <ZapProvider>
+                                <TranslationServiceProvider>
+                                  <FavoriteRelaysProvider>
+                                    <FollowListProvider>
+                                      <MuteListProvider>
+                                        <UserTrustProvider>
+                                          <BookmarksProvider>
+                                            <PinListProvider>
+                                              <FeedProvider>
+                                                <ReplyProvider>
+                                                  <MediaUploadServiceProvider>
+                                                    <KindFilterProvider>
+                                                      <UserPreferencesProvider>
+                                                        <TrendingNotesDismissedProvider>
+                                                          <WidgetsProvider>
+                                                            <PageManager />
+                                                            <Toaster />
+                                                          </WidgetsProvider>
+                                                        </TrendingNotesDismissedProvider>
+                                                      </UserPreferencesProvider>
+                                                    </KindFilterProvider>
+                                                  </MediaUploadServiceProvider>
+                                                </ReplyProvider>
+                                              </FeedProvider>
+                                            </PinListProvider>
+                                          </BookmarksProvider>
+                                        </UserTrustProvider>
+                                      </MuteListProvider>
+                                    </FollowListProvider>
+                                  </FavoriteRelaysProvider>
+                                </TranslationServiceProvider>
+                              </ZapProvider>
+                            </NostrProvider>
+                          </DeletedEventProvider>
+                        </ScreenSizeProvider>
+                      </EntranceMusicProvider>
+                    </ContentPolicyProvider>
+                  </CompactSidebarProvider>
+                </LayoutModeProvider>
+              </ButtonRadiusProvider>
+            </FontFamilyProvider>
+          </FontSizeProvider>
+        </PrimaryColorProvider>
+      </PageThemeProvider>
+    </ThemeProvider>
   )
 }

@@ -1,12 +1,14 @@
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { MEDIA_AUTO_LOAD_POLICY } from '@/constants'
+import { Input } from '@/components/ui/input'
+import { ENTRANCE_MUSIC_FREQUENCY, MEDIA_AUTO_LOAD_POLICY, TEntranceMusicFrequency } from '@/constants'
 import { LocalizedLanguageNames, TLanguage } from '@/i18n'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn, isSupportCheckConnectionType } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
+import { useEntranceMusic } from '@/providers/EntranceMusicProvider'
 import { TMediaAutoLoadPolicy } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
 import { ExternalLink } from 'lucide-react'
@@ -27,6 +29,12 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setMediaAutoLoadPolicy
   } = useContentPolicy()
   const { hideUntrustedNotes, updateHideUntrustedNotes } = useUserTrust()
+  const {
+    entranceMusicUrl,
+    setEntranceMusicUrl,
+    entranceMusicFrequency,
+    setEntranceMusicFrequency
+  } = useEntranceMusic()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -108,6 +116,47 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             {t('Show NSFW content by default')}
           </Label>
           <Switch id="show-nsfw" checked={defaultShowNsfw} onCheckedChange={setDefaultShowNsfw} />
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3">
+          <Label htmlFor="entrance-music-url" className="text-base font-normal">
+            {t('Entrance Music')}
+          </Label>
+          <div className="w-full space-y-2">
+            <Input
+              id="entrance-music-url"
+              type="text"
+              placeholder={t('YouTube URL or MP3 URL')}
+              value={entranceMusicUrl}
+              onChange={(e) => setEntranceMusicUrl(e.target.value)}
+              className="w-full"
+            />
+            <div className="text-xs text-muted-foreground">
+              {t('Enter a YouTube URL or direct MP3 link to play when you visit')}
+            </div>
+          </div>
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="entrance-music-frequency" className="text-base font-normal">
+            {t('Entrance Music Frequency')}
+          </Label>
+          <Select
+            value={entranceMusicFrequency}
+            onValueChange={(value: TEntranceMusicFrequency) =>
+              setEntranceMusicFrequency(value)
+            }
+          >
+            <SelectTrigger id="entrance-music-frequency" className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ENTRANCE_MUSIC_FREQUENCY.ONCE_PER_DAY}>
+                {t('Once every 24 hours')}
+              </SelectItem>
+              <SelectItem value={ENTRANCE_MUSIC_FREQUENCY.EVERY_REFRESH}>
+                {t('Every page refresh')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </SettingItem>
         <SettingItem>
           <div>

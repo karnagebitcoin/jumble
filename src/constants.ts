@@ -59,6 +59,9 @@ export const StorageKey = {
   ENABLED_WIDGETS: 'enabledWidgets',
   ZAP_SOUND: 'zapSound',
   FONT_FAMILY: 'fontFamily',
+  ENTRANCE_MUSIC_URL: 'entranceMusicUrl',
+  ENTRANCE_MUSIC_FREQUENCY: 'entranceMusicFrequency',
+  ENTRANCE_MUSIC_LAST_PLAYED: 'entranceMusicLastPlayed',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -204,6 +207,14 @@ export const ZAP_SOUNDS = {
 } as const
 
 export type TZapSound = (typeof ZAP_SOUNDS)[keyof typeof ZAP_SOUNDS]
+
+export const ENTRANCE_MUSIC_FREQUENCY = {
+  ONCE_PER_DAY: 'once-per-day',
+  EVERY_REFRESH: 'every-refresh'
+} as const
+
+export type TEntranceMusicFrequency =
+  (typeof ENTRANCE_MUSIC_FREQUENCY)[keyof typeof ENTRANCE_MUSIC_FREQUENCY]
 
 export const BUTTON_RADIUS_VALUES = [0, 2, 4, 6, 8, 12, 16, 9999] as const
 export const DEFAULT_BUTTON_RADIUS = 6
