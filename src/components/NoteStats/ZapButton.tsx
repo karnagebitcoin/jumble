@@ -1,3 +1,4 @@
+import { ZAP_SOUNDS } from '@/constants'
 import { useNoteStatsById } from '@/hooks/useNoteStatsById'
 import { getLightningAddressFromProfile } from '@/lib/lightning'
 import { cn } from '@/lib/utils'
@@ -17,7 +18,7 @@ export default function ZapButton({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { checkLogin, pubkey } = useNostr()
   const noteStats = useNoteStatsById(event.id)
-  const { defaultZapSats, defaultZapComment, quickZap } = useZap()
+  const { defaultZapSats, defaultZapComment, quickZap, zapSound } = useZap()
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [openZapDialog, setOpenZapDialog] = useState(false)
   const [zapping, setZapping] = useState(false)
@@ -60,6 +61,14 @@ export default function ZapButton({ event }: { event: Event }) {
         defaultZapSats,
         defaultZapComment
       )
+      // Play zap sound if enabled
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        const audio = new Audio(`/sounds/${zapSound}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
+      }
     } catch (error) {
       toast.error(`${t('Zap failed')}: ${(error as Error).message}`)
     } finally {
