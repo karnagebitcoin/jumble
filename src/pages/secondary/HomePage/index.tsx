@@ -2,14 +2,19 @@ import Widgets from '@/components/Widgets'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useTrendingNotesDismissed } from '@/providers/TrendingNotesDismissedProvider'
 import { useWidgets } from '@/providers/WidgetsProvider'
-import { LayoutGrid } from 'lucide-react'
-import { forwardRef, useEffect } from 'react'
+import { forwardRef, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { trendingNotesDismissed, setTrendingNotesDismissed } = useTrendingNotesDismissed()
-  const { enabledWidgets } = useWidgets()
+  const { enabledWidgets, getWidgetById } = useWidgets()
+
+  // Get the first enabled widget for the title
+  const firstWidget = useMemo(() => {
+    if (enabledWidgets.length === 0) return null
+    return getWidgetById(enabledWidgets[0])
+  }, [enabledWidgets, getWidgetById])
 
   // Reset the dismissed state when the HomePage is shown (on page refresh or navigation back to home)
   useEffect(() => {
@@ -31,7 +36,7 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   }
 
   // If dismissed or no widgets enabled, render an invisible placeholder to maintain layout
-  if (trendingNotesDismissed || enabledWidgets.length === 0) {
+  if (trendingNotesDismissed || enabledWidgets.length === 0 || !firstWidget) {
     return <div className="h-full w-full bg-transparent" ref={ref} />
   }
 
@@ -41,8 +46,8 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
       index={index}
       title={
         <>
-          <LayoutGrid />
-          <div>{t('Widgets')}</div>
+          {firstWidget.icon}
+          <div>{t(firstWidget.name)}</div>
         </>
       }
       hideBackButton

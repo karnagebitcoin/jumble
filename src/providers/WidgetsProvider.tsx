@@ -1,5 +1,6 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
+import { TrendingUp } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 export type TWidgetId = 'trending-notes'
@@ -9,6 +10,7 @@ export type TWidget = {
   name: string
   description: string
   defaultEnabled: boolean
+  icon: React.ReactNode
 }
 
 export const AVAILABLE_WIDGETS: TWidget[] = [
@@ -16,7 +18,8 @@ export const AVAILABLE_WIDGETS: TWidget[] = [
     id: 'trending-notes',
     name: 'Trending Notes',
     description: 'Display trending notes from across Nostr',
-    defaultEnabled: true
+    defaultEnabled: true,
+    icon: <TrendingUp />
   }
 ]
 
@@ -24,6 +27,7 @@ type TWidgetsContext = {
   enabledWidgets: TWidgetId[]
   toggleWidget: (widgetId: TWidgetId) => void
   isWidgetEnabled: (widgetId: TWidgetId) => boolean
+  getWidgetById: (widgetId: TWidgetId) => TWidget | undefined
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
@@ -51,8 +55,14 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     return enabledWidgets.includes(widgetId)
   }
 
+  const getWidgetById = (widgetId: TWidgetId) => {
+    return AVAILABLE_WIDGETS.find((w) => w.id === widgetId)
+  }
+
   return (
-    <WidgetsContext.Provider value={{ enabledWidgets, toggleWidget, isWidgetEnabled }}>
+    <WidgetsContext.Provider
+      value={{ enabledWidgets, toggleWidget, isWidgetEnabled, getWidgetById }}
+    >
       {children}
     </WidgetsContext.Provider>
   )
