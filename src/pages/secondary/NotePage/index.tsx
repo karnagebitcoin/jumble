@@ -88,15 +88,17 @@ const NotePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref
             eventBech32Id={parentEventId}
           />
         )}
-        <Note
-          key={`note-${event.id}`}
-          event={event}
-          className="select-text"
-          hideParentNotePreview
-          originalNoteId={id}
-          showFull
-        />
-        <NoteStats className="mt-3" event={event} fetchIfNotExisting displayTopZapsAndLikes />
+        <div className="group">
+          <Note
+            key={`note-${event.id}`}
+            event={event}
+            className="select-text"
+            hideParentNotePreview
+            originalNoteId={id}
+            showFull
+          />
+          <NoteStats className="mt-3" event={event} fetchIfNotExisting displayTopZapsAndLikes />
+        </div>
       </div>
       <Separator className="mt-4" />
       <NoteInteractions key={`note-interactions-${event.id}`} pageIndex={index} event={event} />
