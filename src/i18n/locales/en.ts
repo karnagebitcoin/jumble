@@ -234,6 +234,7 @@ export default {
     'Custom Feeds': 'Custom Feeds',
     'Custom Feed': 'Custom Feed',
     'Custom feed not found': 'Custom feed not found',
+    'Feed saved successfully': 'Feed saved successfully',
     'Show more': 'Show more',
     General: 'General',
     Appearance: 'Appearance',
