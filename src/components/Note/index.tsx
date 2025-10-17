@@ -58,10 +58,15 @@ export default function Note({
     () => (hideParentNotePreview ? undefined : getParentBech32Id(event)),
     [event, hideParentNotePreview]
   )
-  const { defaultShowNsfw } = useContentPolicy()
+  const { defaultShowNsfw, alwaysHideMutedNotes } = useContentPolicy()
   const [showNsfw, setShowNsfw] = useState(false)
   const { mutePubkeySet } = useMuteList()
   const [showMuted, setShowMuted] = useState(false)
+
+  // If alwaysHideMutedNotes is enabled, completely hide the note
+  if (alwaysHideMutedNotes && mutePubkeySet.has(event.pubkey)) {
+    return null
+  }
 
   let content: React.ReactNode
   if (

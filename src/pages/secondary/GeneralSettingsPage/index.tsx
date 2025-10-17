@@ -26,6 +26,8 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setDefaultShowNsfw,
     hideContentMentioningMutedUsers,
     setHideContentMentioningMutedUsers,
+    alwaysHideMutedNotes,
+    setAlwaysHideMutedNotes,
     mediaAutoLoadPolicy,
     setMediaAutoLoadPolicy
   } = useContentPolicy()
@@ -104,6 +106,17 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="hide-content-mentioning-muted-users"
             checked={hideContentMentioningMutedUsers}
             onCheckedChange={setHideContentMentioningMutedUsers}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="always-hide-muted-notes" className="text-base font-normal">
+            <div>{t('Always hide muted notes')}</div>
+            <div className="text-muted-foreground">{t('Completely hide notes from muted users, even in reposts')}</div>
+          </Label>
+          <Switch
+            id="always-hide-muted-notes"
+            checked={alwaysHideMutedNotes}
+            onCheckedChange={setAlwaysHideMutedNotes}
           />
         </SettingItem>
         <SettingItem>
