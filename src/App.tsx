@@ -6,6 +6,7 @@ import { BookmarksProvider } from '@/providers/BookmarksProvider'
 import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
 import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
 import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
+import { CustomFeedsProvider } from '@/providers/CustomFeedsProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
@@ -53,22 +54,24 @@ export default function App(): JSX.Element {
                                         <UserTrustProvider>
                                           <BookmarksProvider>
                                             <PinListProvider>
-                                              <FeedProvider>
-                                                <ReplyProvider>
-                                                  <MediaUploadServiceProvider>
-                                                    <KindFilterProvider>
-                                                      <UserPreferencesProvider>
-                                                        <TrendingNotesDismissedProvider>
-                                                          <WidgetsProvider>
-                                                            <PageManager />
-                                                            <Toaster />
-                                                          </WidgetsProvider>
-                                                        </TrendingNotesDismissedProvider>
-                                                      </UserPreferencesProvider>
-                                                    </KindFilterProvider>
-                                                  </MediaUploadServiceProvider>
-                                                </ReplyProvider>
-                                              </FeedProvider>
+                                              <CustomFeedsProvider>
+                                                <FeedProvider>
+                                                  <ReplyProvider>
+                                                    <MediaUploadServiceProvider>
+                                                      <KindFilterProvider>
+                                                        <UserPreferencesProvider>
+                                                          <TrendingNotesDismissedProvider>
+                                                            <WidgetsProvider>
+                                                              <PageManager />
+                                                              <Toaster />
+                                                            </WidgetsProvider>
+                                                          </TrendingNotesDismissedProvider>
+                                                        </UserPreferencesProvider>
+                                                      </KindFilterProvider>
+                                                    </MediaUploadServiceProvider>
+                                                  </ReplyProvider>
+                                                </FeedProvider>
+                                              </CustomFeedsProvider>
                                             </PinListProvider>
                                           </BookmarksProvider>
                                         </UserTrustProvider>

@@ -22,6 +22,7 @@ import { randomString } from '@/lib/random'
 import {
   TAccount,
   TAccountPointer,
+  TCustomFeed,
   TFeedInfo,
   TFontFamily,
   TMediaAutoLoadPolicy,
@@ -73,6 +74,7 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
+  private customFeeds: TCustomFeed[] = []
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -273,6 +275,11 @@ class LocalStorageService {
     const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
     if (zapSound && Object.values(ZAP_SOUNDS).includes(zapSound as TZapSound)) {
       this.zapSound = zapSound as TZapSound
+    }
+
+    const customFeedsStr = window.localStorage.getItem(StorageKey.CUSTOM_FEEDS)
+    if (customFeedsStr) {
+      this.customFeeds = JSON.parse(customFeedsStr)
     }
 
     // Clean up deprecated data
@@ -665,6 +672,28 @@ class LocalStorageService {
   setZapSound(sound: TZapSound) {
     this.zapSound = sound
     window.localStorage.setItem(StorageKey.ZAP_SOUND, sound)
+  }
+
+  getCustomFeeds() {
+    return this.customFeeds
+  }
+
+  addCustomFeed(feed: TCustomFeed) {
+    this.customFeeds.push(feed)
+    window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+  }
+
+  removeCustomFeed(id: string) {
+    this.customFeeds = this.customFeeds.filter((feed) => feed.id !== id)
+    window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+  }
+
+  updateCustomFeed(id: string, updates: Partial<TCustomFeed>) {
+    const index = this.customFeeds.findIndex((feed) => feed.id === id)
+    if (index !== -1) {
+      this.customFeeds[index] = { ...this.customFeeds[index], ...updates }
+      window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+    }
   }
 }
 
