@@ -1,5 +1,6 @@
 import Uploader from '@/components/PostEditor/Uploader'
 import ProfileBanner from '@/components/ProfileBanner'
+import ProfileGalleryManager from '@/components/ProfileGalleryManager'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +12,7 @@ import { generateImageByPubkey } from '@/lib/pubkey'
 import { isEmail } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
+import { TGalleryImage } from '@/types'
 import { Loader, Upload } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +34,7 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [saving, setSaving] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [gallery, setGallery] = useState<TGalleryImage[]>([])
   const defaultImage = useMemo(
     () => (account ? generateImageByPubkey(account.pubkey) : undefined),
     [account]
@@ -46,6 +49,7 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
       setWebsite(profile.website ?? '')
       setNip05(profile.nip05 ?? '')
       setLightningAddress(profile.lightningAddress || '')
+      setGallery(profile.gallery || [])
     } else {
       setBanner('')
       setAvatar('')
@@ -54,6 +58,7 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
       setWebsite('')
       setNip05('')
       setLightningAddress('')
+      setGallery([])
     }
   }, [profile])
 
@@ -76,6 +81,13 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
       nip05,
       banner,
       picture: avatar
+    }
+
+    // Add gallery if there are images, otherwise remove it
+    if (gallery.length > 0) {
+      newProfileContent.gallery = gallery
+    } else {
+      delete newProfileContent.gallery
     }
 
     if (lightningAddress) {
@@ -218,6 +230,15 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
           {lightningAddressError && (
             <div className="text-xs text-destructive pl-3">{lightningAddressError}</div>
           )}
+        </Item>
+        <Item>
+          <ProfileGalleryManager
+            gallery={gallery}
+            onChange={(newGallery) => {
+              setGallery(newGallery)
+              setHasChanged(true)
+            }}
+          />
         </Item>
       </div>
     </SecondaryPageLayout>

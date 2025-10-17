@@ -8,6 +8,12 @@ export type TFeedSubRequest = {
   filter: Omit<Filter, 'since' | 'until'>
 }
 
+export type TGalleryImage = {
+  url: string
+  description?: string
+  link?: string
+}
+
 export type TProfile = {
   username: string
   pubkey: string
@@ -22,6 +28,7 @@ export type TProfile = {
   lud16?: string
   lightningAddress?: string
   created_at?: number
+  gallery?: TGalleryImage[]
 }
 export type TMailboxRelayScope = 'read' | 'write' | 'both'
 export type TMailboxRelay = {

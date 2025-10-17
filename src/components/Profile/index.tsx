@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next'
 import Lightbox from 'yet-another-react-lightbox'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import NotFound from '../NotFound'
+import ProfileGallery from '../ProfileGallery'
 import FollowedBy from './FollowedBy'
 import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
@@ -132,7 +133,7 @@ export default function Profile({ id }: { id?: string }) {
   }
   if (!profile) return <NotFound />
 
-  const { banner, username, about, avatar, pubkey, website, lightningAddress } = profile
+  const { banner, username, about, avatar, pubkey, website, lightningAddress, gallery } = profile
 
   const handleAvatarClick = (event: React.MouseEvent) => {
     event.stopPropagation()
@@ -243,6 +244,7 @@ export default function Profile({ id }: { id?: string }) {
               </div>
               {!isSelf && <FollowedBy pubkey={pubkey} />}
             </div>
+            {gallery && gallery.length > 0 && <ProfileGallery gallery={gallery} maxRows={3} />}
           </div>
         </div>
       </div>

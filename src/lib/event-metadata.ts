@@ -67,7 +67,8 @@ export function getProfileFromEvent(event: Event) {
       lud06: profileObj.lud06,
       lud16: profileObj.lud16,
       lightningAddress: getLightningAddressFromProfile(profileObj),
-      created_at: event.created_at
+      created_at: event.created_at,
+      gallery: profileObj.gallery || undefined
     }
   } catch (err) {
     console.error(event.content, err)
