@@ -7,7 +7,6 @@ import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
 import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
 import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
-import { EntranceMusicProvider } from '@/providers/EntranceMusicProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
@@ -43,9 +42,8 @@ export default function App(): JSX.Element {
                 <LayoutModeProvider>
                   <CompactSidebarProvider>
                     <ContentPolicyProvider>
-                      <EntranceMusicProvider>
-                        <ScreenSizeProvider>
-                          <DeletedEventProvider>
+                      <ScreenSizeProvider>
+                        <DeletedEventProvider>
                             <NostrProvider>
                               <ZapProvider>
                                 <TranslationServiceProvider>
@@ -82,7 +80,6 @@ export default function App(): JSX.Element {
                             </NostrProvider>
                           </DeletedEventProvider>
                         </ScreenSizeProvider>
-                      </EntranceMusicProvider>
                     </ContentPolicyProvider>
                   </CompactSidebarProvider>
                 </LayoutModeProvider>

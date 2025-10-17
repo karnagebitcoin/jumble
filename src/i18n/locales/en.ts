@@ -349,13 +349,6 @@ export default {
     MuteListNotFoundConfirmation:
       'Mute list not found. Do you want to create a new one? If you have muted users before, please DO NOT confirm as this operation will cause you to lose your previous mute list.',
     'Show NSFW content by default': 'Show NSFW content by default',
-    'Entrance Music': 'Entrance Music',
-    'YouTube URL or MP3 URL': 'YouTube URL or MP3 URL',
-    'Enter a YouTube URL or direct MP3 link to play when you visit':
-      'Enter a YouTube URL or direct MP3 link to play when you visit',
-    'Entrance Music Frequency': 'Entrance Music Frequency',
-    'Once every 24 hours': 'Once every 24 hours',
-    'Every page refresh': 'Every page refresh',
     'Custom emoji management': 'Custom emoji management',
     'After changing emojis, you may need to refresh the page':
       'After changing emojis, you may need to refresh the page',

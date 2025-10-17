@@ -6,7 +6,6 @@ import {
   DEFAULT_NIP_96_SERVICE,
   DEFAULT_PAGE_THEME,
   DEFAULT_PRIMARY_COLOR,
-  ENTRANCE_MUSIC_FREQUENCY,
   ExtendedKind,
   FONT_FAMILIES,
   FONT_SIZES,
@@ -15,7 +14,6 @@ import {
   PRIMARY_COLORS,
   SUPPORTED_KINDS,
   StorageKey,
-  TEntranceMusicFrequency,
   TZapSound,
   ZAP_SOUNDS
 } from '@/constants'
@@ -73,9 +71,6 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
-  private entranceMusicUrl: string = ''
-  private entranceMusicFrequency: TEntranceMusicFrequency = ENTRANCE_MUSIC_FREQUENCY.ONCE_PER_DAY
-  private entranceMusicLastPlayed: number = 0
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -270,28 +265,6 @@ class LocalStorageService {
     const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
     if (zapSound && Object.values(ZAP_SOUNDS).includes(zapSound as TZapSound)) {
       this.zapSound = zapSound as TZapSound
-    }
-
-    this.entranceMusicUrl = window.localStorage.getItem(StorageKey.ENTRANCE_MUSIC_URL) ?? ''
-
-    const entranceMusicFrequency = window.localStorage.getItem(StorageKey.ENTRANCE_MUSIC_FREQUENCY)
-    if (
-      entranceMusicFrequency &&
-      Object.values(ENTRANCE_MUSIC_FREQUENCY).includes(
-        entranceMusicFrequency as TEntranceMusicFrequency
-      )
-    ) {
-      this.entranceMusicFrequency = entranceMusicFrequency as TEntranceMusicFrequency
-    }
-
-    const entranceMusicLastPlayedStr = window.localStorage.getItem(
-      StorageKey.ENTRANCE_MUSIC_LAST_PLAYED
-    )
-    if (entranceMusicLastPlayedStr) {
-      const timestamp = parseInt(entranceMusicLastPlayedStr)
-      if (!isNaN(timestamp)) {
-        this.entranceMusicLastPlayed = timestamp
-      }
     }
 
     // Clean up deprecated data
@@ -666,33 +639,6 @@ class LocalStorageService {
   setZapSound(sound: TZapSound) {
     this.zapSound = sound
     window.localStorage.setItem(StorageKey.ZAP_SOUND, sound)
-  }
-
-  getEntranceMusicUrl() {
-    return this.entranceMusicUrl
-  }
-
-  setEntranceMusicUrl(url: string) {
-    this.entranceMusicUrl = url
-    window.localStorage.setItem(StorageKey.ENTRANCE_MUSIC_URL, url)
-  }
-
-  getEntranceMusicFrequency() {
-    return this.entranceMusicFrequency
-  }
-
-  setEntranceMusicFrequency(frequency: TEntranceMusicFrequency) {
-    this.entranceMusicFrequency = frequency
-    window.localStorage.setItem(StorageKey.ENTRANCE_MUSIC_FREQUENCY, frequency)
-  }
-
-  getEntranceMusicLastPlayed() {
-    return this.entranceMusicLastPlayed
-  }
-
-  setEntranceMusicLastPlayed(timestamp: number) {
-    this.entranceMusicLastPlayed = timestamp
-    window.localStorage.setItem(StorageKey.ENTRANCE_MUSIC_LAST_PLAYED, timestamp.toString())
   }
 }
 
