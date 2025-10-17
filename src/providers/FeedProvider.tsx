@@ -55,6 +55,8 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         } else {
           // Default to following feed for logged in users
           feedInfo = { feedType: 'following' }
+          // Initialize with following feed
+          return await switchFeed('following', { pubkey })
         }
       } else {
         // For logged out users, default to a relay feed

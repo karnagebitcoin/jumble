@@ -232,6 +232,7 @@ export default {
     'Give this search feed a name to quickly access it later.': 'Give this search feed a name to quickly access it later.',
     'Feed name': 'Feed name',
     'Custom Feeds': 'Custom Feeds',
+    'Custom Feed': 'Custom Feed',
     'Custom feed not found': 'Custom feed not found',
     'Show more': 'Show more',
     General: 'General',
