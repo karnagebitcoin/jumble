@@ -7,20 +7,22 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import modalManager from '@/services/modal-manager.service'
 import { randomString } from '@/lib/random'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface ProfileGalleryProps {
   gallery: TGalleryImage[]
-  maxRows?: number
+  maxImages?: number
 }
 
-export default function ProfileGallery({ gallery, maxRows = 3 }: ProfileGalleryProps) {
+export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState(-1)
   const lightboxId = useMemo(() => `profile-gallery-lightbox-${randomString()}`, [])
 
-  // Limit gallery images to maxRows * 3 columns
+  // Limit gallery images to maxImages (default 8 for 4x2 grid)
   const visibleGallery = useMemo(() => {
-    return gallery.slice(0, maxRows * 3)
-  }, [gallery, maxRows])
+    return gallery.slice(0, maxImages)
+  }, [gallery, maxImages])
 
   const slides = useMemo(() => {
     return visibleGallery.map((image) => ({
@@ -50,8 +52,13 @@ export default function ProfileGallery({ gallery, maxRows = 3 }: ProfileGalleryP
   return (
     <>
       <div className="mt-4">
-        <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Gallery</h3>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-sm font-semibold text-muted-foreground">Gallery</h3>
+          <Badge variant="secondary" className="text-xs">
+            {gallery.length}
+          </Badge>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
           {visibleGallery.map((image, index) => (
             <div
               key={index}
@@ -64,32 +71,14 @@ export default function ProfileGallery({ gallery, maxRows = 3 }: ProfileGalleryP
                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 loading="lazy"
               />
-              {image.link && (
-                <a
-                  href={image.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    'absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm',
-                    'p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity',
-                    'hover:bg-background/90 z-10'
-                  )}
-                  onClick={(e) => e.stopPropagation()}
-                  title="Open link"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
-              {image.description && (
-                <div
-                  className={cn(
-                    'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent',
-                    'p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity'
-                  )}
-                >
-                  <p className="line-clamp-2">{image.description}</p>
-                </div>
-              )}
+              <div
+                className={cn(
+                  'absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity',
+                  'flex items-center justify-center'
+                )}
+              >
+                <div className="text-white text-xs">View</div>
+              </div>
             </div>
           ))}
         </div>
@@ -112,31 +101,46 @@ export default function ProfileGallery({ gallery, maxRows = 3 }: ProfileGalleryP
                 toolbar: { paddingTop: '2.25rem' }
               }}
               render={{
-                slide: ({ slide }) => (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <img
-                      src={slide.src}
-                      alt=""
-                      className="max-w-full max-h-full object-contain"
-                    />
-                    {slide.description && (
-                      <div className="mt-4 text-center text-white max-w-2xl px-4">
-                        <p>{slide.description}</p>
+                slide: ({ slide }) => {
+                  const currentImage = visibleGallery[lightboxIndex]
+                  return (
+                    <div className="flex flex-col items-center justify-center h-full w-full p-4">
+                      <div className="relative max-w-full max-h-full flex items-center justify-center">
+                        <img
+                          src={slide.src}
+                          alt=""
+                          className="max-w-full max-h-[80vh] object-contain"
+                        />
+                        {currentImage?.description && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6 pt-12">
+                            <p className="text-white text-base text-center max-w-3xl mx-auto">
+                              {currentImage.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {visibleGallery[lightboxIndex]?.link && (
-                      <a
-                        href={visibleGallery[lightboxIndex].link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 text-primary hover:underline flex items-center gap-1"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        <span>Visit link</span>
-                      </a>
-                    )}
-                  </div>
-                )
+                      {currentImage?.link && (
+                        <div className="mt-4">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            asChild
+                          >
+                            <a
+                              href={currentImage.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              <span>Visit Link</span>
+                            </a>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
               }}
             />
           </div>,

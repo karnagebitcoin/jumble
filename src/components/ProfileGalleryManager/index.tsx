@@ -27,11 +27,14 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingImage, setEditingImage] = useState<TGalleryImage | null>(null)
   const [uploadingCount, setUploadingCount] = useState(0)
-  const pendingUploadsRef = useRef<string[]>([])
+  const galleryRef = useRef(gallery)
+
+  // Keep ref in sync with gallery prop
+  galleryRef.current = gallery
 
   const handleAddImage = (url: string) => {
-    // Add immediately to the gallery
-    const newGallery = [...gallery, { url }]
+    // Use the ref to get the latest gallery state
+    const newGallery = [...galleryRef.current, { url }]
     onChange(newGallery)
   }
 

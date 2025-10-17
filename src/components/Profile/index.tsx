@@ -244,7 +244,7 @@ export default function Profile({ id }: { id?: string }) {
               </div>
               {!isSelf && <FollowedBy pubkey={pubkey} />}
             </div>
-            {gallery && gallery.length > 0 && <ProfileGallery gallery={gallery} maxRows={3} />}
+            {gallery && gallery.length > 0 && <ProfileGallery gallery={gallery} maxImages={8} />}
           </div>
         </div>
       </div>
