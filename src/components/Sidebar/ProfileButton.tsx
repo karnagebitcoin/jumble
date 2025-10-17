@@ -3,7 +3,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { UserRound } from 'lucide-react'
 import SidebarItem from './SidebarItem'
 
-export default function ProfileButton() {
+export default function ProfileButton({ collapse }: { collapse: boolean }) {
   const { navigate, current } = usePrimaryPage()
   const { checkLogin } = useNostr()
 
@@ -12,8 +12,9 @@ export default function ProfileButton() {
       title="Profile"
       onClick={() => checkLogin(() => navigate('profile'))}
       active={current === 'profile'}
+      collapse={collapse}
     >
-      <UserRound strokeWidth={3} />
+      <UserRound />
     </SidebarItem>
   )
 }

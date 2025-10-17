@@ -48,6 +48,7 @@ class LocalStorageService {
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
+  private sidebarCollapse: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -192,6 +193,8 @@ class LocalStorageService {
     this.shownCreateWalletGuideToastPubkeys = shownCreateWalletGuideToastPubkeysStr
       ? new Set(JSON.parse(shownCreateWalletGuideToastPubkeysStr))
       : new Set()
+
+    this.sidebarCollapse = window.localStorage.getItem(StorageKey.SIDEBAR_COLLAPSE) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -475,6 +478,15 @@ class LocalStorageService {
       StorageKey.SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS,
       JSON.stringify(Array.from(this.shownCreateWalletGuideToastPubkeys))
     )
+  }
+
+  getSidebarCollapse() {
+    return this.sidebarCollapse
+  }
+
+  setSidebarCollapse(collapse: boolean) {
+    this.sidebarCollapse = collapse
+    window.localStorage.setItem(StorageKey.SIDEBAR_COLLAPSE, collapse.toString())
   }
 }
 
