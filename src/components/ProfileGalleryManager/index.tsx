@@ -65,11 +65,23 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
   const handleSaveEdit = () => {
     if (editingIndex !== null && editingImage) {
       const newGallery = [...gallery]
+      const normalizedLink = editingImage.link ? normalizeUrl(editingImage.link) : undefined
+
+      console.log('Saving gallery image edit:', {
+        index: editingIndex,
+        url: editingImage.url,
+        description: editingImage.description,
+        originalLink: editingImage.link,
+        normalizedLink: normalizedLink
+      })
+
       // Normalize the link URL before saving
       newGallery[editingIndex] = {
         ...editingImage,
-        link: editingImage.link ? normalizeUrl(editingImage.link) : undefined
+        link: normalizedLink
       }
+
+      console.log('Updated gallery:', newGallery)
       onChange(newGallery)
       setEditingIndex(null)
       setEditingImage(null)
@@ -227,8 +239,16 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
                   type="url"
                   placeholder={t('https://example.com')}
                   value={editingImage.link || ''}
-                  onChange={(e) => setEditingImage({ ...editingImage, link: e.target.value })}
+                  onChange={(e) => {
+                    console.log('Link input changed to:', e.target.value)
+                    setEditingImage({ ...editingImage, link: e.target.value })
+                  }}
                 />
+                {editingImage.link && (
+                  <p className="text-xs text-muted-foreground">
+                    Will be saved as: {normalizeUrl(editingImage.link)}
+                  </p>
+                )}
               </div>
             </div>
           )}
