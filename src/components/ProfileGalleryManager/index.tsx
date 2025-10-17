@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dialog'
 import Uploader from '@/components/PostEditor/Uploader'
 import { TGalleryImage } from '@/types'
-import { ExternalLink, Loader, Trash2, Upload, X } from 'lucide-react'
-import { useState } from 'react'
+import { ExternalLink, Loader, Trash2, Upload, X, ImagePlus } from 'lucide-react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
@@ -26,9 +26,11 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
   const { t } = useTranslation()
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingImage, setEditingImage] = useState<TGalleryImage | null>(null)
-  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
+  const [uploadingCount, setUploadingCount] = useState(0)
+  const pendingUploadsRef = useRef<string[]>([])
 
   const handleAddImage = (url: string) => {
+    // Add immediately to the gallery
     const newGallery = [...gallery, { url }]
     onChange(newGallery)
   }
@@ -60,7 +62,14 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
 
   const handleUploadSuccess = ({ url }: { url: string }) => {
     handleAddImage(url)
-    setUploadingIndex(null)
+  }
+
+  const handleUploadStart = (file: File) => {
+    setUploadingCount((prev) => prev + 1)
+  }
+
+  const handleUploadEnd = (file: File) => {
+    setUploadingCount((prev) => prev - 1)
   }
 
   return (
@@ -74,6 +83,41 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
         </p>
       </div>
 
+      {/* Upload Area - Full Width */}
+      <Uploader
+        onUploadSuccess={handleUploadSuccess}
+        onUploadStart={handleUploadStart}
+        onUploadEnd={handleUploadEnd}
+        className={cn(
+          'border-2 border-dashed border-muted-foreground/25 rounded-lg',
+          'hover:border-muted-foreground/50 transition-colors cursor-pointer',
+          'bg-muted/20 hover:bg-muted/40'
+        )}
+      >
+        <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
+          {uploadingCount > 0 ? (
+            <>
+              <Loader className="w-10 h-10 animate-spin mb-3" />
+              <p className="text-sm">
+                {t('Uploading')} {uploadingCount} {uploadingCount === 1 ? t('image') : t('images')}
+                ...
+              </p>
+            </>
+          ) : (
+            <>
+              <ImagePlus className="w-10 h-10 mb-3" />
+              <p className="text-base font-medium mb-1">{t('Upload Images')}</p>
+              <p className="text-sm text-center">
+                {t('Click to select or drag and drop')}
+                <br />
+                <span className="text-xs">{t('You can select multiple images at once')}</span>
+              </p>
+            </>
+          )}
+        </div>
+      </Uploader>
+
+      {/* Gallery Grid */}
       {gallery.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {gallery.map((image, index) => (
@@ -124,28 +168,6 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
           ))}
         </div>
       )}
-
-      <Uploader
-        onUploadSuccess={handleUploadSuccess}
-        onUploadStart={() => setUploadingIndex(gallery.length)}
-        onUploadEnd={() => setUploadingIndex(null)}
-        className={cn(
-          'border-2 border-dashed border-muted-foreground/25 rounded-md',
-          'hover:border-muted-foreground/50 transition-colors cursor-pointer',
-          'flex items-center justify-center aspect-square max-w-[200px]'
-        )}
-      >
-        <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
-          {uploadingIndex !== null ? (
-            <Loader className="w-8 h-8 animate-spin" />
-          ) : (
-            <>
-              <Upload className="w-8 h-8 mb-2" />
-              <p className="text-sm text-center">{t('Click or drag to upload')}</p>
-            </>
-          )}
-        </div>
-      </Uploader>
 
       {/* Edit Dialog */}
       <Dialog open={editingIndex !== null} onOpenChange={(open) => !open && handleCancelEdit()}>
