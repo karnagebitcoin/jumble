@@ -15,6 +15,7 @@ import { useFetchFollowings, useFetchProfile } from '@/hooks'
 import { toMuteList, toProfileEditor } from '@/lib/link'
 import { generateImageByPubkey } from '@/lib/pubkey'
 import { randomString } from '@/lib/random'
+import { cn } from '@/lib/utils'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -56,8 +57,10 @@ export default function Profile({ id }: { id?: string }) {
       setTopContainer(node)
     }
   }, [])
-  const lightboxId = useMemo(() => `profile-avatar-lightbox-${randomString()}`, [])
-  const [lightboxIndex, setLightboxIndex] = useState(-1)
+  const avatarLightboxId = useMemo(() => `profile-avatar-lightbox-${randomString()}`, [])
+  const [avatarLightboxIndex, setAvatarLightboxIndex] = useState(-1)
+  const bannerLightboxId = useMemo(() => `profile-banner-lightbox-${randomString()}`, [])
+  const [bannerLightboxIndex, setBannerLightboxIndex] = useState(-1)
 
   useEffect(() => {
     if (!profile?.pubkey) return
@@ -92,14 +95,24 @@ export default function Profile({ id }: { id?: string }) {
   }, [topContainer])
 
   useEffect(() => {
-    if (lightboxIndex >= 0) {
-      modalManager.register(lightboxId, () => {
-        setLightboxIndex(-1)
+    if (avatarLightboxIndex >= 0) {
+      modalManager.register(avatarLightboxId, () => {
+        setAvatarLightboxIndex(-1)
       })
     } else {
-      modalManager.unregister(lightboxId)
+      modalManager.unregister(avatarLightboxId)
     }
-  }, [lightboxIndex, lightboxId])
+  }, [avatarLightboxIndex, avatarLightboxId])
+
+  useEffect(() => {
+    if (bannerLightboxIndex >= 0) {
+      modalManager.register(bannerLightboxId, () => {
+        setBannerLightboxIndex(-1)
+      })
+    } else {
+      modalManager.unregister(bannerLightboxId)
+    }
+  }, [bannerLightboxIndex, bannerLightboxId])
 
   if (!profile && isFetching) {
     return (
@@ -125,7 +138,15 @@ export default function Profile({ id }: { id?: string }) {
     event.stopPropagation()
     event.preventDefault()
     if (avatar) {
-      setLightboxIndex(0)
+      setAvatarLightboxIndex(0)
+    }
+  }
+
+  const handleBannerClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    if (banner) {
+      setBannerLightboxIndex(0)
     }
   }
 
@@ -133,7 +154,15 @@ export default function Profile({ id }: { id?: string }) {
     <>
       <div ref={topContainerRef}>
         <div className="relative bg-cover bg-center mb-2">
-          <ProfileBanner banner={banner} pubkey={pubkey} className="w-full aspect-[3/1]" />
+          <ProfileBanner
+            banner={banner}
+            pubkey={pubkey}
+            className={cn(
+              'w-full aspect-[3/1]',
+              banner && 'cursor-pointer hover:opacity-90 transition-opacity'
+            )}
+            onClick={handleBannerClick}
+          />
           <Avatar
             className="w-24 h-24 absolute left-3 bottom-0 translate-y-1/2 border-4 border-background cursor-pointer hover:opacity-90 transition-opacity"
             onClick={handleAvatarClick}
@@ -218,16 +247,38 @@ export default function Profile({ id }: { id?: string }) {
         </div>
       </div>
       <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} />
-      {lightboxIndex >= 0 &&
+      {avatarLightboxIndex >= 0 &&
         avatar &&
         createPortal(
           <div onClick={(e) => e.stopPropagation()}>
             <Lightbox
-              index={lightboxIndex}
+              index={avatarLightboxIndex}
               slides={[{ src: avatar }]}
               plugins={[Zoom]}
-              open={lightboxIndex >= 0}
-              close={() => setLightboxIndex(-1)}
+              open={avatarLightboxIndex >= 0}
+              close={() => setAvatarLightboxIndex(-1)}
+              controller={{
+                closeOnBackdropClick: true,
+                closeOnPullUp: true,
+                closeOnPullDown: true
+              }}
+              styles={{
+                toolbar: { paddingTop: '2.25rem' }
+              }}
+            />
+          </div>,
+          document.body
+        )}
+      {bannerLightboxIndex >= 0 &&
+        banner &&
+        createPortal(
+          <div onClick={(e) => e.stopPropagation()}>
+            <Lightbox
+              index={bannerLightboxIndex}
+              slides={[{ src: banner }]}
+              plugins={[Zoom]}
+              open={bannerLightboxIndex >= 0}
+              close={() => setBannerLightboxIndex(-1)}
               controller={{
                 closeOnBackdropClick: true,
                 closeOnPullUp: true,

@@ -6,11 +6,13 @@ import { cn } from '@/lib/utils'
 export default function ProfileBanner({
   pubkey,
   banner,
-  className
+  className,
+  onClick
 }: {
   pubkey: string
   banner?: string
   className?: string
+  onClick?: (event: React.MouseEvent) => void
 }) {
   const defaultBanner = useMemo(() => generateImageByPubkey(pubkey), [pubkey])
   const [bannerUrl, setBannerUrl] = useState(banner ?? defaultBanner)
@@ -29,6 +31,7 @@ export default function ProfileBanner({
       alt={`${pubkey} banner`}
       className={cn('rounded-none', className)}
       onError={() => setBannerUrl(defaultBanner)}
+      onClick={onClick}
     />
   )
 }
