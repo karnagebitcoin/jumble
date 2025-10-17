@@ -376,6 +376,7 @@ export default {
     'Suitable Relays': '適切なリレー',
     'People, keywords, or relays': '人、キーワード、またはリレー',
     'Hide content mentioning muted users': 'ミュートしたユーザーを言及するコンテンツを非表示',
+    'Hide notifications from muted users': 'ミュートしたユーザーからの通知を非表示',
     'This note mentions a user you muted': 'このノートはミュートしたユーザーを言及しています',
     Filter: 'フィルター',
     'mentioned you in a note': 'ノートであなたに言及しました',

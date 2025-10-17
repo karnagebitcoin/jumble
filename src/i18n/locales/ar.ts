@@ -374,6 +374,7 @@ export default {
     'Suitable Relays': 'الريلايات المناسبة',
     'People, keywords, or relays': 'أشخاص، كلمات مفتاحية، أو ريلايات',
     'Hide content mentioning muted users': 'إخفاء المحتوى الذي يذكر المستخدمين المكتومين',
+    'Hide notifications from muted users': 'إخفاء الإشعارات من المستخدمين المكتومين',
     'This note mentions a user you muted': 'هذه الملاحظة تذكر مستخدماً قمت بكتمه',
     Filter: 'مرشح',
     'mentioned you in a note': 'ذكرك في ملاحظة',

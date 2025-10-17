@@ -16,6 +16,9 @@ type TContentPolicyContext = {
   alwaysHideMutedNotes?: boolean
   setAlwaysHideMutedNotes?: (hide: boolean) => void
 
+  hideNotificationsFromMutedUsers?: boolean
+  setHideNotificationsFromMutedUsers?: (hide: boolean) => void
+
   autoLoadMedia: boolean
   mediaAutoLoadPolicy: TMediaAutoLoadPolicy
   setMediaAutoLoadPolicy: (policy: TMediaAutoLoadPolicy) => void
@@ -39,6 +42,9 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
   )
   const [alwaysHideMutedNotes, setAlwaysHideMutedNotes] = useState(
     storage.getAlwaysHideMutedNotes()
+  )
+  const [hideNotificationsFromMutedUsers, setHideNotificationsFromMutedUsers] = useState(
+    storage.getHideNotificationsFromMutedUsers()
   )
   const [mediaAutoLoadPolicy, setMediaAutoLoadPolicy] = useState(storage.getMediaAutoLoadPolicy())
   const [connectionType, setConnectionType] = useState((navigator as any).connection?.type)
@@ -89,6 +95,11 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
     setAlwaysHideMutedNotes(hide)
   }
 
+  const updateHideNotificationsFromMutedUsers = (hide: boolean) => {
+    storage.setHideNotificationsFromMutedUsers(hide)
+    setHideNotificationsFromMutedUsers(hide)
+  }
+
   const updateMediaAutoLoadPolicy = (policy: TMediaAutoLoadPolicy) => {
     storage.setMediaAutoLoadPolicy(policy)
     setMediaAutoLoadPolicy(policy)
@@ -105,6 +116,8 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
         setHideContentMentioningMutedUsers: updateHideContentMentioningMutedUsers,
         alwaysHideMutedNotes,
         setAlwaysHideMutedNotes: updateAlwaysHideMutedNotes,
+        hideNotificationsFromMutedUsers,
+        setHideNotificationsFromMutedUsers: updateHideNotificationsFromMutedUsers,
         autoLoadMedia,
         mediaAutoLoadPolicy,
         setMediaAutoLoadPolicy: updateMediaAutoLoadPolicy

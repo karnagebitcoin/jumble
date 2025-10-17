@@ -28,6 +28,8 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setHideContentMentioningMutedUsers,
     alwaysHideMutedNotes,
     setAlwaysHideMutedNotes,
+    hideNotificationsFromMutedUsers,
+    setHideNotificationsFromMutedUsers,
     mediaAutoLoadPolicy,
     setMediaAutoLoadPolicy
   } = useContentPolicy()
@@ -117,6 +119,16 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="always-hide-muted-notes"
             checked={alwaysHideMutedNotes}
             onCheckedChange={setAlwaysHideMutedNotes}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-notifications-from-muted-users" className="text-base font-normal">
+            Hide notifications from muted users
+          </Label>
+          <Switch
+            id="hide-notifications-from-muted-users"
+            checked={hideNotificationsFromMutedUsers}
+            onCheckedChange={setHideNotificationsFromMutedUsers}
           />
         </SettingItem>
         <SettingItem>

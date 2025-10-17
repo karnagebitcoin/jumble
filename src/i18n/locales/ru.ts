@@ -379,6 +379,7 @@ export default {
     'Suitable Relays': 'Подходящие релея',
     'People, keywords, or relays': 'Люди, ключевые слова или релея',
     'Hide content mentioning muted users': 'Скрыть контент, упоминающий заглушённых пользователей',
+    'Hide notifications from muted users': 'Скрыть уведомления от заглушённых пользователей',
     'This note mentions a user you muted':
       'Эта заметка упоминает пользователя, которого вы заглушили',
     Filter: 'Фильтр',

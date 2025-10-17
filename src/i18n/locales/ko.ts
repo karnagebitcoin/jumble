@@ -376,6 +376,7 @@ export default {
     'Suitable Relays': '적합한 릴레이',
     'People, keywords, or relays': '사람, 키워드 또는 릴레이',
     'Hide content mentioning muted users': '뮤트된 사용자를 언급하는 콘텐츠 숨기기',
+    'Hide notifications from muted users': '뮤트된 사용자의 알림 숨기기',
     'This note mentions a user you muted': '이 노트는 뮤트한 사용자를 언급합니다',
     Filter: '필터',
     'mentioned you in a note': '노트에서 당신을 언급했습니다',

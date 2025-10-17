@@ -8,18 +8,20 @@ export function notificationFilter(
     pubkey,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    hideNotificationsFromMutedUsers,
     hideUntrustedNotifications,
     isUserTrusted
   }: {
     pubkey?: string | null
     mutePubkeySet: Set<string>
     hideContentMentioningMutedUsers?: boolean
+    hideNotificationsFromMutedUsers?: boolean
     hideUntrustedNotifications?: boolean
     isUserTrusted: (pubkey: string) => boolean
   }
 ): boolean {
   if (
-    mutePubkeySet.has(event.pubkey) ||
+    (hideNotificationsFromMutedUsers && mutePubkeySet.has(event.pubkey)) ||
     (hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) ||
     (hideUntrustedNotifications && !isUserTrusted(event.pubkey))
   ) {

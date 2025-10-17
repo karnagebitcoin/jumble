@@ -379,6 +379,7 @@ export default {
     'Suitable Relays': 'Relays adequados',
     'People, keywords, or relays': 'Pessoas, palavras-chave ou relays',
     'Hide content mentioning muted users': 'Ocultar conteúdo que menciona utilizadores silenciados',
+    'Hide notifications from muted users': 'Ocultar notificações de utilizadores silenciados',
     'This note mentions a user you muted': 'Esta nota menciona um utilizador que silenciou',
     Filter: 'Filtro',
     'mentioned you in a note': 'mencionou-o numa nota',

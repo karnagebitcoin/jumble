@@ -380,6 +380,7 @@ export default {
     'Suitable Relays': 'Odpowiednie transmitery',
     'People, keywords, or relays': 'Osoby, słowa kluczowe lub transmitery',
     'Hide content mentioning muted users': 'Ukryj treści wspominające wyciszonych użytkowników',
+    'Hide notifications from muted users': 'Ukryj powiadomienia od wyciszonych użytkowników',
     'This note mentions a user you muted': 'Ten wpis wspomina użytkownika, którego wyciszyłeś',
     Filter: 'Filtr',
     'mentioned you in a note': 'wspomniał o tobie w notatce',

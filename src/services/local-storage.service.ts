@@ -60,6 +60,7 @@ class LocalStorageService {
   private showKinds: number[] = []
   private hideContentMentioningMutedUsers: boolean = false
   private alwaysHideMutedNotes: boolean = false
+  private hideNotificationsFromMutedUsers: boolean = false
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
@@ -198,6 +199,9 @@ class LocalStorageService {
 
     this.alwaysHideMutedNotes =
       window.localStorage.getItem(StorageKey.ALWAYS_HIDE_MUTED_NOTES) === 'true'
+
+    this.hideNotificationsFromMutedUsers =
+      window.localStorage.getItem(StorageKey.HIDE_NOTIFICATIONS_FROM_MUTED_USERS) === 'true'
 
     this.notificationListStyle =
       window.localStorage.getItem(StorageKey.NOTIFICATION_LIST_STYLE) ===
@@ -529,6 +533,15 @@ class LocalStorageService {
   setAlwaysHideMutedNotes(hide: boolean) {
     this.alwaysHideMutedNotes = hide
     window.localStorage.setItem(StorageKey.ALWAYS_HIDE_MUTED_NOTES, hide.toString())
+  }
+
+  getHideNotificationsFromMutedUsers() {
+    return this.hideNotificationsFromMutedUsers
+  }
+
+  setHideNotificationsFromMutedUsers(hide: boolean) {
+    this.hideNotificationsFromMutedUsers = hide
+    window.localStorage.setItem(StorageKey.HIDE_NOTIFICATIONS_FROM_MUTED_USERS, hide.toString())
   }
 
   getNotificationListStyle() {

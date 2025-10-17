@@ -385,6 +385,7 @@ export default {
     'Suitable Relays': 'Suitable Relays',
     'People, keywords, or relays': 'People, keywords, or relays',
     'Hide content mentioning muted users': 'Hide content mentioning muted users',
+    'Hide notifications from muted users': 'Hide notifications from muted users',
     'This note mentions a user you muted': 'This note mentions a user you muted',
     Filter: 'Filter',
     'mentioned you in a note': 'mentioned you in a note',

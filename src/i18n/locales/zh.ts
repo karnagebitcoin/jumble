@@ -370,6 +370,7 @@ export default {
     'Suitable Relays': '适合的服务器',
     'People, keywords, or relays': '用户、关键词或服务器',
     'Hide content mentioning muted users': '隐藏提及已屏蔽用户的内容',
+    'Hide notifications from muted users': '隐藏来自已屏蔽用户的通知',
     'This note mentions a user you muted': '此笔记提及了您已屏蔽的用户',
     Filter: '过滤器',
     'mentioned you in a note': '在笔记中提及了您',

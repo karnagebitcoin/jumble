@@ -375,6 +375,7 @@ export default {
     'Suitable Relays': 'رله‌های مناسب',
     'People, keywords, or relays': 'افراد، کلمات کلیدی یا رله‌ها',
     'Hide content mentioning muted users': 'مخفی کردن محتوای اشاره کننده به کاربران بی‌صدا شده',
+    'Hide notifications from muted users': 'مخفی کردن اعلان‌ها از کاربران بی‌صدا شده',
     'This note mentions a user you muted': 'این یادداشت به کاربری که بی‌صدا کرده‌اید اشاره می‌کند',
     Filter: 'فیلتر',
     'mentioned you in a note': 'در یادداشتی از شما نام برد',

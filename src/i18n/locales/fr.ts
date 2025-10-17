@@ -382,6 +382,7 @@ export default {
     'People, keywords, or relays': 'Personnes, mots-clés ou relais',
     'Hide content mentioning muted users':
       'Masquer le contenu mentionnant des utilisateurs masqués',
+    'Hide notifications from muted users': 'Masquer les notifications des utilisateurs masqués',
     'This note mentions a user you muted':
       'Cette note mentionne un utilisateur que vous avez masqué',
     Filter: 'Filtre',

@@ -46,6 +46,7 @@ export const StorageKey = {
   SHOW_KINDS_VERSION: 'showKindsVersion',
   HIDE_CONTENT_MENTIONING_MUTED_USERS: 'hideContentMentioningMutedUsers',
   ALWAYS_HIDE_MUTED_NOTES: 'alwaysHideMutedNotes',
+  HIDE_NOTIFICATIONS_FROM_MUTED_USERS: 'hideNotificationsFromMutedUsers',
   NOTIFICATION_LIST_STYLE: 'notificationListStyle',
   MEDIA_AUTO_LOAD_POLICY: 'mediaAutoLoadPolicy',
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
