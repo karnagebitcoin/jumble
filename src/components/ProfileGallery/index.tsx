@@ -140,11 +140,6 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
                           </Button>
                         </div>
                       )}
-                      {!currentImage?.link && (
-                        <div className="mt-4 text-white text-sm opacity-50">
-                          No link available
-                        </div>
-                      )}
                     </div>
                   )
                 }
