@@ -25,9 +25,11 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
   }, [gallery, maxImages])
 
   const slides = useMemo(() => {
-    return visibleGallery.map((image) => ({
+    return visibleGallery.map((image, index) => ({
       src: image.url,
-      description: image.description
+      description: image.description,
+      link: image.link,
+      index: index
     }))
   }, [visibleGallery])
 
@@ -102,7 +104,8 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
               }}
               render={{
                 slide: ({ slide }) => {
-                  const currentImage = visibleGallery[lightboxIndex]
+                  // Use the slide's stored index to get the correct image data
+                  const currentImage = visibleGallery[slide.index]
                   return (
                     <div className="flex flex-col items-center justify-center h-full w-full p-4">
                       <div className="relative max-w-full max-h-full flex items-center justify-center">
