@@ -14,13 +14,18 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchFollowings, useFetchProfile } from '@/hooks'
 import { toMuteList, toProfileEditor } from '@/lib/link'
 import { generateImageByPubkey } from '@/lib/pubkey'
+import { randomString } from '@/lib/random'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
+import modalManager from '@/services/modal-manager.service'
 import { Link, Zap } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import Lightbox from 'yet-another-react-lightbox'
+import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import NotFound from '../NotFound'
 import FollowedBy from './FollowedBy'
 import Followings from './Followings'
@@ -51,6 +56,8 @@ export default function Profile({ id }: { id?: string }) {
       setTopContainer(node)
     }
   }, [])
+  const lightboxId = useMemo(() => `profile-avatar-lightbox-${randomString()}`, [])
+  const [lightboxIndex, setLightboxIndex] = useState(-1)
 
   useEffect(() => {
     if (!profile?.pubkey) return
@@ -84,6 +91,16 @@ export default function Profile({ id }: { id?: string }) {
     }
   }, [topContainer])
 
+  useEffect(() => {
+    if (lightboxIndex >= 0) {
+      modalManager.register(lightboxId, () => {
+        setLightboxIndex(-1)
+      })
+    } else {
+      modalManager.unregister(lightboxId)
+    }
+  }, [lightboxIndex, lightboxId])
+
   if (!profile && isFetching) {
     return (
       <>
@@ -103,12 +120,24 @@ export default function Profile({ id }: { id?: string }) {
   if (!profile) return <NotFound />
 
   const { banner, username, about, avatar, pubkey, website, lightningAddress } = profile
+
+  const handleAvatarClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    if (avatar) {
+      setLightboxIndex(0)
+    }
+  }
+
   return (
     <>
       <div ref={topContainerRef}>
         <div className="relative bg-cover bg-center mb-2">
           <ProfileBanner banner={banner} pubkey={pubkey} className="w-full aspect-[3/1]" />
-          <Avatar className="w-24 h-24 absolute left-3 bottom-0 translate-y-1/2 border-4 border-background">
+          <Avatar
+            className="w-24 h-24 absolute left-3 bottom-0 translate-y-1/2 border-4 border-background cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={handleAvatarClick}
+          >
             <AvatarImage src={avatar} className="object-cover object-center" />
             <AvatarFallback>
               <img src={defaultImage} />
@@ -189,6 +218,28 @@ export default function Profile({ id }: { id?: string }) {
         </div>
       </div>
       <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} />
+      {lightboxIndex >= 0 &&
+        avatar &&
+        createPortal(
+          <div onClick={(e) => e.stopPropagation()}>
+            <Lightbox
+              index={lightboxIndex}
+              slides={[{ src: avatar }]}
+              plugins={[Zoom]}
+              open={lightboxIndex >= 0}
+              close={() => setLightboxIndex(-1)}
+              controller={{
+                closeOnBackdropClick: true,
+                closeOnPullUp: true,
+                closeOnPullDown: true
+              }}
+              styles={{
+                toolbar: { paddingTop: '2.25rem' }
+              }}
+            />
+          </div>,
+          document.body
+        )}
     </>
   )
 }
