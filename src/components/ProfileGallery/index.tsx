@@ -127,17 +127,14 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
                           <Button
                             variant="secondary"
                             size="sm"
-                            asChild
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.open(currentImage.link, '_blank', 'noopener,noreferrer')
+                            }}
+                            className="flex items-center gap-2"
                           >
-                            <a
-                              href={currentImage.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              <span>Visit Link</span>
-                            </a>
+                            <ExternalLink className="w-4 h-4" />
+                            <span>Visit Link</span>
                           </Button>
                         </div>
                       )}

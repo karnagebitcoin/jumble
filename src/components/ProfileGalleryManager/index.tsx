@@ -48,10 +48,28 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
     setEditingImage({ ...gallery[index] })
   }
 
+  const normalizeUrl = (url: string): string => {
+    if (!url) return ''
+    const trimmed = url.trim()
+    if (!trimmed) return ''
+
+    // If it already has a protocol, return as-is
+    if (trimmed.match(/^https?:\/\//i)) {
+      return trimmed
+    }
+
+    // Add https:// prefix
+    return `https://${trimmed}`
+  }
+
   const handleSaveEdit = () => {
     if (editingIndex !== null && editingImage) {
       const newGallery = [...gallery]
-      newGallery[editingIndex] = editingImage
+      // Normalize the link URL before saving
+      newGallery[editingIndex] = {
+        ...editingImage,
+        link: editingImage.link ? normalizeUrl(editingImage.link) : undefined
+      }
       onChange(newGallery)
       setEditingIndex(null)
       setEditingImage(null)
