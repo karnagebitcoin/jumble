@@ -17,6 +17,10 @@ type TZapContext = {
   updateQuickZap: (quickZap: boolean) => void
   zapSound: TZapSound
   updateZapSound: (sound: TZapSound) => void
+  chargeZapEnabled: boolean
+  updateChargeZapEnabled: (enabled: boolean) => void
+  chargeZapLimit: number
+  updateChargeZapLimit: (limit: number) => void
 }
 
 const ZapContext = createContext<TZapContext | undefined>(undefined)
@@ -34,6 +38,8 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
   const [defaultZapComment, setDefaultZapComment] = useState<string>(storage.getDefaultZapComment())
   const [quickZap, setQuickZap] = useState<boolean>(storage.getQuickZap())
   const [zapSound, setZapSound] = useState<TZapSound>(storage.getZapSound())
+  const [chargeZapEnabled, setChargeZapEnabled] = useState<boolean>(storage.getChargeZapEnabled())
+  const [chargeZapLimit, setChargeZapLimit] = useState<number>(storage.getChargeZapLimit())
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [provider, setProvider] = useState<WebLNProvider | null>(null)
   const [walletInfo, setWalletInfo] = useState<GetInfoResponse | null>(null)
@@ -78,6 +84,16 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
     setZapSound(sound)
   }
 
+  const updateChargeZapEnabled = (enabled: boolean) => {
+    storage.setChargeZapEnabled(enabled)
+    setChargeZapEnabled(enabled)
+  }
+
+  const updateChargeZapLimit = (limit: number) => {
+    storage.setChargeZapLimit(limit)
+    setChargeZapLimit(limit)
+  }
+
   return (
     <ZapContext.Provider
       value={{
@@ -91,7 +107,11 @@ export function ZapProvider({ children }: { children: React.ReactNode }) {
         quickZap,
         updateQuickZap,
         zapSound,
-        updateZapSound
+        updateZapSound,
+        chargeZapEnabled,
+        updateChargeZapEnabled,
+        chargeZapLimit,
+        updateChargeZapLimit
       }}
     >
       {children}

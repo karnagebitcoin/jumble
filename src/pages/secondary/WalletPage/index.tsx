@@ -15,6 +15,8 @@ import { useZap } from '@/providers/ZapProvider'
 import { disconnect, launchModal } from '@getalby/bitcoin-connect-react'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import ChargeZapLimitInput from './ChargeZapLimitInput'
+import ChargeZapSwitch from './ChargeZapSwitch'
 import DefaultZapAmountInput from './DefaultZapAmountInput'
 import DefaultZapCommentInput from './DefaultZapCommentInput'
 import LightningAddressInput from './LightningAddressInput'
@@ -58,6 +60,8 @@ const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
           <DefaultZapAmountInput />
           <DefaultZapCommentInput />
           <QuickZapSwitch />
+          <ChargeZapSwitch />
+          <ChargeZapLimitInput />
           <ZapSoundSelect />
           <LightningAddressInput />
         </div>

@@ -195,6 +195,17 @@ export default {
     'Quick zap': 'Quick zap',
     'If enabled, you can zap with a single click. Click and hold for custom amounts':
       'If enabled, you can zap with a single click. Click and hold for custom amounts',
+    'Enable Charge Zaps': 'Enable Charge Zaps',
+    'Press and hold to charge zap amount': 'Press and hold to charge zap amount',
+    'Quick zaps must be enabled for charge zaps': 'Quick zaps must be enabled for charge zaps',
+    'Charge Zap Limit (sats)': 'Charge Zap Limit (sats)',
+    'Maximum amount that can be charged. No matter how long you hold, zap won\'t exceed this limit.':
+      'Maximum amount that can be charged. No matter how long you hold, zap won\'t exceed this limit.',
+    'Important: Set a reasonable limit': 'Important: Set a reasonable limit',
+    'This prevents accidentally sending large amounts. The zap amount will never exceed this limit.':
+      'This prevents accidentally sending large amounts. The zap amount will never exceed this limit.',
+    'Charge Zap': 'Charge Zap',
+    'Zapped n sats': 'Zapped {{n}} sats',
     All: 'All',
     Reactions: 'Reactions',
     Zaps: 'Zaps',

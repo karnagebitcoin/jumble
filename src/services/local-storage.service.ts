@@ -75,6 +75,8 @@ class LocalStorageService {
   private enabledWidgets: string[] = []
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
   private customFeeds: TCustomFeed[] = []
+  private chargeZapEnabled: boolean = false
+  private chargeZapLimit: number = 1000
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -282,6 +284,16 @@ class LocalStorageService {
       this.customFeeds = JSON.parse(customFeedsStr)
     }
 
+    this.chargeZapEnabled = window.localStorage.getItem(StorageKey.CHARGE_ZAP_ENABLED) === 'true'
+
+    const chargeZapLimitStr = window.localStorage.getItem(StorageKey.CHARGE_ZAP_LIMIT)
+    if (chargeZapLimitStr) {
+      const num = parseInt(chargeZapLimitStr)
+      if (!isNaN(num) && num > 0) {
+        this.chargeZapLimit = num
+      }
+    }
+
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
     window.localStorage.removeItem(StorageKey.ACCOUNT_FOLLOW_LIST_EVENT_MAP)
@@ -397,6 +409,24 @@ class LocalStorageService {
   setQuickZap(quickZap: boolean) {
     this.quickZap = quickZap
     window.localStorage.setItem(StorageKey.QUICK_ZAP, quickZap.toString())
+  }
+
+  getChargeZapEnabled() {
+    return this.chargeZapEnabled
+  }
+
+  setChargeZapEnabled(enabled: boolean) {
+    this.chargeZapEnabled = enabled
+    window.localStorage.setItem(StorageKey.CHARGE_ZAP_ENABLED, enabled.toString())
+  }
+
+  getChargeZapLimit() {
+    return this.chargeZapLimit
+  }
+
+  setChargeZapLimit(limit: number) {
+    this.chargeZapLimit = limit
+    window.localStorage.setItem(StorageKey.CHARGE_ZAP_LIMIT, limit.toString())
   }
 
   getLastReadNotificationTime(pubkey: string) {

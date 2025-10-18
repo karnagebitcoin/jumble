@@ -54,6 +54,7 @@
     "@webbtc/webln-types": "^3.0.0",
     "blossom-client-sdk": "^4.1.0",
     "blurhash": "^2.0.5",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -91,6 +92,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5",

@@ -1,10 +1,12 @@
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
+import { useZap } from '@/providers/ZapProvider'
 import noteStatsService from '@/services/note-stats.service'
 import { Event } from 'nostr-tools'
 import { useEffect, useState } from 'react'
 import BookmarkButton from '../BookmarkButton'
+import ChargeZapButton from './ChargeZapButton'
 import LikeButton from './LikeButton'
 import Likes from './Likes'
 import ReplyButton from './ReplyButton'
@@ -30,7 +32,11 @@ export default function NoteStats({
 }) {
   const { isSmallScreen } = useScreenSize()
   const { pubkey } = useNostr()
+  const { chargeZapEnabled, quickZap } = useZap()
   const [loading, setLoading] = useState(false)
+
+  // Show charge zap button only if charge zap is enabled AND quick zap is enabled
+  const showChargeZap = chargeZapEnabled && quickZap
 
   useEffect(() => {
     if (!fetchIfNotExisting) return
@@ -59,6 +65,7 @@ export default function NoteStats({
           <RepostButton event={event} />
           <LikeButton event={event} />
           <ZapButton event={event} />
+          {showChargeZap && <ChargeZapButton event={event} />}
           <BookmarkButton event={event} />
           <SeenOnButton event={event} />
         </div>
@@ -83,6 +90,7 @@ export default function NoteStats({
           <RepostButton event={event} />
           <LikeButton event={event} />
           <ZapButton event={event} />
+          {showChargeZap && <ChargeZapButton event={event} />}
         </div>
         <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
           <BookmarkButton event={event} />
