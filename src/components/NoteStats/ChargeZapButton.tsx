@@ -8,7 +8,7 @@ import client from '@/services/client.service'
 import lightning from '@/services/lightning.service'
 import noteStatsService from '@/services/note-stats.service'
 import confetti from 'canvas-confetti'
-import { Loader, ZapIcon } from 'lucide-react'
+import { Loader, PlugZap } from 'lucide-react'
 import { Event } from 'nostr-tools'
 import { MouseEvent, TouchEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -262,7 +262,7 @@ export default function ChargeZapButton({ event }: { event: Event }) {
         {zapping ? (
           <Loader className="animate-spin" />
         ) : (
-          <ZapIcon
+          <PlugZap
             className={cn(
               hasZapped || isCharging ? 'fill-yellow-400' : '',
               isCharging ? 'animate-pulse scale-110' : ''
