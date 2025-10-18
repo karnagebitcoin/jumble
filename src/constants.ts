@@ -202,11 +202,26 @@ export const DEFAULT_FONT_FAMILY = 'DEFAULT'
 
 export const ZAP_SOUNDS = {
   NONE: 'none',
+  RANDOM: 'random',
   ZAP1: 'zap1',
-  ELECTRIC_ZAP: 'electric_zap'
+  ELECTRIC_ZAP: 'electric_zap',
+  SENDING_A_MESSAGE: 'sending-a-message',
+  NO_SECOND_BEST: 'no-second-best',
+  FREEDOM: 'freedom',
+  HEY_HEY_HEY: 'hey-hey-hey'
 } as const
 
 export type TZapSound = (typeof ZAP_SOUNDS)[keyof typeof ZAP_SOUNDS]
+
+// Array of actual sound files (excluding 'none' and 'random')
+export const ACTUAL_ZAP_SOUNDS = [
+  ZAP_SOUNDS.ZAP1,
+  ZAP_SOUNDS.ELECTRIC_ZAP,
+  ZAP_SOUNDS.SENDING_A_MESSAGE,
+  ZAP_SOUNDS.NO_SECOND_BEST,
+  ZAP_SOUNDS.FREEDOM,
+  ZAP_SOUNDS.HEY_HEY_HEY
+] as const
 
 export const BUTTON_RADIUS_VALUES = [0, 2, 4, 6, 8, 12, 16, 9999] as const
 export const DEFAULT_BUTTON_RADIUS = 6

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ZAP_SOUNDS } from '@/constants'
+import { ACTUAL_ZAP_SOUNDS, ZAP_SOUNDS } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useZap } from '@/providers/ZapProvider'
@@ -183,7 +183,13 @@ function ZapDialogContent({
 
       // Play zap sound IMMEDIATELY when zap button is pressed
       if (zapSound !== ZAP_SOUNDS.NONE) {
-        const audio = new Audio(`/sounds/${zapSound}.mp3`)
+        let soundToPlay = zapSound
+        // If random is selected, pick a random sound
+        if (zapSound === ZAP_SOUNDS.RANDOM) {
+          const randomIndex = Math.floor(Math.random() * ACTUAL_ZAP_SOUNDS.length)
+          soundToPlay = ACTUAL_ZAP_SOUNDS[randomIndex]
+        }
+        const audio = new Audio(`/sounds/${soundToPlay}.mp3`)
         audio.volume = 0.5
         audio.play().catch(() => {
           // Ignore errors (e.g., autoplay policy restrictions)
