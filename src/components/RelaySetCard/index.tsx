@@ -18,7 +18,7 @@ export default function RelaySetCard({
 
   return (
     <div
-      className={`w-full border rounded-lg py-2 px-3 clickable ${select ? 'border-primary bg-primary/5' : ''}`}
+      className={`w-full border rounded-lg py-1 px-3 clickable ${select ? 'border-primary bg-primary/5' : ''}`}
       onClick={() => onSelectChange(!select)}
     >
       <div className="flex justify-between items-center">
@@ -68,9 +68,11 @@ function RelayUrlsExpandToggle({
 function RelayUrls({ urls }: { urls: string[] }) {
   if (!urls) return null
 
+  const validUrls = urls.filter((url) => url && url.trim())
+
   return (
     <div className="pl-1 space-y-1">
-      {urls.map((url) => (
+      {validUrls.map((url) => (
         <div key={url} className="flex items-center gap-3">
           <RelayIcon url={url} className="w-4 h-4" iconSize={10} />
           <div className="text-muted-foreground text-sm truncate">{url}</div>
