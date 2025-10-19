@@ -23,7 +23,7 @@ import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { TFontFamily, TPrimaryColor } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
-import { Check, Moon, Sun, Monitor } from 'lucide-react'
+import { Check, Moon, Sun, Monitor, LayoutGrid, Maximize2, List, FileText } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -205,28 +205,56 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
             </SelectContent>
           </Select>
         </SettingItem>
-        <SettingItem>
-          <Label htmlFor="layout-mode" className="text-base font-normal">
-            <div>{t('Layout mode')}</div>
-            <div className="text-muted-foreground">
-              {layoutMode === LAYOUT_MODE.BOXED
-                ? t('Content is centered with max width')
-                : t('Content spans full screen width')}
-            </div>
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
+            {t('Layout mode')}
           </Label>
-          <Select
-            defaultValue={LAYOUT_MODE.BOXED}
-            value={layoutMode}
-            onValueChange={setLayoutMode}
-          >
-            <SelectTrigger id="layout-mode" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={LAYOUT_MODE.BOXED}>{t('Boxed')}</SelectItem>
-              <SelectItem value={LAYOUT_MODE.FULL_WIDTH}>{t('Full width')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <button
+              onClick={() => setLayoutMode(LAYOUT_MODE.BOXED)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                layoutMode === LAYOUT_MODE.BOXED
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <LayoutGrid className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">{t('Boxed')}</span>
+              <span className="text-xs text-muted-foreground text-center">
+                {t('Content is centered with max width')}
+              </span>
+              {layoutMode === LAYOUT_MODE.BOXED && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+            <button
+              onClick={() => setLayoutMode(LAYOUT_MODE.FULL_WIDTH)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                layoutMode === LAYOUT_MODE.FULL_WIDTH
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <Maximize2 className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">{t('Full width')}</span>
+              <span className="text-xs text-muted-foreground text-center">
+                {t('Content spans full screen width')}
+              </span>
+              {layoutMode === LAYOUT_MODE.FULL_WIDTH && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+          </div>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="compact-sidebar" className="text-base font-normal">
@@ -241,28 +269,56 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
             onCheckedChange={setCompactSidebar}
           />
         </SettingItem>
-        <SettingItem>
-          <Label htmlFor="notification-list-style" className="text-base font-normal">
-            <div>{t('Notification list style')}</div>
-            <div className="text-muted-foreground">
-              {notificationListStyle === NOTIFICATION_LIST_STYLE.DETAILED
-                ? t('See extra info for each notification')
-                : t('See more notifications at a glance')}
-            </div>
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
+            {t('Notification list style')}
           </Label>
-          <Select
-            defaultValue={NOTIFICATION_LIST_STYLE.DETAILED}
-            value={notificationListStyle}
-            onValueChange={updateNotificationListStyle}
-          >
-            <SelectTrigger id="notification-list-style" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NOTIFICATION_LIST_STYLE.DETAILED}>{t('Detailed')}</SelectItem>
-              <SelectItem value={NOTIFICATION_LIST_STYLE.COMPACT}>{t('Compact')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <button
+              onClick={() => updateNotificationListStyle(NOTIFICATION_LIST_STYLE.COMPACT)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                notificationListStyle === NOTIFICATION_LIST_STYLE.COMPACT
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <List className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">{t('Compact')}</span>
+              <span className="text-xs text-muted-foreground text-center">
+                {t('See more notifications at a glance')}
+              </span>
+              {notificationListStyle === NOTIFICATION_LIST_STYLE.COMPACT && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+            <button
+              onClick={() => updateNotificationListStyle(NOTIFICATION_LIST_STYLE.DETAILED)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                notificationListStyle === NOTIFICATION_LIST_STYLE.DETAILED
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <FileText className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">{t('Detailed')}</span>
+              <span className="text-xs text-muted-foreground text-center">
+                {t('See extra info for each notification')}
+              </span>
+              {notificationListStyle === NOTIFICATION_LIST_STYLE.DETAILED && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+          </div>
         </SettingItem>
       </div>
     </SecondaryPageLayout>
