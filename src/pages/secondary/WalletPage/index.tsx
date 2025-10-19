@@ -37,6 +37,11 @@ const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
                 {t('Connected to')} <strong>{walletInfo.node.alias}</strong>
               </div>
             )}
+            {walletInfo?.balance !== undefined && (
+              <div className="mb-2">
+                {t('Balance')}: <strong>{walletInfo.balance.toLocaleString()} sats</strong>
+              </div>
+            )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">{t('Disconnect Wallet')}</Button>
