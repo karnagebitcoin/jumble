@@ -3,8 +3,10 @@ import CompactTrendingNotes from './CompactTrendingNotes'
 
 export default function TrendingNotesWidget() {
   return (
-    <WidgetContainer className="max-h-[600px]">
-      <CompactTrendingNotes />
+    <WidgetContainer>
+      <div className="max-h-[600px] overflow-y-auto">
+        <CompactTrendingNotes />
+      </div>
     </WidgetContainer>
   )
 }

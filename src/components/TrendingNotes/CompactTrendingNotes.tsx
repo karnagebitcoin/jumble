@@ -11,7 +11,7 @@ import client from '@/services/client.service'
 import { NostrEvent } from 'nostr-tools'
 import { useEffect, useMemo, useState } from 'react'
 
-const DISPLAY_COUNT = 10
+const DISPLAY_COUNT = 16
 
 export default function CompactTrendingNotes() {
   const { isEventDeleted } = useDeletedEvent()
