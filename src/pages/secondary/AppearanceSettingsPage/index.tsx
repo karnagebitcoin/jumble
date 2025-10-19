@@ -1,5 +1,4 @@
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -22,7 +21,6 @@ import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
 import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { TFontFamily, TPrimaryColor } from '@/types'
-import { SelectValue } from '@radix-ui/react-select'
 import { Check, Moon, Sun, Monitor, LayoutGrid, Maximize2, List, FileText } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -255,45 +253,57 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
             </div>
           </div>
         </SettingItem>
-        <SettingItem>
-          <Label htmlFor="font-family" className="text-base font-normal">
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
             {t('Font family')}
           </Label>
-          <Select
-            value={fontFamily}
-            onValueChange={(value) => setFontFamily(value as TFontFamily)}
-          >
-            <SelectTrigger id="font-family" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(FONT_FAMILIES).map(([key, config]) => (
-                <SelectItem key={key} value={key}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
+            {Object.entries(FONT_FAMILIES).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => setFontFamily(key as TFontFamily)}
+                className={cn(
+                  'relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all hover:scale-105 min-h-[80px]',
+                  fontFamily === key
+                    ? 'border-primary'
+                    : 'border-border hover:border-muted-foreground/30'
+                )}
+                style={{ fontFamily: config.value }}
+              >
+                <span className="text-lg font-medium">Aa</span>
+                <span className="text-xs font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                   {config.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                </span>
+                {fontFamily === key && (
+                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         </SettingItem>
-        <SettingItem>
-          <Label htmlFor="font-size" className="text-base font-normal">
-            {t('Font size')}
-          </Label>
-          <Select
-            value={fontSize.toString()}
-            onValueChange={(value) => setFontSize(parseInt(value))}
-          >
-            <SelectTrigger id="font-size" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_SIZES.map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}px
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <SettingItem className="flex-col items-start gap-3">
+          <div className="w-full">
+            <Label className="text-base font-normal">{t('Font size')}</Label>
+            <div className="text-sm text-muted-foreground">{fontSize}px</div>
+          </div>
+          <div className="w-full px-2">
+            <Slider
+              min={0}
+              max={FONT_SIZES.length - 1}
+              step={1}
+              value={[FONT_SIZES.indexOf(fontSize as any)]}
+              onValueChange={(value) => {
+                setFontSize(FONT_SIZES[value[0]])
+              }}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>{FONT_SIZES[0]}px</span>
+              <span>{FONT_SIZES[FONT_SIZES.length - 1]}px</span>
+            </div>
+          </div>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="compact-sidebar" className="text-base font-normal">
