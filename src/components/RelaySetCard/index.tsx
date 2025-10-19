@@ -18,7 +18,7 @@ export default function RelaySetCard({
 
   return (
     <div
-      className={`w-full border rounded-lg p-4 clickable ${select ? 'border-primary bg-primary/5' : ''}`}
+      className={`w-full border rounded-lg py-2 px-3 clickable ${select ? 'border-primary bg-primary/5' : ''}`}
       onClick={() => onSelectChange(!select)}
     >
       <div className="flex justify-between items-center">

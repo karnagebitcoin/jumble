@@ -153,7 +153,7 @@ function FeedSwitcherItem({
 }) {
   return (
     <div
-      className={`w-full border rounded-lg p-4 group ${isActive ? 'border-primary bg-primary/5' : 'clickable'}`}
+      className={`w-full border rounded-lg py-2 px-3 group ${isActive ? 'border-primary bg-primary/5' : 'clickable'}`}
       onClick={onClick}
       style={{ fontSize: 'var(--font-size, 14px)' }}
     >
