@@ -263,15 +263,13 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 key={key}
                 onClick={() => setFontFamily(key as TFontFamily)}
                 className={cn(
-                  'relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all hover:scale-105 min-h-[80px]',
+                  'relative flex items-center justify-center p-4 rounded-lg border-2 transition-all hover:scale-105 min-h-[80px]',
                   fontFamily === key
                     ? 'border-primary'
                     : 'border-border hover:border-muted-foreground/30'
                 )}
-                style={{ fontFamily: config.value }}
               >
-                <span className="text-lg font-medium">Aa</span>
-                <span className="text-xs font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                <span className="text-base font-medium" style={{ fontFamily: config.value }}>
                   {config.name}
                 </span>
                 {fontFamily === key && (
