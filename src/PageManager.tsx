@@ -538,14 +538,16 @@ function HomePageWrapper({
 
   // We're on the home page (widgets sidebar) when secondaryStackLength === 0 and not dismissed
   const isHomePage = secondaryStackLength === 0 && !widgetSidebarDismissed
+  // We're in empty/dismissed state when secondaryStackLength === 0 and dismissed
+  const isDismissed = secondaryStackLength === 0 && widgetSidebarDismissed
 
   return (
     <div
       className={cn(
         'rounded-lg overflow-hidden',
-        // Make the wrapper transparent when on home page to show widgets with their own backgrounds
-        isHomePage ? 'bg-transparent shadow-none' : 'bg-background shadow-lg',
-        pageTheme === 'pure-black' && !isHomePage && 'border border-neutral-900'
+        // Make the wrapper transparent when on home page or when dismissed
+        isHomePage || isDismissed ? 'bg-transparent shadow-none' : 'bg-background shadow-lg',
+        pageTheme === 'pure-black' && !isHomePage && !isDismissed && 'border border-neutral-900'
       )}
     >
       {children}
