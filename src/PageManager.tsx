@@ -34,6 +34,7 @@ import RelayPage from './pages/primary/RelayPage'
 import SearchPage from './pages/primary/SearchPage'
 import { NotificationProvider } from './providers/NotificationProvider'
 import { useScreenSize } from './providers/ScreenSizeProvider'
+import { useWidgetSidebarDismissed } from './providers/WidgetSidebarDismissedProvider'
 import { routes } from './routes'
 import modalManager from './services/modal-manager.service'
 import { Sheet, SheetContent } from './components/ui/sheet'
@@ -116,6 +117,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
   const { layoutMode } = useLayoutMode()
   const { deckViewMode, pinnedColumns, unpinColumn } = useDeckView()
   const { setCompactSidebar } = useCompactSidebar()
+  const { widgetSidebarDismissed } = useWidgetSidebarDismissed()
   const ignorePopStateRef = useRef(false)
 
   // Auto-collapse sidebar when in multi-column mode
@@ -417,7 +419,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                       </div>
                     ))}
                   </div>
-                  <HomePageWrapper secondaryStackLength={secondaryStack.length}>
+                  <HomePageWrapper secondaryStackLength={secondaryStack.length} widgetSidebarDismissed={widgetSidebarDismissed}>
                     {secondaryStack.map((item, index) => (
                       <div
                         key={item.index}
@@ -427,13 +429,15 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                         {item.component}
                       </div>
                     ))}
-                    <div
-                      key="home"
-                      className="w-full"
-                      style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
-                    >
-                      <HomePage />
-                    </div>
+                    {!widgetSidebarDismissed && (
+                      <div
+                        key="home"
+                        className="w-full"
+                        style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+                      >
+                        <HomePage />
+                      </div>
+                    )}
                   </HomePageWrapper>
                 </div>
               )}
@@ -523,15 +527,17 @@ function pushNewPageToStack(
 
 function HomePageWrapper({
   children,
-  secondaryStackLength
+  secondaryStackLength,
+  widgetSidebarDismissed
 }: {
   children: ReactNode
   secondaryStackLength: number
+  widgetSidebarDismissed: boolean
 }) {
   const { pageTheme } = usePageTheme()
 
-  // We're on the home page (widgets sidebar) when secondaryStackLength === 0
-  const isHomePage = secondaryStackLength === 0
+  // We're on the home page (widgets sidebar) when secondaryStackLength === 0 and not dismissed
+  const isHomePage = secondaryStackLength === 0 && !widgetSidebarDismissed
 
   return (
     <div

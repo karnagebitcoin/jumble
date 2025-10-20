@@ -30,6 +30,7 @@ import { TrendingNotesDismissedProvider } from '@/providers/TrendingNotesDismiss
 import { UserPreferencesProvider } from '@/providers/UserPreferencesProvider'
 import { UserTrustProvider } from '@/providers/UserTrustProvider'
 import { WidgetsProvider } from '@/providers/WidgetsProvider'
+import { WidgetSidebarDismissedProvider } from '@/providers/WidgetSidebarDismissedProvider'
 import { ZapProvider } from '@/providers/ZapProvider'
 import { PageManager } from './PageManager'
 
@@ -64,8 +65,10 @@ export default function App(): JSX.Element {
                                                         <UserPreferencesProvider>
                                                           <TrendingNotesDismissedProvider>
                                                             <WidgetsProvider>
-                                                              <PageManager />
-                                                              <Toaster />
+                                                              <WidgetSidebarDismissedProvider>
+                                                                <PageManager />
+                                                                <Toaster />
+                                                              </WidgetSidebarDismissedProvider>
                                                             </WidgetsProvider>
                                                           </TrendingNotesDismissedProvider>
                                                         </UserPreferencesProvider>

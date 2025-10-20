@@ -3,28 +3,30 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useWidgets } from '@/providers/WidgetsProvider'
 import { useDeckView } from '@/providers/DeckViewProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { useWidgetSidebarDismissed } from '@/providers/WidgetSidebarDismissedProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { X, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { toWidgetsSettings, toSearch } from '@/lib/link'
+import { toWidgetsSettings } from '@/lib/link'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { enabledWidgets } = useWidgets()
   const { layoutMode } = useLayoutMode()
   const { deckViewMode } = useDeckView()
-  const { clear, push, currentIndex } = useSecondaryPage()
+  const { clear, push } = useSecondaryPage()
+  const { setWidgetSidebarDismissed } = useWidgetSidebarDismissed()
   const { t } = useTranslation()
 
   const handleClose = () => {
     // If we have a secondary page open (index is defined), clear the stack
-    // Otherwise, navigate to search to "close" the widgets view
+    // Otherwise, dismiss the widget sidebar (until page refresh)
     if (index !== undefined) {
       clear()
     } else {
-      push(toSearch())
+      setWidgetSidebarDismissed(true)
     }
   }
 
