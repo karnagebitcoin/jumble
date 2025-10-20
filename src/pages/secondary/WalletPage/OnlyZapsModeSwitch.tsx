@@ -8,15 +8,20 @@ export default function OnlyZapsModeSwitch() {
   const { onlyZapsMode, updateOnlyZapsMode } = useZap()
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center justify-between">
+      <div className="flex-1">
+        <Label htmlFor="only-zaps-mode" className="cursor-pointer">
+          {t('OnlyZaps mode')}
+        </Label>
+        <div className="text-sm text-muted-foreground mt-1">
+          {t('This will hide the reaction button on notes')}
+        </div>
+      </div>
       <Switch
         id="only-zaps-mode"
         checked={onlyZapsMode}
         onCheckedChange={updateOnlyZapsMode}
       />
-      <Label htmlFor="only-zaps-mode" className="cursor-pointer">
-        {t('OnlyZaps mode')}
-      </Label>
     </div>
   )
 }
