@@ -47,6 +47,12 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             switchFeed('bookmarks', { pubkey })
             close?.()
           }}
+          controls={
+            <PinButton
+              column={{ type: 'bookmarks' }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          }
         >
           <div className="flex gap-2 items-center">
             <div className="flex justify-center items-center w-6 h-6 shrink-0">

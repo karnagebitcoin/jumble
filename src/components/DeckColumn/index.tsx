@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { TPinnedColumn } from '@/types'
-import { X } from 'lucide-react'
+import { X, Compass, Bell, UserRound, Search, Server, Bookmark } from 'lucide-react'
 import { useRef } from 'react'
 import Explore from '@/components/Explore'
 import NotificationList from '@/components/NotificationList'
@@ -8,6 +8,7 @@ import Profile from '@/components/Profile'
 import SearchResult from '@/components/SearchResult'
 import Relay from '@/components/Relay'
 import NormalFeed from '@/components/NormalFeed'
+import BookmarkList from '@/components/BookmarkList'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '../ui/button'
 import { usePageTheme } from '@/providers/PageThemeProvider'
@@ -16,7 +17,10 @@ import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { BIG_RELAY_URLS, SEARCHABLE_RELAY_URLS } from '@/constants'
-import { normalizeUrl } from '@/lib/url'
+import { normalizeUrl, simplifyUrl } from '@/lib/url'
+import { useTranslation } from 'react-i18next'
+import { useFetchProfile } from '@/hooks'
+import Username from '../Username'
 
 export default function DeckColumn({ column }: { column: TPinnedColumn }) {
   const { pageTheme } = usePageTheme()
@@ -26,27 +30,33 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   let content: React.ReactNode = null
+  let titlebar: React.ReactNode = null
 
   switch (column.type) {
     case 'explore':
+      titlebar = <ExploreTitlebar onClose={() => unpinColumn(column.id)} />
       content = <Explore />
       break
     case 'notifications':
+      titlebar = <NotificationsTitlebar onClose={() => unpinColumn(column.id)} />
       content = <NotificationList />
       break
     case 'profile':
       if (column.props?.pubkey) {
+        titlebar = <ProfileTitlebar pubkey={column.props.pubkey} onClose={() => unpinColumn(column.id)} />
         content = <Profile id={column.props.pubkey} />
       }
       break
     case 'search':
       if (column.props?.searchParams) {
+        titlebar = <SearchTitlebar searchParams={column.props.searchParams} onClose={() => unpinColumn(column.id)} />
         content = <SearchResult searchParams={column.props.searchParams} />
       }
       break
     case 'relay':
       if (column.props?.url) {
         const normalizedUrl = normalizeUrl(column.props.url)
+        titlebar = <RelayTitlebar url={normalizedUrl} onClose={() => unpinColumn(column.id)} />
         content = <Relay url={normalizedUrl} />
       }
       break
@@ -54,6 +64,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
       if (column.props?.activeRelaySetId) {
         const relaySet = relaySets.find((s) => s.id === column.props.activeRelaySetId)
         if (relaySet) {
+          titlebar = <RelaySetTitlebar name={relaySet.name} onClose={() => unpinColumn(column.id)} />
           content = (
             <NormalFeed
               subRequests={[{ urls: relaySet.relayUrls, filter: {} }]}
@@ -67,6 +78,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
       if (column.props?.customFeedId) {
         const customFeed = customFeeds.find((f) => f.id === column.props.customFeedId)
         if (customFeed) {
+          titlebar = <CustomFeedTitlebar name={customFeed.name} onClose={() => unpinColumn(column.id)} />
           const { searchParams } = customFeed
           if (searchParams.type === 'notes') {
             content = (
@@ -88,6 +100,14 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
         }
       }
       break
+    case 'bookmarks':
+      titlebar = <BookmarksTitlebar onClose={() => unpinColumn(column.id)} />
+      content = (
+        <div className="px-4 pt-4">
+          <BookmarkList />
+        </div>
+      )
+      break
   }
 
   if (!content) {
@@ -97,28 +117,162 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
   return (
     <div
       className={cn(
-        'rounded-lg shadow-lg bg-background overflow-hidden relative flex flex-col',
+        'rounded-lg shadow-lg bg-background overflow-hidden flex flex-col',
         pageTheme === 'pure-black' && 'border border-neutral-900'
       )}
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 z-10 h-6 w-6 rounded-full bg-background/80 hover:bg-background"
-        onClick={() => unpinColumn(column.id)}
-      >
-        <X className="size-4" />
-      </Button>
+      {titlebar && (
+        <div className={cn(
+          "sticky top-0 z-10 border-b bg-background h-12 flex items-center",
+          pageTheme === 'pure-black' && 'border-neutral-900'
+        )}>
+          {titlebar}
+        </div>
+      )}
       <DeepBrowsingProvider active={true} scrollAreaRef={scrollAreaRef}>
         <ScrollArea
           className="h-full overflow-auto"
-          scrollBarClassName="z-50"
+          scrollBarClassName="z-50 pt-12"
           ref={scrollAreaRef}
         >
           {content}
           <div className="h-4" />
         </ScrollArea>
       </DeepBrowsingProvider>
+    </div>
+  )
+}
+
+// Titlebar components
+function ExploreTitlebar({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Compass className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {t('Explore')}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function NotificationsTitlebar({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Bell className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {t('Notifications')}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function ProfileTitlebar({ pubkey, onClose }: { pubkey: string; onClose: () => void }) {
+  const { profile } = useFetchProfile(pubkey)
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <UserRound className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          <Username userId={pubkey} />
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function SearchTitlebar({ searchParams, onClose }: { searchParams: any; onClose: () => void }) {
+  const displayText = searchParams.input || searchParams.search || 'Search'
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Search className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {displayText}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function RelayTitlebar({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Server className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {simplifyUrl(url)}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function RelaySetTitlebar({ name, onClose }: { name: string; onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Server className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {name}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function CustomFeedTitlebar({ name, onClose }: { name: string; onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Search className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {name}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function BookmarksTitlebar({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Bookmark className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {t('Bookmarks')}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
     </div>
   )
 }
