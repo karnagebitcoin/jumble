@@ -5,6 +5,8 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 
 export type TWidgetId = 'trending-notes' | 'bitcoin-ticker'
 
+export type TTrendingNotesHeight = 'short' | 'medium' | 'tall'
+
 export type TWidget = {
   id: TWidgetId
   name: string
@@ -36,6 +38,8 @@ type TWidgetsContext = {
   isWidgetEnabled: (widgetId: TWidgetId) => boolean
   getWidgetById: (widgetId: TWidgetId) => TWidget | undefined
   reorderWidgets: (newOrder: TWidgetId[]) => void
+  trendingNotesHeight: TTrendingNotesHeight
+  setTrendingNotesHeight: (height: TTrendingNotesHeight) => void
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
@@ -45,9 +49,21 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     return localStorageService.getEnabledWidgets() as TWidgetId[]
   })
 
+  const [trendingNotesHeight, setTrendingNotesHeightState] = useState<TTrendingNotesHeight>(() => {
+    return localStorageService.getTrendingNotesHeight()
+  })
+
   useEffect(() => {
     localStorageService.setEnabledWidgets(enabledWidgets)
   }, [enabledWidgets])
+
+  useEffect(() => {
+    localStorageService.setTrendingNotesHeight(trendingNotesHeight)
+  }, [trendingNotesHeight])
+
+  const setTrendingNotesHeight = (height: TTrendingNotesHeight) => {
+    setTrendingNotesHeightState(height)
+  }
 
   const toggleWidget = (widgetId: TWidgetId) => {
     setEnabledWidgets((prev) => {
@@ -73,7 +89,15 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
 
   return (
     <WidgetsContext.Provider
-      value={{ enabledWidgets, toggleWidget, isWidgetEnabled, getWidgetById, reorderWidgets }}
+      value={{
+        enabledWidgets,
+        toggleWidget,
+        isWidgetEnabled,
+        getWidgetById,
+        reorderWidgets,
+        trendingNotesHeight,
+        setTrendingNotesHeight
+      }}
     >
       {children}
     </WidgetsContext.Provider>

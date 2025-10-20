@@ -57,6 +57,7 @@ export const StorageKey = {
   PAGE_THEME: 'pageTheme',
   PRIVATE_NOTES: 'privateNotes',
   TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
+  TRENDING_NOTES_HEIGHT: 'trendingNotesHeight',
   COMPACT_SIDEBAR: 'compactSidebar',
   ENABLED_WIDGETS: 'enabledWidgets',
   ZAP_SOUND: 'zapSound',

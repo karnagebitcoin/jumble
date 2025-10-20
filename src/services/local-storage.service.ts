@@ -73,6 +73,7 @@ class LocalStorageService {
   private trendingNotesDismissed: boolean = false
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
+  private trendingNotesHeight: 'short' | 'medium' | 'tall' = 'medium'
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
   private customFeeds: TCustomFeed[] = []
   private chargeZapEnabled: boolean = false
@@ -274,6 +275,11 @@ class LocalStorageService {
       // Default to trending notes enabled
       this.enabledWidgets = ['trending-notes']
       window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
+    }
+
+    const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
+    if (trendingNotesHeight && ['short', 'medium', 'tall'].includes(trendingNotesHeight)) {
+      this.trendingNotesHeight = trendingNotesHeight as 'short' | 'medium' | 'tall'
     }
 
     const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
@@ -699,6 +705,15 @@ class LocalStorageService {
   setEnabledWidgets(widgets: string[]) {
     this.enabledWidgets = widgets
     window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(widgets))
+  }
+
+  getTrendingNotesHeight() {
+    return this.trendingNotesHeight
+  }
+
+  setTrendingNotesHeight(height: 'short' | 'medium' | 'tall') {
+    this.trendingNotesHeight = height
+    window.localStorage.setItem(StorageKey.TRENDING_NOTES_HEIGHT, height)
   }
 
   getZapSound() {

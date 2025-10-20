@@ -1,10 +1,12 @@
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import { AVAILABLE_WIDGETS, useWidgets, TWidgetId } from '@/providers/WidgetsProvider'
+import { AVAILABLE_WIDGETS, useWidgets, TWidgetId, TTrendingNotesHeight } from '@/providers/WidgetsProvider'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, GripVertical } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   DndContext,
   closestCenter,
@@ -25,7 +27,19 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-function SortableWidgetCard({ id, enabled, onToggle }: { id: TWidgetId; enabled: boolean; onToggle: () => void }) {
+function SortableWidgetCard({
+  id,
+  enabled,
+  onToggle,
+  trendingNotesHeight,
+  onTrendingNotesHeightChange
+}: {
+  id: TWidgetId
+  enabled: boolean
+  onToggle: () => void
+  trendingNotesHeight?: TTrendingNotesHeight
+  onTrendingNotesHeightChange?: (height: TTrendingNotesHeight) => void
+}) {
   const { t } = useTranslation()
   const widget = AVAILABLE_WIDGETS.find((w) => w.id === id)
 
@@ -45,6 +59,8 @@ function SortableWidgetCard({ id, enabled, onToggle }: { id: TWidgetId; enabled:
   }
 
   if (!widget) return null
+
+  const showHeightSettings = id === 'trending-notes' && enabled
 
   return (
     <div
@@ -103,6 +119,37 @@ function SortableWidgetCard({ id, enabled, onToggle }: { id: TWidgetId; enabled:
         </div>
       </div>
 
+      {/* Widget-specific settings */}
+      {showHeightSettings && trendingNotesHeight && onTrendingNotesHeightChange && (
+        <div className="px-4 pb-4 pt-2 border-t border-border/50">
+          <Label className="text-sm font-medium mb-2 block">Widget Height</Label>
+          <RadioGroup
+            value={trendingNotesHeight}
+            onValueChange={onTrendingNotesHeightChange}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="short" id={`${id}-short`} />
+              <Label htmlFor={`${id}-short`} className="cursor-pointer font-normal">
+                Short (220px)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="medium" id={`${id}-medium`} />
+              <Label htmlFor={`${id}-medium`} className="cursor-pointer font-normal">
+                Medium (320px)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="tall" id={`${id}-tall`} />
+              <Label htmlFor={`${id}-tall`} className="cursor-pointer font-normal">
+                Tall (480px)
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+      )}
+
       {/* Active indicator bar */}
       {enabled && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
@@ -113,7 +160,14 @@ function SortableWidgetCard({ id, enabled, onToggle }: { id: TWidgetId; enabled:
 
 const WidgetsSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
-  const { enabledWidgets, isWidgetEnabled, toggleWidget, reorderWidgets } = useWidgets()
+  const {
+    enabledWidgets,
+    isWidgetEnabled,
+    toggleWidget,
+    reorderWidgets,
+    trendingNotesHeight,
+    setTrendingNotesHeight
+  } = useWidgets()
   const [activeId, setActiveId] = useState<TWidgetId | null>(null)
 
   const sensors = useSensors(
@@ -180,6 +234,8 @@ const WidgetsSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
                   id={widgetId}
                   enabled={isWidgetEnabled(widgetId)}
                   onToggle={() => toggleWidget(widgetId)}
+                  trendingNotesHeight={trendingNotesHeight}
+                  onTrendingNotesHeightChange={setTrendingNotesHeight}
                 />
               ))}
             </div>
