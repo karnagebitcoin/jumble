@@ -1,19 +1,20 @@
 import { cn } from '@/lib/utils'
 import { TPinnedColumn } from '@/types'
 import { X } from 'lucide-react'
-import { createRef } from 'react'
+import { useRef } from 'react'
 import Explore from '@/components/Explore'
 import NotificationList from '@/components/NotificationList'
 import Profile from '@/components/Profile'
 import SearchResult from '@/components/SearchResult'
 import Relay from '@/components/Relay'
 import NormalFeed from '@/components/NormalFeed'
-import BookmarkList from '@/components/BookmarkList'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '../ui/button'
 import { usePageTheme } from '@/providers/PageThemeProvider'
 import { useDeckView } from '@/providers/DeckViewProvider'
 import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
+import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { BIG_RELAY_URLS, SEARCHABLE_RELAY_URLS } from '@/constants'
 import { normalizeUrl } from '@/lib/url'
 
@@ -22,6 +23,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
   const { unpinColumn } = useDeckView()
   const { customFeeds } = useCustomFeeds()
   const { relaySets } = useFavoriteRelays()
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   let content: React.ReactNode = null
 
@@ -107,7 +109,16 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
       >
         <X className="size-4" />
       </Button>
-      <div className="h-full overflow-hidden">{content}</div>
+      <DeepBrowsingProvider active={true} scrollAreaRef={scrollAreaRef}>
+        <ScrollArea
+          className="h-full overflow-auto"
+          scrollBarClassName="z-50"
+          ref={scrollAreaRef}
+        >
+          {content}
+          <div className="h-4" />
+        </ScrollArea>
+      </DeepBrowsingProvider>
     </div>
   )
 }
