@@ -529,41 +529,17 @@ function HomePageWrapper({
   secondaryStackLength: number
 }) {
   const { pageTheme } = usePageTheme()
-  const [dismissedState, setDismissedState] = useState(false)
 
-  useEffect(() => {
-    // Listen for custom event from HomePage
-    const handleTrendingNotesDismissed = (e: CustomEvent) => {
-      setDismissedState(e.detail.dismissed)
-    }
-
-    window.addEventListener(
-      'trendingNotesDismissed',
-      handleTrendingNotesDismissed as EventListener
-    )
-    return () => {
-      window.removeEventListener(
-        'trendingNotesDismissed',
-        handleTrendingNotesDismissed as EventListener
-      )
-    }
-  }, [])
-
-  // Show transparent background when:
-  // 1. We're on the home page (secondaryStackLength === 0)
-  // 2. AND the trending notes have been dismissed
-  const isTransparent = secondaryStackLength === 0 && dismissedState
-
-  // We're on the home page (widgets sidebar)
+  // We're on the home page (widgets sidebar) when secondaryStackLength === 0
   const isHomePage = secondaryStackLength === 0
 
   return (
     <div
       className={cn(
         'rounded-lg overflow-hidden',
-        isTransparent ? 'bg-transparent shadow-none' : 'bg-background',
-        !isHomePage && 'shadow-lg',
-        pageTheme === 'pure-black' && !isTransparent && !isHomePage && 'border border-neutral-900'
+        // Make the wrapper transparent when on home page to show widgets with their own backgrounds
+        isHomePage ? 'bg-transparent shadow-none' : 'bg-background shadow-lg',
+        pageTheme === 'pure-black' && !isHomePage && 'border border-neutral-900'
       )}
     >
       {children}
