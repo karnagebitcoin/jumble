@@ -28,7 +28,7 @@ export default function BitcoinTickerWidget() {
             onClick={() => toggleWidget('bitcoin-ticker')}
             title={t('Hide widget')}
           >
-            <EyeOff className="h-4 w-4" />
+            <EyeOff className="h-3.5 w-3.5" />
           </button>
         )}
       </CardHeader>

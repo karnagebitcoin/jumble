@@ -42,7 +42,7 @@ export default function TrendingNotesWidget() {
             onClick={() => toggleWidget('trending-notes')}
             title={t('Hide widget')}
           >
-            <EyeOff className="h-4 w-4" />
+            <EyeOff className="h-3.5 w-3.5" />
           </button>
         )}
       </CardHeader>
