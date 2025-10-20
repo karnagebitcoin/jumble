@@ -2,7 +2,6 @@ import WidgetContainer from '@/components/WidgetContainer'
 import { useWidgets, AVAILABLE_WIDGETS } from '@/providers/WidgetsProvider'
 import CompactTrendingNotes from './CompactTrendingNotes'
 import { CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -38,15 +37,13 @@ export default function TrendingNotesWidget() {
       >
         <CardTitle className="font-semibold" style={{ fontSize: '14px' }}>{widgetName}</CardTitle>
         {isHovered && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+          <button
+            className="shrink-0 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
             onClick={() => toggleWidget('trending-notes')}
             title={t('Hide widget')}
           >
             <EyeOff className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </CardHeader>
       <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4`}>

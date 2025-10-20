@@ -3,7 +3,6 @@ import NoteCard from '@/components/NoteCard'
 import { useWidgets } from '@/providers/WidgetsProvider'
 import { useFetchEvent } from '@/hooks/useFetchEvent'
 import { Loader2, Pin, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from 'react-i18next'
 import React from 'react'
@@ -35,15 +34,13 @@ export default function PinnedNoteWidget({ widgetId, eventId }: PinnedNoteWidget
           {t('Pinned Note')}
         </CardTitle>
         {isHovered && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+          <button
+            className="shrink-0 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
             onClick={handleUnpin}
             title={t('Unpin from sidebar')}
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </CardHeader>
       <div className="px-4 pb-4">
