@@ -400,7 +400,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                   pinnedColumns={pinnedColumns}
                 />
               ) : (
-                <div className={cn("grid grid-cols-2 gap-2 w-full pr-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
+                <div className={cn("grid grid-cols-2 gap-2 w-full px-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
                   <div className={cn(
                     "rounded-lg shadow-lg bg-background overflow-hidden",
                     pageTheme === 'pure-black' && "border border-neutral-900"
@@ -590,7 +590,7 @@ function DeckLayout({
   return (
     <>
       <div
-        className="flex gap-2 w-full pr-2 py-2 overflow-x-auto"
+        className="flex gap-2 w-full px-2 py-2 overflow-x-auto"
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${columnCount}, minmax(350px, 1fr))`
