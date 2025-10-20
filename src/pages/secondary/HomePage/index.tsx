@@ -15,7 +15,7 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { enabledWidgets } = useWidgets()
   const { layoutMode } = useLayoutMode()
   const { deckViewMode } = useDeckView()
-  const { clear, push } = useSecondaryPage()
+  const { clear, push, currentIndex } = useSecondaryPage()
   const { t } = useTranslation()
 
   // Check if we're in multi-column mode
@@ -25,6 +25,9 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   if (isMultiColumn || enabledWidgets.length === 0) {
     return <div className="h-full w-full bg-transparent" ref={ref} />
   }
+
+  // Only show close button if we have a secondary page to close (index is defined)
+  const showCloseButton = index !== undefined
 
   return (
     <SecondaryPageLayout
@@ -40,21 +43,23 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
               title={t('Widgets Settings')}
               onClick={() => push(toWidgetsSettings())}
             >
               <Settings className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              title={t('close')}
-              onClick={() => clear()}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {showCloseButton && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                title={t('close')}
+                onClick={() => clear()}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
         <Widgets />
