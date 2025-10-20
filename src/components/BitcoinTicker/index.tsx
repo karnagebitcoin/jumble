@@ -54,7 +54,7 @@ export default function BitcoinTicker() {
 
   if (loading) {
     return (
-      <div className={cn('flex items-center p-6', alignmentClass)}>
+      <div className={cn('flex items-center px-6 py-3', alignmentClass)}>
         <div className="animate-pulse text-sm text-muted-foreground">Loading...</div>
       </div>
     )
@@ -62,14 +62,14 @@ export default function BitcoinTicker() {
 
   if (error || !price) {
     return (
-      <div className={cn('flex items-center p-6', alignmentClass)}>
+      <div className={cn('flex items-center px-6 py-3', alignmentClass)}>
         <div className="text-sm text-red-500">{error || 'Failed to load price'}</div>
       </div>
     )
   }
 
   return (
-    <div className={cn('p-6 flex items-center', alignmentClass)}>
+    <div className={cn('px-6 py-3 flex items-center', alignmentClass)}>
       <div className={cn('font-bold', textSizeClass)}>{formatPrice(price.usd)}</div>
     </div>
   )
