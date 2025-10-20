@@ -21,7 +21,7 @@ export default function Widgets() {
         if (!WidgetComponent) return null
 
         return (
-          <div key={widgetId} className="border rounded-lg bg-card overflow-hidden">
+          <div key={widgetId} className="border rounded-xl bg-card overflow-hidden">
             <WidgetComponent />
           </div>
         )

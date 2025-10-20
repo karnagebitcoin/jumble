@@ -75,7 +75,7 @@ export default function CompactTrendingNotes() {
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex gap-2">
-            <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+            <Skeleton className="w-8 h-8 rounded-full shrink-0" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-3 w-full" />
@@ -95,7 +95,7 @@ export default function CompactTrendingNotes() {
           className="flex gap-2 cursor-pointer hover:bg-accent/50 p-2 -m-2 rounded-md transition-colors"
           onClick={() => push(toNote(event.id))}
         >
-          <SimpleUserAvatar userId={event.pubkey} size="normal" className="shrink-0" />
+          <SimpleUserAvatar userId={event.pubkey} size="compact" className="shrink-0" />
           <div className="flex-1 min-w-0 space-y-0.5">
             <SimpleUsername
               userId={event.pubkey}
