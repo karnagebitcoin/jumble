@@ -6,17 +6,20 @@ import { useTranslation } from 'react-i18next'
 import RelayIcon from '../RelayIcon'
 import SaveRelayDropdownMenu from '../SaveRelayDropdownMenu'
 import { SimpleUserAvatar } from '../UserAvatar'
+import PinButton from '../PinButton'
 
 export default function RelaySimpleInfo({
   relayInfo,
   users,
   className,
   compact = false,
+  showPinButton = false,
   ...props
 }: HTMLProps<HTMLDivElement> & {
   relayInfo?: TRelayInfo
   users?: string[]
   compact?: boolean
+  showPinButton?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -34,7 +37,15 @@ export default function RelaySimpleInfo({
             )}
           </div>
         </div>
-        {relayInfo && <SaveRelayDropdownMenu urls={[relayInfo.url]} />}
+        <div className="flex items-center gap-1">
+          {relayInfo && showPinButton && (
+            <PinButton
+              column={{ type: 'relay', props: { url: relayInfo.url } }}
+              size="titlebar-icon"
+            />
+          )}
+          {relayInfo && <SaveRelayDropdownMenu urls={[relayInfo.url]} />}
+        </div>
       </div>
       {!compact && !!relayInfo?.description && (
         <div className="line-clamp-3">{relayInfo.description}</div>

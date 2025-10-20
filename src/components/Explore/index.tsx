@@ -77,6 +77,7 @@ function RelayItem({ url }: { url: string }) {
       className="clickable h-auto px-4 py-2 border-b md:rounded-lg md:border"
       relayInfo={relayInfo}
       compact
+      showPinButton
       onClick={(e) => {
         e.stopPropagation()
         push(toRelay(relayInfo.url))

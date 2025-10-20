@@ -82,6 +82,7 @@ function RelayItem({ url, users }: { url: string; users: string[] }) {
       relayInfo={relayInfo}
       users={users}
       className="clickable p-4 border-b"
+      showPinButton
       onClick={(e) => {
         e.stopPropagation()
         push(toRelay(url))
