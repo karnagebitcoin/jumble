@@ -7,6 +7,9 @@ export type TWidgetId = 'trending-notes' | 'bitcoin-ticker'
 
 export type TTrendingNotesHeight = 'short' | 'medium' | 'tall'
 
+export type TBitcoinTickerAlignment = 'left' | 'center'
+export type TBitcoinTickerTextSize = 'large' | 'small'
+
 export type TWidget = {
   id: TWidgetId
   name: string
@@ -40,6 +43,10 @@ type TWidgetsContext = {
   reorderWidgets: (newOrder: TWidgetId[]) => void
   trendingNotesHeight: TTrendingNotesHeight
   setTrendingNotesHeight: (height: TTrendingNotesHeight) => void
+  bitcoinTickerAlignment: TBitcoinTickerAlignment
+  setBitcoinTickerAlignment: (alignment: TBitcoinTickerAlignment) => void
+  bitcoinTickerTextSize: TBitcoinTickerTextSize
+  setBitcoinTickerTextSize: (size: TBitcoinTickerTextSize) => void
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
@@ -53,6 +60,14 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     return localStorageService.getTrendingNotesHeight()
   })
 
+  const [bitcoinTickerAlignment, setBitcoinTickerAlignmentState] = useState<TBitcoinTickerAlignment>(() => {
+    return localStorageService.getBitcoinTickerAlignment()
+  })
+
+  const [bitcoinTickerTextSize, setBitcoinTickerTextSizeState] = useState<TBitcoinTickerTextSize>(() => {
+    return localStorageService.getBitcoinTickerTextSize()
+  })
+
   useEffect(() => {
     localStorageService.setEnabledWidgets(enabledWidgets)
   }, [enabledWidgets])
@@ -61,8 +76,24 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     localStorageService.setTrendingNotesHeight(trendingNotesHeight)
   }, [trendingNotesHeight])
 
+  useEffect(() => {
+    localStorageService.setBitcoinTickerAlignment(bitcoinTickerAlignment)
+  }, [bitcoinTickerAlignment])
+
+  useEffect(() => {
+    localStorageService.setBitcoinTickerTextSize(bitcoinTickerTextSize)
+  }, [bitcoinTickerTextSize])
+
   const setTrendingNotesHeight = (height: TTrendingNotesHeight) => {
     setTrendingNotesHeightState(height)
+  }
+
+  const setBitcoinTickerAlignment = (alignment: TBitcoinTickerAlignment) => {
+    setBitcoinTickerAlignmentState(alignment)
+  }
+
+  const setBitcoinTickerTextSize = (size: TBitcoinTickerTextSize) => {
+    setBitcoinTickerTextSizeState(size)
   }
 
   const toggleWidget = (widgetId: TWidgetId) => {
@@ -96,7 +127,11 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
         getWidgetById,
         reorderWidgets,
         trendingNotesHeight,
-        setTrendingNotesHeight
+        setTrendingNotesHeight,
+        bitcoinTickerAlignment,
+        setBitcoinTickerAlignment,
+        bitcoinTickerTextSize,
+        setBitcoinTickerTextSize
       }}
     >
       {children}

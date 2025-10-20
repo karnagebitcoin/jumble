@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useWidgets } from '@/providers/WidgetsProvider'
+import { cn } from '@/lib/utils'
 
 type BitcoinPrice = {
   usd: number
 }
 
 export default function BitcoinTicker() {
+  const { bitcoinTickerAlignment, bitcoinTickerTextSize } = useWidgets()
   const [price, setPrice] = useState<BitcoinPrice | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -46,9 +49,12 @@ export default function BitcoinTicker() {
     }).format(price)
   }
 
+  const alignmentClass = bitcoinTickerAlignment === 'center' ? 'justify-center' : 'justify-start'
+  const textSizeClass = bitcoinTickerTextSize === 'small' ? 'text-lg' : 'text-4xl'
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-6">
+      <div className={cn('flex items-center p-6', alignmentClass)}>
         <div className="animate-pulse text-sm text-muted-foreground">Loading...</div>
       </div>
     )
@@ -56,15 +62,15 @@ export default function BitcoinTicker() {
 
   if (error || !price) {
     return (
-      <div className="flex items-center justify-center p-6">
+      <div className={cn('flex items-center p-6', alignmentClass)}>
         <div className="text-sm text-red-500">{error || 'Failed to load price'}</div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 flex items-center justify-center">
-      <div className="text-4xl font-bold">{formatPrice(price.usd)}</div>
+    <div className={cn('p-6 flex items-center', alignmentClass)}>
+      <div className={cn('font-bold', textSizeClass)}>{formatPrice(price.usd)}</div>
     </div>
   )
 }

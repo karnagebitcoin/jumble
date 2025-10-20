@@ -74,6 +74,8 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private trendingNotesHeight: 'short' | 'medium' | 'tall' = 'medium'
+  private bitcoinTickerAlignment: 'left' | 'center' = 'left'
+  private bitcoinTickerTextSize: 'large' | 'small' = 'large'
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
   private customFeeds: TCustomFeed[] = []
   private chargeZapEnabled: boolean = false
@@ -280,6 +282,16 @@ class LocalStorageService {
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
     if (trendingNotesHeight && ['short', 'medium', 'tall'].includes(trendingNotesHeight)) {
       this.trendingNotesHeight = trendingNotesHeight as 'short' | 'medium' | 'tall'
+    }
+
+    const bitcoinTickerAlignment = window.localStorage.getItem(StorageKey.BITCOIN_TICKER_ALIGNMENT)
+    if (bitcoinTickerAlignment && ['left', 'center'].includes(bitcoinTickerAlignment)) {
+      this.bitcoinTickerAlignment = bitcoinTickerAlignment as 'left' | 'center'
+    }
+
+    const bitcoinTickerTextSize = window.localStorage.getItem(StorageKey.BITCOIN_TICKER_TEXT_SIZE)
+    if (bitcoinTickerTextSize && ['large', 'small'].includes(bitcoinTickerTextSize)) {
+      this.bitcoinTickerTextSize = bitcoinTickerTextSize as 'large' | 'small'
     }
 
     const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
@@ -714,6 +726,24 @@ class LocalStorageService {
   setTrendingNotesHeight(height: 'short' | 'medium' | 'tall') {
     this.trendingNotesHeight = height
     window.localStorage.setItem(StorageKey.TRENDING_NOTES_HEIGHT, height)
+  }
+
+  getBitcoinTickerAlignment() {
+    return this.bitcoinTickerAlignment
+  }
+
+  setBitcoinTickerAlignment(alignment: 'left' | 'center') {
+    this.bitcoinTickerAlignment = alignment
+    window.localStorage.setItem(StorageKey.BITCOIN_TICKER_ALIGNMENT, alignment)
+  }
+
+  getBitcoinTickerTextSize() {
+    return this.bitcoinTickerTextSize
+  }
+
+  setBitcoinTickerTextSize(size: 'large' | 'small') {
+    this.bitcoinTickerTextSize = size
+    window.localStorage.setItem(StorageKey.BITCOIN_TICKER_TEXT_SIZE, size)
   }
 
   getZapSound() {

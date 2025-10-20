@@ -1,5 +1,5 @@
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import { AVAILABLE_WIDGETS, useWidgets, TWidgetId, TTrendingNotesHeight } from '@/providers/WidgetsProvider'
+import { AVAILABLE_WIDGETS, useWidgets, TWidgetId, TTrendingNotesHeight, TBitcoinTickerAlignment, TBitcoinTickerTextSize } from '@/providers/WidgetsProvider'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { forwardRef, useState } from 'react'
@@ -32,13 +32,21 @@ function SortableWidgetCard({
   enabled,
   onToggle,
   trendingNotesHeight,
-  onTrendingNotesHeightChange
+  onTrendingNotesHeightChange,
+  bitcoinTickerAlignment,
+  onBitcoinTickerAlignmentChange,
+  bitcoinTickerTextSize,
+  onBitcoinTickerTextSizeChange
 }: {
   id: TWidgetId
   enabled: boolean
   onToggle: () => void
   trendingNotesHeight?: TTrendingNotesHeight
   onTrendingNotesHeightChange?: (height: TTrendingNotesHeight) => void
+  bitcoinTickerAlignment?: TBitcoinTickerAlignment
+  onBitcoinTickerAlignmentChange?: (alignment: TBitcoinTickerAlignment) => void
+  bitcoinTickerTextSize?: TBitcoinTickerTextSize
+  onBitcoinTickerTextSizeChange?: (size: TBitcoinTickerTextSize) => void
 }) {
   const { t } = useTranslation()
   const widget = AVAILABLE_WIDGETS.find((w) => w.id === id)
@@ -61,6 +69,7 @@ function SortableWidgetCard({
   if (!widget) return null
 
   const showHeightSettings = id === 'trending-notes' && enabled
+  const showBitcoinSettings = id === 'bitcoin-ticker' && enabled
 
   return (
     <div
@@ -150,6 +159,54 @@ function SortableWidgetCard({
         </div>
       )}
 
+      {showBitcoinSettings && bitcoinTickerAlignment && onBitcoinTickerAlignmentChange && bitcoinTickerTextSize && onBitcoinTickerTextSizeChange && (
+        <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-4">
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Text Alignment</Label>
+            <RadioGroup
+              value={bitcoinTickerAlignment}
+              onValueChange={onBitcoinTickerAlignmentChange}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="left" id={`${id}-align-left`} />
+                <Label htmlFor={`${id}-align-left`} className="cursor-pointer font-normal">
+                  Left
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="center" id={`${id}-align-center`} />
+                <Label htmlFor={`${id}-align-center`} className="cursor-pointer font-normal">
+                  Center
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Text Size</Label>
+            <RadioGroup
+              value={bitcoinTickerTextSize}
+              onValueChange={onBitcoinTickerTextSizeChange}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="large" id={`${id}-size-large`} />
+                <Label htmlFor={`${id}-size-large`} className="cursor-pointer font-normal">
+                  Large
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="small" id={`${id}-size-small`} />
+                <Label htmlFor={`${id}-size-small`} className="cursor-pointer font-normal">
+                  Small
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+      )}
+
       {/* Active indicator bar */}
       {enabled && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
@@ -166,7 +223,11 @@ const WidgetsSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     toggleWidget,
     reorderWidgets,
     trendingNotesHeight,
-    setTrendingNotesHeight
+    setTrendingNotesHeight,
+    bitcoinTickerAlignment,
+    setBitcoinTickerAlignment,
+    bitcoinTickerTextSize,
+    setBitcoinTickerTextSize
   } = useWidgets()
   const [activeId, setActiveId] = useState<TWidgetId | null>(null)
 
@@ -236,6 +297,10 @@ const WidgetsSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
                   onToggle={() => toggleWidget(widgetId)}
                   trendingNotesHeight={trendingNotesHeight}
                   onTrendingNotesHeightChange={setTrendingNotesHeight}
+                  bitcoinTickerAlignment={bitcoinTickerAlignment}
+                  onBitcoinTickerAlignmentChange={setBitcoinTickerAlignment}
+                  bitcoinTickerTextSize={bitcoinTickerTextSize}
+                  onBitcoinTickerTextSizeChange={setBitcoinTickerTextSize}
                 />
               ))}
             </div>

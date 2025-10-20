@@ -58,6 +58,8 @@ export const StorageKey = {
   PRIVATE_NOTES: 'privateNotes',
   TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
   TRENDING_NOTES_HEIGHT: 'trendingNotesHeight',
+  BITCOIN_TICKER_ALIGNMENT: 'bitcoinTickerAlignment',
+  BITCOIN_TICKER_TEXT_SIZE: 'bitcoinTickerTextSize',
   COMPACT_SIDEBAR: 'compactSidebar',
   ENABLED_WIDGETS: 'enabledWidgets',
   ZAP_SOUND: 'zapSound',
