@@ -578,7 +578,7 @@ function DeckLayout({
   return (
     <>
       <div
-        className="flex gap-2 w-full px-2 py-2 overflow-x-auto"
+        className="gap-2 w-full px-2 py-2 overflow-x-auto"
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${columnCount}, 1fr)`
