@@ -1,9 +1,9 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, Bitcoin } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
-export type TWidgetId = 'trending-notes'
+export type TWidgetId = 'trending-notes' | 'bitcoin-ticker'
 
 export type TWidget = {
   id: TWidgetId
@@ -15,11 +15,18 @@ export type TWidget = {
 
 export const AVAILABLE_WIDGETS: TWidget[] = [
   {
+    id: 'bitcoin-ticker',
+    name: 'Bitcoin Ticker',
+    description: 'Display real-time Bitcoin price from CoinGecko',
+    defaultEnabled: false,
+    icon: <Bitcoin className="h-5 w-5" />
+  },
+  {
     id: 'trending-notes',
     name: 'Trending Notes',
     description: 'Display trending notes from across Nostr',
     defaultEnabled: true,
-    icon: <TrendingUp />
+    icon: <TrendingUp className="h-5 w-5" />
   }
 ]
 
@@ -28,13 +35,14 @@ type TWidgetsContext = {
   toggleWidget: (widgetId: TWidgetId) => void
   isWidgetEnabled: (widgetId: TWidgetId) => boolean
   getWidgetById: (widgetId: TWidgetId) => TWidget | undefined
+  reorderWidgets: (newOrder: TWidgetId[]) => void
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
 
 export function WidgetsProvider({ children }: { children: ReactNode }) {
   const [enabledWidgets, setEnabledWidgets] = useState<TWidgetId[]>(() => {
-    return localStorageService.getEnabledWidgets()
+    return localStorageService.getEnabledWidgets() as TWidgetId[]
   })
 
   useEffect(() => {
@@ -59,9 +67,13 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     return AVAILABLE_WIDGETS.find((w) => w.id === widgetId)
   }
 
+  const reorderWidgets = (newOrder: TWidgetId[]) => {
+    setEnabledWidgets(newOrder)
+  }
+
   return (
     <WidgetsContext.Provider
-      value={{ enabledWidgets, toggleWidget, isWidgetEnabled, getWidgetById }}
+      value={{ enabledWidgets, toggleWidget, isWidgetEnabled, getWidgetById, reorderWidgets }}
     >
       {children}
     </WidgetsContext.Provider>
