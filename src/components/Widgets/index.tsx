@@ -8,7 +8,7 @@ const WIDGET_COMPONENTS: Record<TWidgetId, React.ComponentType> = {
 }
 
 export default function Widgets() {
-  const { enabledWidgets, getWidgetById } = useWidgets()
+  const { enabledWidgets } = useWidgets()
 
   if (enabledWidgets.length === 0) {
     return null
@@ -18,15 +18,10 @@ export default function Widgets() {
     <div className="space-y-4">
       {enabledWidgets.map((widgetId) => {
         const WidgetComponent = WIDGET_COMPONENTS[widgetId]
-        const widget = getWidgetById(widgetId)
-        if (!WidgetComponent || !widget) return null
+        if (!WidgetComponent) return null
 
         return (
           <div key={widgetId} className="border rounded-lg bg-card overflow-hidden">
-            <div className="px-4 py-3 border-b bg-muted/30 font-semibold text-sm flex items-center gap-2">
-              {widget.icon}
-              <span>{widget.name}</span>
-            </div>
             <WidgetComponent />
           </div>
         )

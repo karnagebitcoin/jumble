@@ -6,12 +6,10 @@ import { useDeckView } from '@/providers/DeckViewProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { forwardRef, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
-  const { t } = useTranslation()
   const { trendingNotesDismissed, setTrendingNotesDismissed } = useTrendingNotesDismissed()
   const { enabledWidgets } = useWidgets()
   const { layoutMode } = useLayoutMode()
@@ -49,22 +47,18 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     <SecondaryPageLayout
       ref={ref}
       index={index}
-      title={t('Widgets')}
-      hideBackButton
-      hideTitlebarBottomBorder
+      hideTitlebar
     >
-      <div className="relative">
+      <div className="relative px-4 pt-4 pb-4">
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full"
+          className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full hover:bg-accent"
           onClick={handleClose}
         >
           <X className="h-4 w-4" />
         </Button>
-        <div className="px-4 pt-4 pb-4">
-          <Widgets />
-        </div>
+        <Widgets />
       </div>
     </SecondaryPageLayout>
   )

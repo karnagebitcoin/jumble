@@ -21,7 +21,8 @@ const SecondaryPageLayout = forwardRef(
       displayScrollToTopButton = false,
       titlebar,
       showCloseButton = false,
-      onClose
+      onClose,
+      hideTitlebar = false
     }: {
       children?: React.ReactNode
       index?: number
@@ -33,6 +34,7 @@ const SecondaryPageLayout = forwardRef(
       titlebar?: React.ReactNode
       showCloseButton?: boolean
       onClose?: () => void
+      hideTitlebar?: boolean
     },
     ref
   ) => {
@@ -70,15 +72,17 @@ const SecondaryPageLayout = forwardRef(
               paddingBottom: 'calc(env(safe-area-inset-bottom) + 3rem)'
             }}
           >
-            <SecondaryPageTitlebar
-              title={title}
-              controls={controls}
-              hideBackButton={hideBackButton}
-              hideBottomBorder={hideTitlebarBottomBorder}
-              titlebar={titlebar}
-              showCloseButton={showCloseButton}
-              onClose={onClose}
-            />
+            {!hideTitlebar && (
+              <SecondaryPageTitlebar
+                title={title}
+                controls={controls}
+                hideBackButton={hideBackButton}
+                hideBottomBorder={hideTitlebarBottomBorder}
+                titlebar={titlebar}
+                showCloseButton={showCloseButton}
+                onClose={onClose}
+              />
+            )}
             {children}
           </div>
           {displayScrollToTopButton && <ScrollToTopButton />}
@@ -93,15 +97,17 @@ const SecondaryPageLayout = forwardRef(
           scrollBarClassName="z-50 pt-12"
           ref={scrollAreaRef}
         >
-          <SecondaryPageTitlebar
-            title={title}
-            controls={controls}
-            hideBackButton={hideBackButton}
-            hideBottomBorder={hideTitlebarBottomBorder}
-            titlebar={titlebar}
-            showCloseButton={showCloseButton}
-            onClose={onClose}
-          />
+          {!hideTitlebar && (
+            <SecondaryPageTitlebar
+              title={title}
+              controls={controls}
+              hideBackButton={hideBackButton}
+              hideBottomBorder={hideTitlebarBottomBorder}
+              titlebar={titlebar}
+              showCloseButton={showCloseButton}
+              onClose={onClose}
+            />
+          )}
           {children}
           <div className="h-4" />
         </ScrollArea>

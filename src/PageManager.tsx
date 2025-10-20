@@ -554,12 +554,16 @@ function HomePageWrapper({
   // 2. AND the trending notes have been dismissed
   const isTransparent = secondaryStackLength === 0 && dismissedState
 
+  // We're on the home page (widgets sidebar)
+  const isHomePage = secondaryStackLength === 0
+
   return (
     <div
       className={cn(
-        'rounded-lg shadow-lg overflow-hidden',
+        'rounded-lg overflow-hidden',
         isTransparent ? 'bg-transparent shadow-none' : 'bg-background',
-        pageTheme === 'pure-black' && !isTransparent && 'border border-neutral-900'
+        !isHomePage && 'shadow-lg',
+        pageTheme === 'pure-black' && !isTransparent && !isHomePage && 'border border-neutral-900'
       )}
     >
       {children}

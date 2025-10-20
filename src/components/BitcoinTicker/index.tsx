@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
-import { TrendingUp, TrendingDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 type BitcoinPrice = {
   usd: number
-  usd_24h_change: number
 }
 
 export default function BitcoinTicker() {
@@ -16,15 +13,14 @@ export default function BitcoinTicker() {
     const fetchPrice = async () => {
       try {
         const response = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'
+          'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
         )
         if (!response.ok) {
           throw new Error('Failed to fetch Bitcoin price')
         }
         const data = await response.json()
         setPrice({
-          usd: data.bitcoin.usd,
-          usd_24h_change: data.bitcoin.usd_24h_change
+          usd: data.bitcoin.usd
         })
         setError(null)
       } catch (err) {
@@ -50,18 +46,6 @@ export default function BitcoinTicker() {
     }).format(price)
   }
 
-  const getChangeIcon = (change: number) => {
-    if (change > 0) return <TrendingUp className="h-5 w-5" />
-    if (change < 0) return <TrendingDown className="h-5 w-5" />
-    return null
-  }
-
-  const getChangeColor = (change: number) => {
-    if (change > 0) return 'text-green-500'
-    if (change < 0) return 'text-red-500'
-    return 'text-muted-foreground'
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6">
@@ -79,11 +63,8 @@ export default function BitcoinTicker() {
   }
 
   return (
-    <div className="p-6 flex items-center justify-center gap-3">
+    <div className="p-6 flex items-center justify-center">
       <div className="text-4xl font-bold">{formatPrice(price.usd)}</div>
-      <div className={cn('flex items-center', getChangeColor(price.usd_24h_change))}>
-        {getChangeIcon(price.usd_24h_change)}
-      </div>
     </div>
   )
 }
