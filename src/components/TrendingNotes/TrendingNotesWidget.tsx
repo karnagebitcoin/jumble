@@ -1,11 +1,7 @@
 import WidgetContainer from '@/components/WidgetContainer'
 import { useWidgets, AVAILABLE_WIDGETS } from '@/providers/WidgetsProvider'
 import CompactTrendingNotes from './CompactTrendingNotes'
-import { useTranslation } from 'react-i18next'
 import { CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
-import { useSecondaryPage } from '@/PageManager'
 
 const HEIGHT_CLASSES = {
   short: 'max-h-[220px]',
@@ -15,8 +11,6 @@ const HEIGHT_CLASSES = {
 
 export default function TrendingNotesWidget() {
   const { trendingNotesHeight, enabledWidgets } = useWidgets()
-  const { t } = useTranslation()
-  const { clear } = useSecondaryPage()
 
   // Check if trending notes is the only enabled widget
   // (other widgets could be pinned notes or bitcoin ticker)
@@ -31,17 +25,8 @@ export default function TrendingNotesWidget() {
 
   return (
     <WidgetContainer className={isOnlyWidget ? 'h-full' : ''}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-        <CardTitle className="text-lg font-semibold">{widgetName}</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
-          title={t('close')}
-          onClick={() => clear()}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
+        <CardTitle className="font-semibold" style={{ fontSize: '16px' }}>{widgetName}</CardTitle>
       </CardHeader>
       <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4`}>
         <CompactTrendingNotes />
