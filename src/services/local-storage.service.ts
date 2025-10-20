@@ -77,6 +77,8 @@ class LocalStorageService {
   private customFeeds: TCustomFeed[] = []
   private chargeZapEnabled: boolean = false
   private chargeZapLimit: number = 1000
+  private zapOnReactions: boolean = false
+  private onlyZapsMode: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -293,6 +295,10 @@ class LocalStorageService {
         this.chargeZapLimit = num
       }
     }
+
+    this.zapOnReactions = window.localStorage.getItem(StorageKey.ZAP_ON_REACTIONS) === 'true'
+
+    this.onlyZapsMode = window.localStorage.getItem(StorageKey.ONLY_ZAPS_MODE) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -724,6 +730,24 @@ class LocalStorageService {
       this.customFeeds[index] = { ...this.customFeeds[index], ...updates }
       window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
     }
+  }
+
+  getZapOnReactions() {
+    return this.zapOnReactions
+  }
+
+  setZapOnReactions(enabled: boolean) {
+    this.zapOnReactions = enabled
+    window.localStorage.setItem(StorageKey.ZAP_ON_REACTIONS, enabled.toString())
+  }
+
+  getOnlyZapsMode() {
+    return this.onlyZapsMode
+  }
+
+  setOnlyZapsMode(enabled: boolean) {
+    this.onlyZapsMode = enabled
+    window.localStorage.setItem(StorageKey.ONLY_ZAPS_MODE, enabled.toString())
   }
 }
 

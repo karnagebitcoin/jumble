@@ -20,7 +20,9 @@ import ChargeZapSwitch from './ChargeZapSwitch'
 import DefaultZapAmountInput from './DefaultZapAmountInput'
 import DefaultZapCommentInput from './DefaultZapCommentInput'
 import LightningAddressInput from './LightningAddressInput'
+import OnlyZapsModeSwitch from './OnlyZapsModeSwitch'
 import QuickZapSwitch from './QuickZapSwitch'
+import ZapOnReactionsSwitch from './ZapOnReactionsSwitch'
 import ZapSoundSelect from './ZapSoundSelect'
 
 const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
@@ -65,8 +67,10 @@ const WalletPage = forwardRef(({ index }: { index?: number }, ref) => {
           <DefaultZapAmountInput />
           <DefaultZapCommentInput />
           <QuickZapSwitch />
+          <ZapOnReactionsSwitch />
           <ChargeZapSwitch />
           <ChargeZapLimitInput />
+          <OnlyZapsModeSwitch />
           <ZapSoundSelect />
           <LightningAddressInput />
         </div>

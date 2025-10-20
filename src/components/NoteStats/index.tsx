@@ -32,7 +32,7 @@ export default function NoteStats({
 }) {
   const { isSmallScreen } = useScreenSize()
   const { pubkey } = useNostr()
-  const { chargeZapEnabled, quickZap } = useZap()
+  const { chargeZapEnabled, quickZap, onlyZapsMode } = useZap()
   const [loading, setLoading] = useState(false)
 
   // Show charge zap button only if charge zap is enabled AND quick zap is enabled
@@ -63,7 +63,7 @@ export default function NoteStats({
         >
           <ReplyButton event={event} />
           <RepostButton event={event} />
-          <LikeButton event={event} />
+          {!onlyZapsMode && <LikeButton event={event} />}
           <ZapButton event={event} />
           {showChargeZap && <ChargeZapButton event={event} />}
           <BookmarkButton event={event} />
@@ -88,7 +88,7 @@ export default function NoteStats({
         >
           <ReplyButton event={event} />
           <RepostButton event={event} />
-          <LikeButton event={event} />
+          {!onlyZapsMode && <LikeButton event={event} />}
           <ZapButton event={event} />
           {showChargeZap && <ChargeZapButton event={event} />}
         </div>

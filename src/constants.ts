@@ -64,6 +64,8 @@ export const StorageKey = {
   CUSTOM_FEEDS: 'customFeeds',
   CHARGE_ZAP_ENABLED: 'chargeZapEnabled',
   CHARGE_ZAP_LIMIT: 'chargeZapLimit',
+  ZAP_ON_REACTIONS: 'zapOnReactions',
+  ONLY_ZAPS_MODE: 'onlyZapsMode',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
