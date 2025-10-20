@@ -631,7 +631,7 @@ function DeckLayout({
         <SheetContent
           side="right"
           className={cn(
-            "w-[650px] sm:w-[650px] p-0 gap-0",
+            "w-[768px] sm:w-[768px] p-0 gap-0",
             pageTheme === 'pure-black' && "border-l border-neutral-900"
           )}
           hideClose
