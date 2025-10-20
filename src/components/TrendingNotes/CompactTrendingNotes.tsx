@@ -72,7 +72,7 @@ export default function CompactTrendingNotes() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 pt-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex gap-2">
             <Skeleton className="w-8 h-8 rounded-full shrink-0" />
@@ -88,7 +88,7 @@ export default function CompactTrendingNotes() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pt-3">
       {filteredEvents.map((event) => (
         <div
           key={event.id}

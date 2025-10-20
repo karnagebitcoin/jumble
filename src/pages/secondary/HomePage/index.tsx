@@ -7,14 +7,15 @@ import { useSecondaryPage } from '@/PageManager'
 import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import { X, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toWidgetsSettings } from '@/lib/link'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { enabledWidgets } = useWidgets()
   const { layoutMode } = useLayoutMode()
   const { deckViewMode } = useDeckView()
-  const { clear } = useSecondaryPage()
+  const { clear, push } = useSecondaryPage()
   const { t } = useTranslation()
 
   // Check if we're in multi-column mode
@@ -31,18 +32,30 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
       index={index}
       hideTitlebar
     >
-      <div className="px-4 pt-4 pb-4 bg-transparent relative">
-        {/* Close button for the entire sidebar - positioned at the top right */}
-        <div className="absolute top-2 right-2 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background/90 shadow-sm"
-            title={t('close')}
-            onClick={() => clear()}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+      <div className="px-4 pt-4 pb-4 bg-transparent">
+        {/* Title Header */}
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h2 className="text-lg font-semibold">My Jumble</h2>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title={t('Widgets Settings')}
+              onClick={() => push(toWidgetsSettings())}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title={t('close')}
+              onClick={() => clear()}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <Widgets />
       </div>
