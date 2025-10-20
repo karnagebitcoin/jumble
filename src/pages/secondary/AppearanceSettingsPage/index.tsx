@@ -3,6 +3,7 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import {
   BUTTON_RADIUS_VALUES,
+  DECK_VIEW_MODE,
   FONT_FAMILIES,
   FONT_SIZES,
   LAYOUT_MODE,
@@ -13,6 +14,7 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn } from '@/lib/utils'
 import { useButtonRadius } from '@/providers/ButtonRadiusProvider'
 import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
+import { useDeckView } from '@/providers/DeckViewProvider'
 import { useFontFamily } from '@/providers/FontFamilyProvider'
 import { useFontSize } from '@/providers/FontSizeProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
@@ -21,7 +23,7 @@ import { usePrimaryColor } from '@/providers/PrimaryColorProvider'
 import { useTheme } from '@/providers/ThemeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { TFontFamily, TPrimaryColor } from '@/types'
-import { Check, Moon, Sun, Monitor, LayoutGrid, Maximize2, List, FileText } from 'lucide-react'
+import { Check, Moon, Sun, Monitor, LayoutGrid, Maximize2, List, FileText, Columns } from 'lucide-react'
 import { forwardRef, HTMLProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -33,6 +35,7 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
   const { fontFamily, setFontFamily } = useFontFamily()
   const { primaryColor, setPrimaryColor } = usePrimaryColor()
   const { layoutMode, setLayoutMode } = useLayoutMode()
+  const { deckViewMode, setDeckViewMode } = useDeckView()
   const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
   const { buttonRadius, setButtonRadius } = useButtonRadius()
   const { compactSidebar, setCompactSidebar } = useCompactSidebar()
@@ -148,6 +151,56 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
             </button>
           </div>
         </SettingItem>
+        {layoutMode === LAYOUT_MODE.FULL_WIDTH && (
+          <SettingItem className="flex-col items-start gap-3">
+            <Label className="text-base font-normal">
+              {t('Multi-Column (Deck)')}
+            </Label>
+            <div className="text-sm text-muted-foreground mb-1">
+              {t('Allows you to pin feeds as new columns')}
+            </div>
+            <div className="grid grid-cols-2 gap-3 w-full">
+              <button
+                onClick={() => setDeckViewMode(DECK_VIEW_MODE.STANDARD)}
+                className={cn(
+                  'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                  deckViewMode === DECK_VIEW_MODE.STANDARD
+                    ? 'border-primary'
+                    : 'border-border hover:border-muted-foreground/30'
+                )}
+              >
+                <div className="flex items-center justify-center w-8 h-8">
+                  <LayoutGrid className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium">{t('Standard')}</span>
+                {deckViewMode === DECK_VIEW_MODE.STANDARD && (
+                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
+              </button>
+              <button
+                onClick={() => setDeckViewMode(DECK_VIEW_MODE.MULTI_COLUMN)}
+                className={cn(
+                  'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                  deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
+                    ? 'border-primary'
+                    : 'border-border hover:border-muted-foreground/30'
+                )}
+              >
+                <div className="flex items-center justify-center w-8 h-8">
+                  <Columns className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium">{t('Multi-Column')}</span>
+                {deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN && (
+                  <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
+              </button>
+            </div>
+          </SettingItem>
+        )}
         <SettingItem className="flex-col items-start gap-3">
           <Label className="text-base font-normal">
             {t('Notification list style')}

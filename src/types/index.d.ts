@@ -89,6 +89,16 @@ export type TFontFamily = 'DEFAULT' | 'SYSTEM' | 'IBM_PLEX_SANS' | 'LATO' | 'OUT
 
 export type TLayoutMode = 'boxed' | 'full-width'
 
+export type TDeckViewMode = 'standard' | 'multi-column'
+
+export type TPinnedColumnType = 'explore' | 'notifications' | 'profile' | 'search' | 'relay' | 'relays' | 'custom'
+
+export type TPinnedColumn = {
+  id: string
+  type: TPinnedColumnType
+  props?: any
+}
+
 export type TDraftEvent = Pick<Event, 'content' | 'created_at' | 'kind' | 'tags'>
 
 export type TNip07 = {

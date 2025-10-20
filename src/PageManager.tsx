@@ -1,11 +1,13 @@
 import Sidebar from '@/components/Sidebar'
-import { LAYOUT_MODE } from '@/constants'
+import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { cn } from '@/lib/utils'
 import NoteListPage from '@/pages/primary/NoteListPage'
 import HomePage from '@/pages/secondary/HomePage'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
+import { useDeckView } from '@/providers/DeckViewProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { TPageRef } from '@/types'
 import {
   cloneElement,
@@ -21,6 +23,7 @@ import {
 import BackgroundAudio from './components/BackgroundAudio'
 import BottomNavigationBar from './components/BottomNavigationBar'
 import CreateWalletGuideToast from './components/CreateWalletGuideToast'
+import DeckColumn from './components/DeckColumn'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import ExplorePage from './pages/primary/ExplorePage'
@@ -110,7 +113,16 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
   const [secondaryStack, setSecondaryStack] = useState<TStackItem[]>([])
   const { isSmallScreen } = useScreenSize()
   const { layoutMode } = useLayoutMode()
+  const { deckViewMode, pinnedColumns, unpinColumn } = useDeckView()
+  const { setCompactSidebar } = useCompactSidebar()
   const ignorePopStateRef = useRef(false)
+
+  // Auto-collapse sidebar when in multi-column mode
+  useEffect(() => {
+    if (layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN) {
+      setCompactSidebar(true)
+    }
+  }, [layoutMode, deckViewMode, setCompactSidebar])
 
   useEffect(() => {
     if (['/npub1', '/nprofile1'].some((prefix) => window.location.pathname.startsWith(prefix))) {
@@ -379,42 +391,51 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               )}>
                 <Sidebar />
               </div>
-              <div className={cn("grid grid-cols-2 gap-2 w-full pr-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
-                <div className={cn(
-                  "rounded-lg shadow-lg bg-background overflow-hidden",
-                  pageTheme === 'pure-black' && "border border-neutral-900"
-                )}>
-                  {primaryPages.map(({ name, element, props }) => (
-                    <div
-                      key={name}
-                      className="flex flex-col h-full w-full"
-                      style={{
-                        display: currentPrimaryPage === name ? 'block' : 'none'
-                      }}
-                    >
-                      {props ? cloneElement(element as React.ReactElement, props) : element}
-                    </div>
-                  ))}
-                </div>
-                <HomePageWrapper secondaryStackLength={secondaryStack.length}>
-                  {secondaryStack.map((item, index) => (
-                    <div
-                      key={item.index}
-                      className="flex flex-col h-full w-full"
-                      style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
-                    >
-                      {item.component}
-                    </div>
-                  ))}
-                  <div
-                    key="home"
-                    className="w-full"
-                    style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
-                  >
-                    <HomePage />
+              {layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN ? (
+                <DeckLayout
+                  primaryPages={primaryPages}
+                  currentPrimaryPage={currentPrimaryPage}
+                  secondaryStack={secondaryStack}
+                  pinnedColumns={pinnedColumns}
+                />
+              ) : (
+                <div className={cn("grid grid-cols-2 gap-2 w-full pr-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
+                  <div className={cn(
+                    "rounded-lg shadow-lg bg-background overflow-hidden",
+                    pageTheme === 'pure-black' && "border border-neutral-900"
+                  )}>
+                    {primaryPages.map(({ name, element, props }) => (
+                      <div
+                        key={name}
+                        className="flex flex-col h-full w-full"
+                        style={{
+                          display: currentPrimaryPage === name ? 'block' : 'none'
+                        }}
+                      >
+                        {props ? cloneElement(element as React.ReactElement, props) : element}
+                      </div>
+                    ))}
                   </div>
-                </HomePageWrapper>
-              </div>
+                  <HomePageWrapper secondaryStackLength={secondaryStack.length}>
+                    {secondaryStack.map((item, index) => (
+                      <div
+                        key={item.index}
+                        className="flex flex-col h-full w-full"
+                        style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+                      >
+                        {item.component}
+                      </div>
+                    ))}
+                    <div
+                      key="home"
+                      className="w-full"
+                      style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+                    >
+                      <HomePage />
+                    </div>
+                  </HomePageWrapper>
+                </div>
+              )}
             </div>
             <TooManyRelaysAlertDialog />
             <CreateWalletGuideToast />
@@ -541,6 +562,76 @@ function HomePageWrapper({
       )}
     >
       {children}
+    </div>
+  )
+}
+
+function DeckLayout({
+  primaryPages,
+  currentPrimaryPage,
+  secondaryStack,
+  pinnedColumns
+}: {
+  primaryPages: { name: TPrimaryPageName; element: ReactNode; props?: any }[]
+  currentPrimaryPage: TPrimaryPageName
+  secondaryStack: TStackItem[]
+  pinnedColumns: any[]
+}) {
+  const { pageTheme } = usePageTheme()
+
+  // Calculate the number of columns
+  const columnCount = 1 + pinnedColumns.length + 1 // main + pinned + sidebar
+
+  return (
+    <div
+      className="flex gap-2 w-full pr-2 py-2 overflow-x-auto"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columnCount}, minmax(350px, 1fr))`
+      }}
+    >
+      {/* Main column */}
+      <div className={cn(
+        "rounded-lg shadow-lg bg-background overflow-hidden",
+        pageTheme === 'pure-black' && "border border-neutral-900"
+      )}>
+        {primaryPages.map(({ name, element, props }) => (
+          <div
+            key={name}
+            className="flex flex-col h-full w-full"
+            style={{
+              display: currentPrimaryPage === name ? 'block' : 'none'
+            }}
+          >
+            {props ? cloneElement(element as React.ReactElement, props) : element}
+          </div>
+        ))}
+      </div>
+
+      {/* Pinned columns */}
+      {pinnedColumns.map((column) => (
+        <DeckColumn key={column.id} column={column} />
+      ))}
+
+      {/* Right sidebar column */}
+      <HomePageWrapper secondaryStackLength={secondaryStack.length}>
+        {secondaryStack.map((item, index) => (
+          <div
+            key={item.index}
+            className="flex flex-col h-full w-full"
+            style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+          >
+            {item.component}
+          </div>
+        ))}
+        <div
+          key="home"
+          className="w-full"
+          style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+        >
+          <HomePage />
+        </div>
+      </HomePageWrapper>
     </div>
   )
 }

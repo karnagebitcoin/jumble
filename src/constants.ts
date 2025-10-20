@@ -66,6 +66,8 @@ export const StorageKey = {
   CHARGE_ZAP_LIMIT: 'chargeZapLimit',
   ZAP_ON_REACTIONS: 'zapOnReactions',
   ONLY_ZAPS_MODE: 'onlyZapsMode',
+  DECK_VIEW_MODE: 'deckViewMode',
+  PINNED_COLUMNS: 'pinnedColumns',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -362,5 +364,12 @@ export const LAYOUT_MODE = {
 } as const
 
 export const DEFAULT_LAYOUT_MODE = 'boxed'
+
+export const DECK_VIEW_MODE = {
+  STANDARD: 'standard',
+  MULTI_COLUMN: 'multi-column'
+} as const
+
+export const DEFAULT_DECK_VIEW_MODE = 'standard'
 
 export const DEFAULT_PAGE_THEME = 'default'

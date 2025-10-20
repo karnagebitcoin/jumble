@@ -7,6 +7,7 @@ import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { BookmarkIcon, Hash, Search, Trash2, UsersRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import PinButton from '../PinButton'
 import { Button } from '../ui/button'
 import RelayIcon from '../RelayIcon'
 import RelaySetCard from '../RelaySetCard'
@@ -70,17 +71,26 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
                 close?.()
               }}
               controls={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeCustomFeed(feed.id)
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+                <div className="flex gap-1 items-center">
+                  <PinButton
+                    column={{
+                      type: 'custom',
+                      props: { customFeedId: feed.id }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeCustomFeed(feed.id)
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
               }
             >
               <div className="flex gap-2 items-center">
@@ -129,6 +139,15 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             switchFeed('relay', { relay })
             close?.()
           }}
+          controls={
+            <PinButton
+              column={{
+                type: 'relay',
+                props: { url: relay }
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          }
         >
           <div className="flex gap-2 items-center w-full">
             <RelayIcon url={relay} />

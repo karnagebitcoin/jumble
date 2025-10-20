@@ -2,6 +2,7 @@ import { TRelaySet } from '@/types'
 import { ChevronDown, FolderClosed } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import PinButton from '../PinButton'
 import RelayIcon from '../RelayIcon'
 
 export default function RelaySetCard({
@@ -18,7 +19,7 @@ export default function RelaySetCard({
 
   return (
     <div
-      className={`w-full border rounded-lg py-1 px-3 clickable ${select ? 'border-primary bg-primary/5' : ''}`}
+      className={`w-full border rounded-lg py-1 px-3 clickable group ${select ? 'border-primary bg-primary/5' : ''}`}
       onClick={() => onSelectChange(!select)}
     >
       <div className="flex justify-between items-center">
@@ -28,7 +29,14 @@ export default function RelaySetCard({
           </div>
           <div className="h-8 font-semibold flex items-center select-none">{relaySet.name}</div>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
+          <PinButton
+            column={{
+              type: 'relays',
+              props: { activeRelaySetId: relaySet.id }
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+          />
           <RelayUrlsExpandToggle expand={expand} onExpandChange={setExpand}>
             {t('n relays', { n: relaySet.relayUrls.length })}
           </RelayUrlsExpandToggle>

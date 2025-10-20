@@ -6,6 +6,7 @@ import { BookmarksProvider } from '@/providers/BookmarksProvider'
 import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
 import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
 import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
+import { DeckViewProvider } from '@/providers/DeckViewProvider'
 import { CustomFeedsProvider } from '@/providers/CustomFeedsProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
@@ -41,10 +42,11 @@ export default function App(): JSX.Element {
             <FontFamilyProvider>
               <ButtonRadiusProvider>
                 <LayoutModeProvider>
-                  <CompactSidebarProvider>
-                    <ContentPolicyProvider>
-                      <ScreenSizeProvider>
-                        <DeletedEventProvider>
+                  <DeckViewProvider>
+                    <CompactSidebarProvider>
+                        <ContentPolicyProvider>
+                        <ScreenSizeProvider>
+                          <DeletedEventProvider>
                             <NostrProvider>
                               <ZapProvider>
                                 <TranslationServiceProvider>
@@ -82,10 +84,11 @@ export default function App(): JSX.Element {
                               </ZapProvider>
                             </NostrProvider>
                           </DeletedEventProvider>
-                        </ScreenSizeProvider>
-                    </ContentPolicyProvider>
-                  </CompactSidebarProvider>
-                </LayoutModeProvider>
+                          </ScreenSizeProvider>
+                        </ContentPolicyProvider>
+                      </CompactSidebarProvider>
+                    </DeckViewProvider>
+                  </LayoutModeProvider>
               </ButtonRadiusProvider>
             </FontFamilyProvider>
           </FontSizeProvider>
