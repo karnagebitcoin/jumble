@@ -598,7 +598,8 @@ function DeckLayout({
       >
         {/* Main column */}
         <div className={cn(
-          "rounded-lg shadow-lg bg-background overflow-hidden",
+          "rounded-lg shadow-lg bg-background overflow-hidden mx-auto w-full",
+          "max-w-2xl",
           pageTheme === 'pure-black' && "border border-neutral-900"
         )}>
           {primaryPages.map(({ name, element, props }) => (
@@ -622,7 +623,8 @@ function DeckLayout({
 
       {/* Right drawer for secondary pages in multi-column mode */}
       <Sheet open={isDrawerOpen} onOpenChange={(open) => {
-        if (!open && secondaryStack.length > 0) {
+        if (!open) {
+          // Close the drawer by popping the page
           pop()
         }
       }}>
