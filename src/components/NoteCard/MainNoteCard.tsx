@@ -15,7 +15,8 @@ export default function MainNoteCard({
   reposter,
   embedded,
   originalNoteId,
-  pinned = false
+  pinned = false,
+  hideSeparator = false
 }: {
   event: Event
   className?: string
@@ -23,6 +24,7 @@ export default function MainNoteCard({
   embedded?: boolean
   originalNoteId?: string
   pinned?: boolean
+  hideSeparator?: boolean
 }) {
   const { push } = useSecondaryPage()
 
@@ -47,7 +49,7 @@ export default function MainNoteCard({
         </Collapsible>
         {!embedded && <NoteStats className="mt-3 px-4" event={event} />}
       </div>
-      {!embedded && <Separator />}
+      {!embedded && !hideSeparator && <Separator />}
     </div>
   )
 }

@@ -11,12 +11,14 @@ export default function NoteCard({
   event,
   className,
   filterMutedNotes = true,
-  pinned = false
+  pinned = false,
+  hideSeparator = false
 }: {
   event: Event
   className?: string
   filterMutedNotes?: boolean
   pinned?: boolean
+  hideSeparator?: boolean
 }) {
   const { mutePubkeySet } = useMuteList()
   const { hideContentMentioningMutedUsers } = useContentPolicy()
@@ -38,10 +40,11 @@ export default function NoteCard({
         className={className}
         filterMutedNotes={filterMutedNotes}
         pinned={pinned}
+        hideSeparator={hideSeparator}
       />
     )
   }
-  return <MainNoteCard event={event} className={className} pinned={pinned} />
+  return <MainNoteCard event={event} className={className} pinned={pinned} hideSeparator={hideSeparator} />
 }
 
 export function NoteCardLoadingSkeleton() {

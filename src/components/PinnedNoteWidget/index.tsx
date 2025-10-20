@@ -48,7 +48,7 @@ export default function PinnedNoteWidget({ widgetId, eventId }: PinnedNoteWidget
             {t('Note not found')}
           </div>
         )}
-        {event && <NoteCard event={event} />}
+        {event && <NoteCard event={event} hideSeparator />}
       </div>
     </WidgetContainer>
   )

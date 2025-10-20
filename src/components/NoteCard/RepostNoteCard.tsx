@@ -14,12 +14,14 @@ export default function RepostNoteCard({
   event,
   className,
   filterMutedNotes = true,
-  pinned = false
+  pinned = false,
+  hideSeparator = false
 }: {
   event: Event
   className?: string
   filterMutedNotes?: boolean
   pinned?: boolean
+  hideSeparator?: boolean
 }) {
   const { t } = useTranslation()
   const { mutePubkeySet } = useMuteList()
@@ -90,7 +92,7 @@ export default function RepostNoteCard({
             {t('You muted this note')}
           </div>
         </div>
-        <Separator />
+        {!hideSeparator && <Separator />}
       </div>
     )
   }
@@ -101,6 +103,7 @@ export default function RepostNoteCard({
       reposter={event.pubkey}
       event={targetEvent}
       pinned={pinned}
+      hideSeparator={hideSeparator}
     />
   )
 }
