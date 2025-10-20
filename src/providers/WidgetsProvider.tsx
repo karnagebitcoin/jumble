@@ -1,9 +1,9 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
-import { TrendingUp, Bitcoin } from 'lucide-react'
+import { TrendingUp, Bitcoin, Pin } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
-export type TWidgetId = 'trending-notes' | 'bitcoin-ticker'
+export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | string // Allow dynamic pinned-note-* IDs
 
 export type TTrendingNotesHeight = 'short' | 'medium' | 'tall'
 
@@ -16,6 +16,11 @@ export type TWidget = {
   description: string
   defaultEnabled: boolean
   icon: React.ReactNode
+}
+
+export type TPinnedNoteWidget = {
+  id: string
+  eventId: string
 }
 
 export const AVAILABLE_WIDGETS: TWidget[] = [
@@ -47,6 +52,11 @@ type TWidgetsContext = {
   setBitcoinTickerAlignment: (alignment: TBitcoinTickerAlignment) => void
   bitcoinTickerTextSize: TBitcoinTickerTextSize
   setBitcoinTickerTextSize: (size: TBitcoinTickerTextSize) => void
+  pinnedNoteWidgets: TPinnedNoteWidget[]
+  pinNoteWidget: (eventId: string) => string
+  unpinNoteWidget: (widgetId: string) => void
+  unpinNoteByEventId: (eventId: string) => void
+  isPinned: (eventId: string) => boolean
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
@@ -54,6 +64,10 @@ const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
 export function WidgetsProvider({ children }: { children: ReactNode }) {
   const [enabledWidgets, setEnabledWidgets] = useState<TWidgetId[]>(() => {
     return localStorageService.getEnabledWidgets() as TWidgetId[]
+  })
+
+  const [pinnedNoteWidgets, setPinnedNoteWidgets] = useState<TPinnedNoteWidget[]>(() => {
+    return localStorageService.getPinnedNoteWidgets()
   })
 
   const [trendingNotesHeight, setTrendingNotesHeightState] = useState<TTrendingNotesHeight>(() => {
@@ -71,6 +85,10 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorageService.setEnabledWidgets(enabledWidgets)
   }, [enabledWidgets])
+
+  useEffect(() => {
+    localStorageService.setPinnedNoteWidgets(pinnedNoteWidgets)
+  }, [pinnedNoteWidgets])
 
   useEffect(() => {
     localStorageService.setTrendingNotesHeight(trendingNotesHeight)
@@ -118,6 +136,34 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     setEnabledWidgets(newOrder)
   }
 
+  const pinNoteWidget = (eventId: string) => {
+    const id = localStorageService.addPinnedNoteWidget(eventId)
+    setPinnedNoteWidgets((prev) => [...prev, { id, eventId }])
+    // Auto-enable the widget
+    if (!enabledWidgets.includes(id)) {
+      setEnabledWidgets((prev) => [...prev, id])
+    }
+    return id
+  }
+
+  const unpinNoteWidget = (widgetId: string) => {
+    localStorageService.removePinnedNoteWidget(widgetId)
+    setPinnedNoteWidgets((prev) => prev.filter((w) => w.id !== widgetId))
+    // Remove from enabled widgets
+    setEnabledWidgets((prev) => prev.filter((id) => id !== widgetId))
+  }
+
+  const unpinNoteByEventId = (eventId: string) => {
+    const widget = pinnedNoteWidgets.find((w) => w.eventId === eventId)
+    if (widget) {
+      unpinNoteWidget(widget.id)
+    }
+  }
+
+  const isPinned = (eventId: string) => {
+    return pinnedNoteWidgets.some((w) => w.eventId === eventId)
+  }
+
   return (
     <WidgetsContext.Provider
       value={{
@@ -131,7 +177,12 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
         bitcoinTickerAlignment,
         setBitcoinTickerAlignment,
         bitcoinTickerTextSize,
-        setBitcoinTickerTextSize
+        setBitcoinTickerTextSize,
+        pinnedNoteWidgets,
+        pinNoteWidget,
+        unpinNoteWidget,
+        unpinNoteByEventId,
+        isPinned
       }}
     >
       {children}

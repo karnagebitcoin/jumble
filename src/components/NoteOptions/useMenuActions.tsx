@@ -7,6 +7,7 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinList } from '@/providers/PinListProvider'
+import { useWidgets } from '@/providers/WidgetsProvider'
 import client from '@/services/client.service'
 import {
   Bell,
@@ -19,7 +20,8 @@ import {
   SatelliteDish,
   StickyNote,
   Trash2,
-  TriangleAlert
+  TriangleAlert,
+  PanelRightClose
 } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
@@ -71,7 +73,9 @@ export function useMenuActions({
   }, [currentBrowsingRelayUrls, favoriteRelays])
   const { mutePubkeyPublicly, mutePubkeyPrivately, unmutePubkey, mutePubkeySet } = useMuteList()
   const { pinnedEventHexIdSet, pin, unpin } = usePinList()
+  const { pinNoteWidget, unpinNoteByEventId, isPinned: isWidgetPinned } = useWidgets()
   const isMuted = useMemo(() => mutePubkeySet.has(event.pubkey), [mutePubkeySet, event])
+  const isPinnedToSidebar = useMemo(() => isWidgetPinned(event.id), [isWidgetPinned, event.id])
 
   const broadcastSubMenu: SubMenuAction[] = useMemo(() => {
     const items = []
@@ -220,6 +224,25 @@ export function useMenuActions({
           closeDrawer()
           await (pinned ? unpin(event) : pin(event))
         }
+      })
+    }
+
+    // Pin to sidebar option (available for all users)
+    if (pubkey) {
+      actions.push({
+        icon: isPinnedToSidebar ? PinOff : PanelRightClose,
+        label: isPinnedToSidebar ? t('Unpin from sidebar') : t('Pin to sidebar'),
+        onClick: () => {
+          closeDrawer()
+          if (isPinnedToSidebar) {
+            unpinNoteByEventId(event.id)
+            toast.success(t('Note unpinned from sidebar'))
+          } else {
+            pinNoteWidget(event.id)
+            toast.success(t('Note pinned to sidebar'))
+          }
+        },
+        separator: event.pubkey === pubkey && event.kind === kinds.ShortTextNote ? false : true
       })
     }
 

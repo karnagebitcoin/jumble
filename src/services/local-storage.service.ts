@@ -73,6 +73,7 @@ class LocalStorageService {
   private trendingNotesDismissed: boolean = false
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
+  private pinnedNoteWidgets: { id: string; eventId: string }[] = []
   private trendingNotesHeight: 'short' | 'medium' | 'tall' = 'medium'
   private bitcoinTickerAlignment: 'left' | 'center' = 'left'
   private bitcoinTickerTextSize: 'large' | 'small' = 'large'
@@ -277,6 +278,11 @@ class LocalStorageService {
       // Default to trending notes enabled
       this.enabledWidgets = ['trending-notes']
       window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
+    }
+
+    const pinnedNoteWidgetsStr = window.localStorage.getItem(StorageKey.PINNED_NOTE_WIDGETS)
+    if (pinnedNoteWidgetsStr) {
+      this.pinnedNoteWidgets = JSON.parse(pinnedNoteWidgetsStr)
     }
 
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
@@ -744,6 +750,27 @@ class LocalStorageService {
   setBitcoinTickerTextSize(size: 'large' | 'small') {
     this.bitcoinTickerTextSize = size
     window.localStorage.setItem(StorageKey.BITCOIN_TICKER_TEXT_SIZE, size)
+  }
+
+  getPinnedNoteWidgets() {
+    return this.pinnedNoteWidgets
+  }
+
+  setPinnedNoteWidgets(widgets: { id: string; eventId: string }[]) {
+    this.pinnedNoteWidgets = widgets
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(widgets))
+  }
+
+  addPinnedNoteWidget(eventId: string) {
+    const id = `pinned-note-${Date.now()}`
+    this.pinnedNoteWidgets.push({ id, eventId })
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
+    return id
+  }
+
+  removePinnedNoteWidget(id: string) {
+    this.pinnedNoteWidgets = this.pinnedNoteWidgets.filter((widget) => widget.id !== id)
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
   }
 
   getZapSound() {
