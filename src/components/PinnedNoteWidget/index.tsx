@@ -24,7 +24,7 @@ export default function PinnedNoteWidget({ widgetId, eventId }: PinnedNoteWidget
   return (
     <WidgetContainer>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
-        <CardTitle className="font-semibold flex items-center gap-2" style={{ fontSize: '16px' }}>
+        <CardTitle className="font-semibold flex items-center gap-2" style={{ fontSize: '14px' }}>
           <Pin className="h-4 w-4" />
           {t('Pinned Note')}
         </CardTitle>

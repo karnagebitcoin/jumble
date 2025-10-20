@@ -10,7 +10,7 @@ export default function BitcoinTickerWidget() {
   return (
     <WidgetContainer>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
-        <CardTitle className="font-semibold" style={{ fontSize: '16px' }}>{widgetName}</CardTitle>
+        <CardTitle className="font-semibold" style={{ fontSize: '14px' }}>{widgetName}</CardTitle>
       </CardHeader>
       <BitcoinTicker />
     </WidgetContainer>

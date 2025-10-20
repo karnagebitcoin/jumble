@@ -26,7 +26,7 @@ export default function TrendingNotesWidget() {
   return (
     <WidgetContainer className={isOnlyWidget ? 'h-full' : ''}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
-        <CardTitle className="font-semibold" style={{ fontSize: '16px' }}>{widgetName}</CardTitle>
+        <CardTitle className="font-semibold" style={{ fontSize: '14px' }}>{widgetName}</CardTitle>
       </CardHeader>
       <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4`}>
         <CompactTrendingNotes />
