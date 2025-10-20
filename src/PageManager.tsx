@@ -598,7 +598,7 @@ function DeckLayout({
       >
         {/* Main column */}
         <div className={cn(
-          "rounded-lg shadow-lg bg-background overflow-hidden mx-auto w-full",
+          "rounded-lg shadow-lg bg-background overflow-hidden w-full",
           "max-w-2xl",
           pageTheme === 'pure-black' && "border border-neutral-900"
         )}>
