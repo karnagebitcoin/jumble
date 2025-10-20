@@ -2,6 +2,9 @@ import Widgets from '@/components/Widgets'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useTrendingNotesDismissed } from '@/providers/TrendingNotesDismissedProvider'
 import { useWidgets } from '@/providers/WidgetsProvider'
+import { useDeckView } from '@/providers/DeckViewProvider'
+import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { forwardRef, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -9,6 +12,11 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { trendingNotesDismissed, setTrendingNotesDismissed } = useTrendingNotesDismissed()
   const { enabledWidgets, getWidgetById } = useWidgets()
+  const { layoutMode } = useLayoutMode()
+  const { deckViewMode } = useDeckView()
+
+  // Check if we're in multi-column mode
+  const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
 
   // Get the first enabled widget for the title
   const firstWidget = useMemo(() => {
@@ -35,8 +43,9 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     setTrendingNotesDismissed(true)
   }
 
+  // In multi-column mode, don't show widgets at all
   // If dismissed or no widgets enabled, render an invisible placeholder to maintain layout
-  if (trendingNotesDismissed || enabledWidgets.length === 0 || !firstWidget) {
+  if (isMultiColumn || trendingNotesDismissed || enabledWidgets.length === 0 || !firstWidget) {
     return <div className="h-full w-full bg-transparent" ref={ref} />
   }
 

@@ -36,6 +36,7 @@ import { NotificationProvider } from './providers/NotificationProvider'
 import { useScreenSize } from './providers/ScreenSizeProvider'
 import { routes } from './routes'
 import modalManager from './services/modal-manager.service'
+import { Sheet, SheetContent } from './components/ui/sheet'
 
 export type TPrimaryPageName = keyof typeof PRIMARY_PAGE_MAP
 
@@ -578,60 +579,72 @@ function DeckLayout({
   pinnedColumns: any[]
 }) {
   const { pageTheme } = usePageTheme()
+  const { pop } = useSecondaryPage()
 
-  // Calculate the number of columns
-  const columnCount = 1 + pinnedColumns.length + 1 // main + pinned + sidebar
+  // Calculate the number of columns (no right sidebar in multi-column mode)
+  const columnCount = 1 + pinnedColumns.length // main + pinned only
+
+  // Check if drawer should be open
+  const isDrawerOpen = secondaryStack.length > 0
 
   return (
-    <div
-      className="flex gap-2 w-full pr-2 py-2 overflow-x-auto"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${columnCount}, minmax(350px, 1fr))`
-      }}
-    >
-      {/* Main column */}
-      <div className={cn(
-        "rounded-lg shadow-lg bg-background overflow-hidden",
-        pageTheme === 'pure-black' && "border border-neutral-900"
-      )}>
-        {primaryPages.map(({ name, element, props }) => (
-          <div
-            key={name}
-            className="flex flex-col h-full w-full"
-            style={{
-              display: currentPrimaryPage === name ? 'block' : 'none'
-            }}
-          >
-            {props ? cloneElement(element as React.ReactElement, props) : element}
-          </div>
+    <>
+      <div
+        className="flex gap-2 w-full pr-2 py-2 overflow-x-auto"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columnCount}, minmax(350px, 1fr))`
+        }}
+      >
+        {/* Main column */}
+        <div className={cn(
+          "rounded-lg shadow-lg bg-background overflow-hidden",
+          pageTheme === 'pure-black' && "border border-neutral-900"
+        )}>
+          {primaryPages.map(({ name, element, props }) => (
+            <div
+              key={name}
+              className="flex flex-col h-full w-full"
+              style={{
+                display: currentPrimaryPage === name ? 'block' : 'none'
+              }}
+            >
+              {props ? cloneElement(element as React.ReactElement, props) : element}
+            </div>
+          ))}
+        </div>
+
+        {/* Pinned columns */}
+        {pinnedColumns.map((column) => (
+          <DeckColumn key={column.id} column={column} />
         ))}
       </div>
 
-      {/* Pinned columns */}
-      {pinnedColumns.map((column) => (
-        <DeckColumn key={column.id} column={column} />
-      ))}
-
-      {/* Right sidebar column */}
-      <HomePageWrapper secondaryStackLength={secondaryStack.length}>
-        {secondaryStack.map((item, index) => (
-          <div
-            key={item.index}
-            className="flex flex-col h-full w-full"
-            style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
-          >
-            {item.component}
-          </div>
-        ))}
-        <div
-          key="home"
-          className="w-full"
-          style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+      {/* Right drawer for secondary pages in multi-column mode */}
+      <Sheet open={isDrawerOpen} onOpenChange={(open) => {
+        if (!open && secondaryStack.length > 0) {
+          pop()
+        }
+      }}>
+        <SheetContent
+          side="right"
+          className={cn(
+            "w-[500px] sm:w-[500px] p-0 gap-0",
+            pageTheme === 'pure-black' && "border-l border-neutral-900"
+          )}
+          hideClose
         >
-          <HomePage />
-        </div>
-      </HomePageWrapper>
-    </div>
+          {secondaryStack.map((item, index) => (
+            <div
+              key={item.index}
+              className="flex flex-col h-full w-full"
+              style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+            >
+              {item.component}
+            </div>
+          ))}
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }
