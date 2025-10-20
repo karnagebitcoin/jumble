@@ -1,4 +1,3 @@
-import PinButton from '@/components/PinButton'
 import SearchInput from '@/components/SearchInput'
 import { useSearchProfiles } from '@/hooks'
 import { toNote } from '@/lib/link'
@@ -356,14 +355,6 @@ const SearchBar = forwardRef<
           onFocus={() => setSearching(true)}
           onBlur={() => setSearching(false)}
         />
-        {currentSearchParams && (
-          <PinButton
-            column={{
-              type: 'search',
-              props: { searchParams: currentSearchParams }
-            }}
-          />
-        )}
         {canSaveFeed && (
           <Button
             variant="ghost"
