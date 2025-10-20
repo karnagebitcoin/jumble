@@ -5,24 +5,20 @@ import { useWidgets } from '@/providers/WidgetsProvider'
 import { useDeckView } from '@/providers/DeckViewProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
-import { forwardRef, useEffect, useMemo } from 'react'
+import { forwardRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
   const { trendingNotesDismissed, setTrendingNotesDismissed } = useTrendingNotesDismissed()
-  const { enabledWidgets, getWidgetById } = useWidgets()
+  const { enabledWidgets } = useWidgets()
   const { layoutMode } = useLayoutMode()
   const { deckViewMode } = useDeckView()
 
   // Check if we're in multi-column mode
   const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
-
-  // Get the first enabled widget for the title
-  const firstWidget = useMemo(() => {
-    if (enabledWidgets.length === 0) return null
-    return getWidgetById(enabledWidgets[0])
-  }, [enabledWidgets, getWidgetById])
 
   // Reset the dismissed state when the HomePage is shown (on page refresh or navigation back to home)
   useEffect(() => {
@@ -45,7 +41,7 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
 
   // In multi-column mode, don't show widgets at all
   // If dismissed or no widgets enabled, render an invisible placeholder to maintain layout
-  if (isMultiColumn || trendingNotesDismissed || enabledWidgets.length === 0 || !firstWidget) {
+  if (isMultiColumn || trendingNotesDismissed || enabledWidgets.length === 0) {
     return <div className="h-full w-full bg-transparent" ref={ref} />
   }
 
@@ -53,19 +49,22 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
     <SecondaryPageLayout
       ref={ref}
       index={index}
-      title={
-        <>
-          {firstWidget.icon}
-          <div>{t(firstWidget.name)}</div>
-        </>
-      }
+      title={t('Widgets')}
       hideBackButton
       hideTitlebarBottomBorder
-      showCloseButton
-      onClose={handleClose}
     >
-      <div className="px-4 pt-4">
-        <Widgets />
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full"
+          onClick={handleClose}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+        <div className="px-4 pt-4 pb-4">
+          <Widgets />
+        </div>
       </div>
     </SecondaryPageLayout>
   )

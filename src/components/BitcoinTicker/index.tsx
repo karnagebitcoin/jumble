@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type BitcoinPrice = {
@@ -50,14 +50,10 @@ export default function BitcoinTicker() {
     }).format(price)
   }
 
-  const formatChange = (change: number) => {
-    return `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`
-  }
-
   const getChangeIcon = (change: number) => {
-    if (change > 0) return <TrendingUp className="h-4 w-4" />
-    if (change < 0) return <TrendingDown className="h-4 w-4" />
-    return <Minus className="h-4 w-4" />
+    if (change > 0) return <TrendingUp className="h-5 w-5" />
+    if (change < 0) return <TrendingDown className="h-5 w-5" />
+    return null
   }
 
   const getChangeColor = (change: number) => {
@@ -83,26 +79,11 @@ export default function BitcoinTicker() {
   }
 
   return (
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">
-            ₿
-          </div>
-          <div>
-            <div className="font-semibold text-sm">Bitcoin</div>
-            <div className="text-xs text-muted-foreground">BTC</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="font-bold text-lg">{formatPrice(price.usd)}</div>
-          <div className={cn('flex items-center gap-1 text-sm font-medium', getChangeColor(price.usd_24h_change))}>
-            {getChangeIcon(price.usd_24h_change)}
-            <span>{formatChange(price.usd_24h_change)}</span>
-          </div>
-        </div>
+    <div className="p-6 flex items-center justify-center gap-3">
+      <div className="text-4xl font-bold">{formatPrice(price.usd)}</div>
+      <div className={cn('flex items-center', getChangeColor(price.usd_24h_change))}>
+        {getChangeIcon(price.usd_24h_change)}
       </div>
-      <div className="text-xs text-muted-foreground text-center">24h change</div>
     </div>
   )
 }
