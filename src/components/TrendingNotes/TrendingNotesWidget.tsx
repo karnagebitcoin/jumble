@@ -2,6 +2,10 @@ import WidgetContainer from '@/components/WidgetContainer'
 import { useWidgets, AVAILABLE_WIDGETS } from '@/providers/WidgetsProvider'
 import CompactTrendingNotes from './CompactTrendingNotes'
 import { CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { EyeOff } from 'lucide-react'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const HEIGHT_CLASSES = {
   short: 'max-h-[220px]',
@@ -10,7 +14,9 @@ const HEIGHT_CLASSES = {
 }
 
 export default function TrendingNotesWidget() {
-  const { trendingNotesHeight, enabledWidgets } = useWidgets()
+  const { t } = useTranslation()
+  const { trendingNotesHeight, enabledWidgets, toggleWidget } = useWidgets()
+  const [isHovered, setIsHovered] = useState(false)
 
   // Check if trending notes is the only enabled widget
   // (other widgets could be pinned notes or bitcoin ticker)
@@ -25,8 +31,23 @@ export default function TrendingNotesWidget() {
 
   return (
     <WidgetContainer className={isOnlyWidget ? 'h-full' : ''}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
+      <CardHeader
+        className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <CardTitle className="font-semibold" style={{ fontSize: '14px' }}>{widgetName}</CardTitle>
+        {isHovered && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={() => toggleWidget('trending-notes')}
+            title={t('Hide widget')}
+          >
+            <EyeOff className="h-4 w-4" />
+          </Button>
+        )}
       </CardHeader>
       <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4`}>
         <CompactTrendingNotes />

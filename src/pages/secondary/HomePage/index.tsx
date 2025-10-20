@@ -9,7 +9,7 @@ import { forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { X, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { toWidgetsSettings } from '@/lib/link'
+import { toWidgetsSettings, toSearch } from '@/lib/link'
 
 const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { enabledWidgets } = useWidgets()
@@ -17,6 +17,16 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
   const { deckViewMode } = useDeckView()
   const { clear, push, currentIndex } = useSecondaryPage()
   const { t } = useTranslation()
+
+  const handleClose = () => {
+    // If we have a secondary page open (index is defined), clear the stack
+    // Otherwise, navigate to search to "close" the widgets view
+    if (index !== undefined) {
+      clear()
+    } else {
+      push(toSearch())
+    }
+  }
 
   // Check if we're in multi-column mode
   const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
@@ -51,7 +61,7 @@ const HomePage = forwardRef(({ index }: { index?: number }, ref) => {
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               title={t('close')}
-              onClick={() => clear()}
+              onClick={handleClose}
             >
               <X className="h-4 w-4" />
             </Button>

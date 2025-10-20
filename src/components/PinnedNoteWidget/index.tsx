@@ -6,6 +6,7 @@ import { Loader2, Pin, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from 'react-i18next'
+import React from 'react'
 
 interface PinnedNoteWidgetProps {
   widgetId: string
@@ -16,6 +17,7 @@ export default function PinnedNoteWidget({ widgetId, eventId }: PinnedNoteWidget
   const { t } = useTranslation()
   const { unpinNoteWidget } = useWidgets()
   const { event, isFetching } = useFetchEvent(eventId)
+  const [isHovered, setIsHovered] = React.useState(false)
 
   const handleUnpin = () => {
     unpinNoteWidget(widgetId)
@@ -23,20 +25,26 @@ export default function PinnedNoteWidget({ widgetId, eventId }: PinnedNoteWidget
 
   return (
     <WidgetContainer>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b">
+      <CardHeader
+        className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <CardTitle className="font-semibold flex items-center gap-2" style={{ fontSize: '14px' }}>
           <Pin className="h-4 w-4" />
           {t('Pinned Note')}
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
-          onClick={handleUnpin}
-          title={t('Unpin from sidebar')}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {isHovered && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={handleUnpin}
+            title={t('Unpin from sidebar')}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </CardHeader>
       <div className="px-4 pb-4">
         {isFetching && (
