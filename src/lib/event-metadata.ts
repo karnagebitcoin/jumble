@@ -54,6 +54,11 @@ export function getProfileFromEvent(event: Event) {
       profileObj.display_name?.trim() ||
       profileObj.name?.trim() ||
       profileObj.nip05?.split('@')[0]?.trim()
+
+    if (profileObj.gallery) {
+      console.log('Profile has gallery with', profileObj.gallery.length, 'images:', profileObj.gallery)
+    }
+
     return {
       pubkey: event.pubkey,
       npub: pubkeyToNpub(event.pubkey) ?? '',
@@ -67,7 +72,8 @@ export function getProfileFromEvent(event: Event) {
       lud06: profileObj.lud06,
       lud16: profileObj.lud16,
       lightningAddress: getLightningAddressFromProfile(profileObj),
-      created_at: event.created_at
+      created_at: event.created_at,
+      gallery: profileObj.gallery || undefined
     }
   } catch (err) {
     console.error(event.content, err)

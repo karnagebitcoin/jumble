@@ -1,3 +1,4 @@
+import { Separator } from '@/components/ui/separator'
 import { isMentioningMutedUsers } from '@/lib/event'
 import { tagNameEquals } from '@/lib/tag'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
@@ -5,32 +6,40 @@ import { useMuteList } from '@/providers/MuteListProvider'
 import client from '@/services/client.service'
 import { Event, kinds, nip19, verifyEvent } from 'nostr-tools'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import MainNoteCard from './MainNoteCard'
+import RepostDescription from './RepostDescription'
 
 export default function RepostNoteCard({
   event,
   className,
   filterMutedNotes = true,
-  pinned = false
+  pinned = false,
+  hideSeparator = false
 }: {
   event: Event
   className?: string
   filterMutedNotes?: boolean
   pinned?: boolean
+  hideSeparator?: boolean
 }) {
+  const { t } = useTranslation()
   const { mutePubkeySet } = useMuteList()
-  const { hideContentMentioningMutedUsers } = useContentPolicy()
+  const { hideContentMentioningMutedUsers, alwaysHideMutedNotes } = useContentPolicy()
   const [targetEvent, setTargetEvent] = useState<Event | null>(null)
+  const isMuted = useMemo(() => {
+    return targetEvent && filterMutedNotes && mutePubkeySet.has(targetEvent.pubkey)
+  }, [targetEvent, filterMutedNotes, mutePubkeySet])
   const shouldHide = useMemo(() => {
     if (!targetEvent) return true
-    if (filterMutedNotes && mutePubkeySet.has(targetEvent.pubkey)) {
+    if (isMuted && !alwaysHideMutedNotes) {
       return true
     }
     if (hideContentMentioningMutedUsers && isMentioningMutedUsers(targetEvent, mutePubkeySet)) {
       return true
     }
     return false
-  }, [targetEvent, filterMutedNotes, hideContentMentioningMutedUsers, mutePubkeySet])
+  }, [targetEvent, isMuted, alwaysHideMutedNotes, hideContentMentioningMutedUsers, mutePubkeySet])
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -73,12 +82,28 @@ export default function RepostNoteCard({
 
   if (!targetEvent || shouldHide) return null
 
+  // If alwaysHideMutedNotes is enabled and the note is muted, show a message in the repost
+  if (alwaysHideMutedNotes && isMuted) {
+    return (
+      <div className={className}>
+        <div className="py-3">
+          <RepostDescription className="px-4" reposter={event.pubkey} />
+          <div className="px-4 mt-2 text-muted-foreground font-medium">
+            {t('You muted this note')}
+          </div>
+        </div>
+        {!hideSeparator && <Separator />}
+      </div>
+    )
+  }
+
   return (
     <MainNoteCard
       className={className}
       reposter={event.pubkey}
       event={targetEvent}
       pinned={pinned}
+      hideSeparator={hideSeparator}
     />
   )
 }

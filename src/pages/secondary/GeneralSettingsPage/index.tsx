@@ -1,24 +1,24 @@
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { MEDIA_AUTO_LOAD_POLICY, NOTIFICATION_LIST_STYLE } from '@/constants'
+import { Button } from '@/components/ui/button'
+import { MEDIA_AUTO_LOAD_POLICY } from '@/constants'
 import { LocalizedLanguageNames, TLanguage } from '@/i18n'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn, isSupportCheckConnectionType } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
-import { useTheme } from '@/providers/ThemeProvider'
-import { useUserPreferences } from '@/providers/UserPreferencesProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
+import localStorageService from '@/services/local-storage.service'
 import { TMediaAutoLoadPolicy } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, RotateCcw } from 'lucide-react'
 import { forwardRef, HTMLProps, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t, i18n } = useTranslation()
   const [language, setLanguage] = useState<TLanguage>(i18n.language as TLanguage)
-  const { themeSetting, setThemeSetting } = useTheme()
   const {
     autoplay,
     setAutoplay,
@@ -26,11 +26,14 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setDefaultShowNsfw,
     hideContentMentioningMutedUsers,
     setHideContentMentioningMutedUsers,
+    alwaysHideMutedNotes,
+    setAlwaysHideMutedNotes,
+    hideNotificationsFromMutedUsers,
+    setHideNotificationsFromMutedUsers,
     mediaAutoLoadPolicy,
     setMediaAutoLoadPolicy
   } = useContentPolicy()
   const { hideUntrustedNotes, updateHideUntrustedNotes } = useUserTrust()
-  const { notificationListStyle, updateNotificationListStyle } = useUserPreferences()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -54,44 +57,6 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
                   {value}
                 </SelectItem>
               ))}
-            </SelectContent>
-          </Select>
-        </SettingItem>
-        <SettingItem>
-          <Label htmlFor="theme" className="text-base font-normal">
-            {t('Theme')}
-          </Label>
-          <Select defaultValue="system" value={themeSetting} onValueChange={setThemeSetting}>
-            <SelectTrigger id="theme" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="system">{t('System')}</SelectItem>
-              <SelectItem value="light">{t('Light')}</SelectItem>
-              <SelectItem value="dark">{t('Dark')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </SettingItem>
-        <SettingItem>
-          <Label htmlFor="notification-list-style" className="text-base font-normal">
-            <div>{t('Notification list style')}</div>
-            <div className="text-muted-foreground">
-              {notificationListStyle === NOTIFICATION_LIST_STYLE.DETAILED
-                ? t('See extra info for each notification')
-                : t('See more notifications at a glance')}
-            </div>
-          </Label>
-          <Select
-            defaultValue={NOTIFICATION_LIST_STYLE.DETAILED}
-            value={notificationListStyle}
-            onValueChange={updateNotificationListStyle}
-          >
-            <SelectTrigger id="notification-list-style" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NOTIFICATION_LIST_STYLE.DETAILED}>{t('Detailed')}</SelectItem>
-              <SelectItem value={NOTIFICATION_LIST_STYLE.COMPACT}>{t('Compact')}</SelectItem>
             </SelectContent>
           </Select>
         </SettingItem>
@@ -143,6 +108,27 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="hide-content-mentioning-muted-users"
             checked={hideContentMentioningMutedUsers}
             onCheckedChange={setHideContentMentioningMutedUsers}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="always-hide-muted-notes" className="text-base font-normal">
+            <div>{t('Always hide muted notes')}</div>
+            <div className="text-muted-foreground">{t('Completely hide notes from muted users, even in reposts')}</div>
+          </Label>
+          <Switch
+            id="always-hide-muted-notes"
+            checked={alwaysHideMutedNotes}
+            onCheckedChange={setAlwaysHideMutedNotes}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-notifications-from-muted-users" className="text-base font-normal">
+            Hide notifications from muted users
+          </Label>
+          <Switch
+            id="hide-notifications-from-muted-users"
+            checked={hideNotificationsFromMutedUsers}
+            onCheckedChange={setHideNotificationsFromMutedUsers}
           />
         </SettingItem>
         <SettingItem>

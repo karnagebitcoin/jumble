@@ -5,10 +5,11 @@ import { randomString } from '@/lib/random'
 import { normalizeUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
+import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import modalManager from '@/services/modal-manager.service'
-import { TSearchParams } from '@/types'
-import { Hash, Notebook, Search, Server } from 'lucide-react'
+import { TCustomFeed, TSearchParams } from '@/types'
+import { Hash, Notebook, Plus, Search, Server } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import {
   forwardRef,
@@ -21,6 +22,16 @@ import {
   useState
 } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '../ui/dialog'
+import { Input } from '../ui/input'
 import UserItem, { UserItemSkeleton } from '../UserItem'
 
 const SearchBar = forwardRef<
@@ -29,11 +40,13 @@ const SearchBar = forwardRef<
     input: string
     setInput: (input: string) => void
     onSearch: (params: TSearchParams | null) => void
+    currentSearchParams?: TSearchParams | null
   }
->(({ input, setInput, onSearch }, ref) => {
+>(({ input, setInput, onSearch, currentSearchParams }, ref) => {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
   const { isSmallScreen } = useScreenSize()
+  const { addCustomFeed, customFeeds } = useCustomFeeds()
   const [debouncedInput, setDebouncedInput] = useState(input)
   const { profiles, isFetching: isFetchingProfiles } = useSearchProfiles(debouncedInput, 5)
   const [searching, setSearching] = useState(false)
@@ -41,6 +54,8 @@ const SearchBar = forwardRef<
   const [selectableOptions, setSelectableOptions] = useState<TSearchParams[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [feedName, setFeedName] = useState('')
   const normalizedUrl = useMemo(() => {
     if (['w', 'ws', 'ws:', 'ws:/', 'wss', 'wss:', 'wss:/'].includes(input)) {
       return undefined
@@ -271,38 +286,119 @@ const SearchBar = forwardRef<
     [input, onSearch, selectableOptions, selectedIndex]
   )
 
+  const handleSaveFeed = () => {
+    if (!currentSearchParams) return
+
+    // Generate default name based on search params
+    let defaultName = ''
+    if (currentSearchParams.type === 'notes') {
+      defaultName = currentSearchParams.search
+    } else if (currentSearchParams.type === 'hashtag') {
+      defaultName = `#${currentSearchParams.search}`
+    } else {
+      defaultName = currentSearchParams.input || currentSearchParams.search
+    }
+
+    setFeedName(defaultName)
+    setShowSaveDialog(true)
+  }
+
+  const handleConfirmSave = () => {
+    if (!currentSearchParams || !feedName.trim()) return
+
+    const feed: TCustomFeed = {
+      id: randomString(),
+      name: feedName.trim(),
+      searchParams: currentSearchParams
+    }
+
+    addCustomFeed(feed)
+    setShowSaveDialog(false)
+    setFeedName('')
+  }
+
+  const canSaveFeed = useMemo(() => {
+    if (!currentSearchParams) return false
+    // Can save notes and hashtag searches
+    return currentSearchParams.type === 'notes' || currentSearchParams.type === 'hashtag'
+  }, [currentSearchParams])
+
   return (
-    <div className="relative flex gap-1 items-center h-full w-full">
-      {displayList && list && (
-        <>
-          <div
-            className={cn(
-              'bg-surface-background rounded-b-lg shadow-lg z-50',
-              isSmallScreen
-                ? 'fixed top-12 inset-x-0'
-                : 'absolute top-full -translate-y-1 inset-x-0 pt-1 '
-            )}
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            <div className="h-fit">{list}</div>
-          </div>
-          <div className="fixed inset-0 w-full h-full" onClick={() => blur()} />
-        </>
-      )}
-      <SearchInput
-        ref={searchInputRef}
-        className={cn(
-          'bg-surface-background shadow-inner h-full border-none',
-          searching ? 'z-50' : ''
+    <>
+      <div className="relative flex gap-1 items-center h-full w-full">
+        {displayList && list && (
+          <>
+            <div
+              className={cn(
+                'bg-surface-background rounded-b-lg shadow-lg z-50',
+                isSmallScreen
+                  ? 'fixed top-12 inset-x-0'
+                  : 'absolute top-full -translate-y-1 inset-x-0 pt-1 '
+              )}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <div className="h-fit">{list}</div>
+            </div>
+            <div className="fixed inset-0 w-full h-full" onClick={() => blur()} />
+          </>
         )}
-        placeholder={t('People, keywords, or relays')}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setSearching(true)}
-        onBlur={() => setSearching(false)}
-      />
-    </div>
+        <SearchInput
+          ref={searchInputRef}
+          className={cn(
+            'bg-surface-background shadow-inner h-full border-none flex-1',
+            searching ? 'z-50' : ''
+          )}
+          placeholder={t('People, keywords, or relays')}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setSearching(true)}
+          onBlur={() => setSearching(false)}
+        />
+        {canSaveFeed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0 gap-1"
+            onClick={handleSaveFeed}
+          >
+            <Plus className="size-4" />
+            <span className="hidden sm:inline">{t('Save feed')}</span>
+          </Button>
+        )}
+      </div>
+
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('Save Custom Feed')}</DialogTitle>
+            <DialogDescription>
+              {t('Give this search feed a name to quickly access it later.')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              placeholder={t('Feed name')}
+              value={feedName}
+              onChange={(e) => setFeedName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleConfirmSave()
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              {t('Cancel')}
+            </Button>
+            <Button onClick={handleConfirmSave} disabled={!feedName.trim()}>
+              {t('Save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 })
 SearchBar.displayName = 'SearchBar'

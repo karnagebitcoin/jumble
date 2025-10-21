@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSecondaryPage } from '@/PageManager'
 import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, X } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -19,7 +19,10 @@ const SecondaryPageLayout = forwardRef(
       hideBackButton = false,
       hideTitlebarBottomBorder = false,
       displayScrollToTopButton = false,
-      titlebar
+      titlebar,
+      showCloseButton = false,
+      onClose,
+      hideTitlebar = false
     }: {
       children?: React.ReactNode
       index?: number
@@ -29,6 +32,9 @@ const SecondaryPageLayout = forwardRef(
       hideTitlebarBottomBorder?: boolean
       displayScrollToTopButton?: boolean
       titlebar?: React.ReactNode
+      showCloseButton?: boolean
+      onClose?: () => void
+      hideTitlebar?: boolean
     },
     ref
   ) => {
@@ -66,13 +72,17 @@ const SecondaryPageLayout = forwardRef(
               paddingBottom: 'calc(env(safe-area-inset-bottom) + 3rem)'
             }}
           >
-            <SecondaryPageTitlebar
-              title={title}
-              controls={controls}
-              hideBackButton={hideBackButton}
-              hideBottomBorder={hideTitlebarBottomBorder}
-              titlebar={titlebar}
-            />
+            {!hideTitlebar && (
+              <SecondaryPageTitlebar
+                title={title}
+                controls={controls}
+                hideBackButton={hideBackButton}
+                hideBottomBorder={hideTitlebarBottomBorder}
+                titlebar={titlebar}
+                showCloseButton={showCloseButton}
+                onClose={onClose}
+              />
+            )}
             {children}
           </div>
           {displayScrollToTopButton && <ScrollToTopButton />}
@@ -87,13 +97,17 @@ const SecondaryPageLayout = forwardRef(
           scrollBarClassName="z-50 pt-12"
           ref={scrollAreaRef}
         >
-          <SecondaryPageTitlebar
-            title={title}
-            controls={controls}
-            hideBackButton={hideBackButton}
-            hideBottomBorder={hideTitlebarBottomBorder}
-            titlebar={titlebar}
-          />
+          {!hideTitlebar && (
+            <SecondaryPageTitlebar
+              title={title}
+              controls={controls}
+              hideBackButton={hideBackButton}
+              hideBottomBorder={hideTitlebarBottomBorder}
+              titlebar={titlebar}
+              showCloseButton={showCloseButton}
+              onClose={onClose}
+            />
+          )}
           {children}
           <div className="h-4" />
         </ScrollArea>
@@ -110,14 +124,20 @@ export function SecondaryPageTitlebar({
   controls,
   hideBackButton = false,
   hideBottomBorder = false,
-  titlebar
+  titlebar,
+  showCloseButton = false,
+  onClose
 }: {
   title?: React.ReactNode
   controls?: React.ReactNode
   hideBackButton?: boolean
   hideBottomBorder?: boolean
   titlebar?: React.ReactNode
+  showCloseButton?: boolean
+  onClose?: () => void
 }): JSX.Element {
+  const { isSmallScreen } = useScreenSize()
+
   if (titlebar) {
     return (
       <Titlebar className="p-1" hideBottomBorder={hideBottomBorder}>
@@ -131,7 +151,7 @@ export function SecondaryPageTitlebar({
       hideBottomBorder={hideBottomBorder}
     >
       {hideBackButton ? (
-        <div className="flex gap-2 items-center pl-3 w-fit truncate text-lg font-semibold">
+        <div className="flex gap-2 items-center pl-3 w-fit truncate text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
           {title}
         </div>
       ) : (
@@ -139,7 +159,10 @@ export function SecondaryPageTitlebar({
           <BackButton>{title}</BackButton>
         </div>
       )}
-      <div className="flex-shrink-0">{controls}</div>
+      <div className="flex-shrink-0 flex items-center gap-1">
+        {controls}
+        {(!isSmallScreen || showCloseButton) && <CloseButton onClose={onClose} />}
+      </div>
     </Titlebar>
   )
 }
@@ -157,7 +180,29 @@ function BackButton({ children }: { children?: React.ReactNode }) {
       onClick={() => pop()}
     >
       <ChevronLeft />
-      <div className="truncate text-lg font-semibold">{children}</div>
+      <div className="truncate text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{children}</div>
+    </Button>
+  )
+}
+
+function CloseButton({ onClose }: { onClose?: () => void }) {
+  const { t } = useTranslation()
+  const { clear } = useSecondaryPage()
+
+  return (
+    <Button
+      variant="ghost"
+      size="titlebar-icon"
+      title={t('close')}
+      onClick={() => {
+        if (onClose) {
+          onClose()
+        } else {
+          clear()
+        }
+      }}
+    >
+      <X />
     </Button>
   )
 }

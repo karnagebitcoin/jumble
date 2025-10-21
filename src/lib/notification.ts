@@ -8,20 +8,31 @@ export function notificationFilter(
     pubkey,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    hideNotificationsFromMutedUsers,
     hideUntrustedNotifications,
     isUserTrusted
   }: {
     pubkey?: string | null
     mutePubkeySet: Set<string>
     hideContentMentioningMutedUsers?: boolean
+    hideNotificationsFromMutedUsers?: boolean
     hideUntrustedNotifications?: boolean
     isUserTrusted: (pubkey: string) => boolean
   }
 ): boolean {
+  // For zap events, the actual sender is in the 'P' tag, not event.pubkey
+  let senderPubkey = event.pubkey
+  if (event.kind === kinds.Zap) {
+    const zapSenderTag = event.tags.find(tagNameEquals('P'))
+    if (zapSenderTag) {
+      senderPubkey = zapSenderTag[1]
+    }
+  }
+
   if (
-    mutePubkeySet.has(event.pubkey) ||
+    (hideNotificationsFromMutedUsers && mutePubkeySet.has(senderPubkey)) ||
     (hideContentMentioningMutedUsers && isMentioningMutedUsers(event, mutePubkeySet)) ||
-    (hideUntrustedNotifications && !isUserTrusted(event.pubkey))
+    (hideUntrustedNotifications && !isUserTrusted(senderPubkey))
   ) {
     return false
   }

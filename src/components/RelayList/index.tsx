@@ -75,6 +75,7 @@ export default function RelayList() {
           key={relay.url}
           relayInfo={relay}
           className="clickable p-4 border-b"
+          showPinButton
           onClick={(e) => {
             e.stopPropagation()
             navigate('relay', { url: relay.url })

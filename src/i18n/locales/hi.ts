@@ -68,6 +68,7 @@ export default {
     'invalid relay URL': 'अमान्य रिले URL',
     'Add a new relay': 'नया रिले जोड़ें',
     back: 'वापस',
+    close: 'बंद करें',
     'Lost in the void': 'शून्य में खो गया',
     'Carry me home': 'मुझे घर ले चलो',
     'no replies': 'कोई उत्तर नहीं',

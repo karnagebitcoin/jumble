@@ -2,6 +2,7 @@ import Collapsible from '@/components/Collapsible'
 import FollowButton from '@/components/FollowButton'
 import Nip05 from '@/components/Nip05'
 import NpubQrCode from '@/components/NpubQrCode'
+import PrivateNote from '@/components/PrivateNote'
 import ProfileAbout from '@/components/ProfileAbout'
 import ProfileBanner from '@/components/ProfileBanner'
 import ProfileOptions from '@/components/ProfileOptions'
@@ -13,13 +14,19 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchFollowings, useFetchProfile } from '@/hooks'
 import { toMuteList, toProfileEditor } from '@/lib/link'
 import { generateImageByPubkey } from '@/lib/pubkey'
+import { randomString } from '@/lib/random'
+import { cn } from '@/lib/utils'
 import { SecondaryPageLink, useSecondaryPage } from '@/PageManager'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import client from '@/services/client.service'
+import modalManager from '@/services/modal-manager.service'
 import { Link, Zap } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import Lightbox from 'yet-another-react-lightbox'
+import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import NotFound from '../NotFound'
 import SearchInput from '../SearchInput'
 import FollowedBy from './FollowedBy'
@@ -53,6 +60,10 @@ export default function Profile({ id }: { id?: string }) {
       setTopContainer(node)
     }
   }, [])
+  const avatarLightboxId = useMemo(() => `profile-avatar-lightbox-${randomString()}`, [])
+  const [avatarLightboxIndex, setAvatarLightboxIndex] = useState(-1)
+  const bannerLightboxId = useMemo(() => `profile-banner-lightbox-${randomString()}`, [])
+  const [bannerLightboxIndex, setBannerLightboxIndex] = useState(-1)
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -96,6 +107,26 @@ export default function Profile({ id }: { id?: string }) {
     }
   }, [topContainer])
 
+  useEffect(() => {
+    if (avatarLightboxIndex >= 0) {
+      modalManager.register(avatarLightboxId, () => {
+        setAvatarLightboxIndex(-1)
+      })
+    } else {
+      modalManager.unregister(avatarLightboxId)
+    }
+  }, [avatarLightboxIndex, avatarLightboxId])
+
+  useEffect(() => {
+    if (bannerLightboxIndex >= 0) {
+      modalManager.register(bannerLightboxId, () => {
+        setBannerLightboxIndex(-1)
+      })
+    } else {
+      modalManager.unregister(bannerLightboxId)
+    }
+  }, [bannerLightboxIndex, bannerLightboxId])
+
   if (!profile && isFetching) {
     return (
       <>
@@ -114,13 +145,41 @@ export default function Profile({ id }: { id?: string }) {
   }
   if (!profile) return <NotFound />
 
-  const { banner, username, about, avatar, pubkey, website, lightningAddress } = profile
+  const { banner, username, about, avatar, pubkey, website, lightningAddress, gallery } = profile
+
+  const handleAvatarClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    if (avatar) {
+      setAvatarLightboxIndex(0)
+    }
+  }
+
+  const handleBannerClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    if (banner) {
+      setBannerLightboxIndex(0)
+    }
+  }
+
   return (
     <>
       <div ref={topContainerRef}>
         <div className="relative bg-cover bg-center mb-2">
-          <ProfileBanner banner={banner} pubkey={pubkey} className="w-full aspect-[3/1]" />
-          <Avatar className="w-24 h-24 absolute left-3 bottom-0 translate-y-1/2 border-4 border-background">
+          <ProfileBanner
+            banner={banner}
+            pubkey={pubkey}
+            className={cn(
+              'w-full aspect-[3/1]',
+              banner && 'cursor-pointer hover:opacity-90 transition-opacity'
+            )}
+            onClick={handleBannerClick}
+          />
+          <Avatar
+            className="w-24 h-24 absolute left-3 bottom-0 translate-y-1/2 border-4 border-background cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={handleAvatarClick}
+          >
             <AvatarImage src={avatar} className="object-cover object-center" />
             <AvatarFallback>
               <img src={defaultImage} />
@@ -146,6 +205,7 @@ export default function Profile({ id }: { id?: string }) {
             )}
           </div>
           <div className="pt-2">
+            {!isSelf && <PrivateNote pubkey={pubkey} />}
             <div className="flex gap-2 items-center">
               <div className="text-xl font-semibold truncate select-text">{username}</div>
               {isFollowingYou && (
@@ -196,6 +256,7 @@ export default function Profile({ id }: { id?: string }) {
               </div>
               {!isSelf && <FollowedBy pubkey={pubkey} />}
             </div>
+            {gallery && gallery.length > 0 && <ProfileGallery gallery={gallery} maxImages={8} />}
           </div>
         </div>
         <div className="px-4 pt-2 pb-0.5">

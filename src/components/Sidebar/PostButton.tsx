@@ -8,6 +8,7 @@ import SidebarItem from './SidebarItem'
 export default function PostButton({ collapse }: { collapse: boolean }) {
   const { checkLogin } = useNostr()
   const [open, setOpen] = useState(false)
+  const { compactSidebar } = useCompactSidebar()
 
   return (
     <div className="pt-4">

@@ -15,6 +15,7 @@ const UserAvatarSizeCnMap = {
   semiBig: 'w-12 h-12',
   normal: 'w-10 h-10',
   medium: 'w-9 h-9',
+  compact: 'w-8 h-8',
   small: 'w-7 h-7',
   xSmall: 'w-5 h-5',
   tiny: 'w-4 h-4'
@@ -27,7 +28,7 @@ export default function UserAvatar({
 }: {
   userId: string
   className?: string
-  size?: 'large' | 'big' | 'semiBig' | 'normal' | 'medium' | 'small' | 'xSmall' | 'tiny'
+  size?: 'large' | 'big' | 'semiBig' | 'normal' | 'medium' | 'compact' | 'small' | 'xSmall' | 'tiny'
 }) {
   const { profile } = useFetchProfile(userId)
   const defaultAvatar = useMemo(
@@ -68,7 +69,7 @@ export function SimpleUserAvatar({
   onClick
 }: {
   userId: string
-  size?: 'large' | 'big' | 'normal' | 'medium' | 'small' | 'xSmall' | 'tiny'
+  size?: 'large' | 'big' | 'normal' | 'medium' | 'compact' | 'small' | 'xSmall' | 'tiny'
   className?: string
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }) {

@@ -1,5 +1,6 @@
 import { Button, ButtonProps } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,6 +9,7 @@ const SidebarItem = forwardRef<
   ButtonProps & { title: string; collapse: boolean; description?: string; active?: boolean }
 >(({ children, title, description, className, active, collapse, ...props }, ref) => {
   const { t } = useTranslation()
+  const { compactSidebar } = useCompactSidebar()
 
   return (
     <Button
@@ -19,6 +21,7 @@ const SidebarItem = forwardRef<
         active && 'text-primary hover:text-primary bg-primary/10 hover:bg-primary/10',
         className
       )}
+      style={{ fontSize: 'var(--font-size, 14px)' }}
       variant="ghost"
       title={t(title)}
       ref={ref}

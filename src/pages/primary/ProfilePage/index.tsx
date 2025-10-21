@@ -1,3 +1,4 @@
+import PinButton from '@/components/PinButton'
 import Profile from '@/components/Profile'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
 import { useNostr } from '@/providers/NostrProvider'
@@ -11,7 +12,7 @@ const ProfilePage = forwardRef((_, ref) => {
   return (
     <PrimaryPageLayout
       pageName="profile"
-      titlebar={<ProfilePageTitlebar />}
+      titlebar={<ProfilePageTitlebar pubkey={pubkey} />}
       displayScrollToTopButton
       ref={ref}
     >
@@ -22,13 +23,16 @@ const ProfilePage = forwardRef((_, ref) => {
 ProfilePage.displayName = 'ProfilePage'
 export default ProfilePage
 
-function ProfilePageTitlebar() {
+function ProfilePageTitlebar({ pubkey }: { pubkey: string | null }) {
   const { t } = useTranslation()
 
   return (
-    <div className="flex gap-2 items-center h-full pl-3">
-      <UserRound />
-      <div className="text-lg font-semibold">{t('Profile')}</div>
+    <div className="flex gap-2 items-center justify-between h-full pl-3">
+      <div className="flex gap-2 items-center">
+        <UserRound />
+        <div className="text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{t('Profile')}</div>
+      </div>
+      {pubkey && <PinButton column={{ type: 'profile', props: { pubkey } }} />}
     </div>
   )
 }

@@ -1,21 +1,36 @@
 import {
+  BUTTON_RADIUS_VALUES,
+  DEFAULT_BUTTON_RADIUS,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_SIZE,
   DEFAULT_NIP_96_SERVICE,
+  DEFAULT_PAGE_THEME,
+  DEFAULT_PRIMARY_COLOR,
   ExtendedKind,
+  FONT_FAMILIES,
+  FONT_SIZES,
   MEDIA_AUTO_LOAD_POLICY,
   NOTIFICATION_LIST_STYLE,
+  PRIMARY_COLORS,
   SUPPORTED_KINDS,
-  StorageKey
+  StorageKey,
+  TZapSound,
+  ZAP_SOUNDS
 } from '@/constants'
 import { isSameAccount } from '@/lib/account'
 import { randomString } from '@/lib/random'
 import {
   TAccount,
   TAccountPointer,
+  TCustomFeed,
   TFeedInfo,
+  TFontFamily,
   TMediaAutoLoadPolicy,
   TMediaUploadServiceConfig,
   TNoteListMode,
   TNotificationStyle,
+  TPageTheme,
+  TPrimaryColor,
   TRelaySet,
   TThemeSetting,
   TTranslationServiceConfig
@@ -45,6 +60,8 @@ class LocalStorageService {
   private dismissedTooManyRelaysAlert: boolean = false
   private showKinds: number[] = []
   private hideContentMentioningMutedUsers: boolean = false
+  private alwaysHideMutedNotes: boolean = false
+  private hideNotificationsFromMutedUsers: boolean = false
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
@@ -172,6 +189,12 @@ class LocalStorageService {
 
     this.hideContentMentioningMutedUsers =
       window.localStorage.getItem(StorageKey.HIDE_CONTENT_MENTIONING_MUTED_USERS) === 'true'
+
+    this.alwaysHideMutedNotes =
+      window.localStorage.getItem(StorageKey.ALWAYS_HIDE_MUTED_NOTES) === 'true'
+
+    this.hideNotificationsFromMutedUsers =
+      window.localStorage.getItem(StorageKey.HIDE_NOTIFICATIONS_FROM_MUTED_USERS) === 'true'
 
     this.notificationListStyle =
       window.localStorage.getItem(StorageKey.NOTIFICATION_LIST_STYLE) ===
@@ -313,6 +336,24 @@ class LocalStorageService {
     window.localStorage.setItem(StorageKey.QUICK_ZAP, quickZap.toString())
   }
 
+  getChargeZapEnabled() {
+    return this.chargeZapEnabled
+  }
+
+  setChargeZapEnabled(enabled: boolean) {
+    this.chargeZapEnabled = enabled
+    window.localStorage.setItem(StorageKey.CHARGE_ZAP_ENABLED, enabled.toString())
+  }
+
+  getChargeZapLimit() {
+    return this.chargeZapLimit
+  }
+
+  setChargeZapLimit(limit: number) {
+    this.chargeZapLimit = limit
+    window.localStorage.setItem(StorageKey.CHARGE_ZAP_LIMIT, limit.toString())
+  }
+
   getLastReadNotificationTime(pubkey: string) {
     return this.lastReadNotificationTimeMap[pubkey] ?? 0
   }
@@ -445,6 +486,24 @@ class LocalStorageService {
   setHideContentMentioningMutedUsers(hide: boolean) {
     this.hideContentMentioningMutedUsers = hide
     window.localStorage.setItem(StorageKey.HIDE_CONTENT_MENTIONING_MUTED_USERS, hide.toString())
+  }
+
+  getAlwaysHideMutedNotes() {
+    return this.alwaysHideMutedNotes
+  }
+
+  setAlwaysHideMutedNotes(hide: boolean) {
+    this.alwaysHideMutedNotes = hide
+    window.localStorage.setItem(StorageKey.ALWAYS_HIDE_MUTED_NOTES, hide.toString())
+  }
+
+  getHideNotificationsFromMutedUsers() {
+    return this.hideNotificationsFromMutedUsers
+  }
+
+  setHideNotificationsFromMutedUsers(hide: boolean) {
+    this.hideNotificationsFromMutedUsers = hide
+    window.localStorage.setItem(StorageKey.HIDE_NOTIFICATIONS_FROM_MUTED_USERS, hide.toString())
   }
 
   getNotificationListStyle() {

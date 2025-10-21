@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'неверный URL ретранслятора',
     'Add a new relay': 'Добавить новый ретранслятор',
     back: 'назад',
+    close: 'закрыть',
     'Lost in the void': 'Потерялся в пустоте',
     'Carry me home': 'Отведи меня домой',
     'no replies': 'нет ответов',
@@ -378,6 +379,7 @@ export default {
     'Suitable Relays': 'Подходящие релея',
     'People, keywords, or relays': 'Люди, ключевые слова или релея',
     'Hide content mentioning muted users': 'Скрыть контент, упоминающий заглушённых пользователей',
+    'Hide notifications from muted users': 'Скрыть уведомления от заглушённых пользователей',
     'This note mentions a user you muted':
       'Эта заметка упоминает пользователя, которого вы заглушили',
     Filter: 'Фильтр',

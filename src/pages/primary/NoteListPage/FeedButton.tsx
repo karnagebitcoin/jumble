@@ -3,10 +3,11 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { simplifyUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
+import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { BookmarkIcon, ChevronDown, Server, UsersRound } from 'lucide-react'
+import { BookmarkIcon, ChevronDown, Hash, Search, Server, UsersRound } from 'lucide-react'
 import { forwardRef, HTMLAttributes, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -53,11 +54,17 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
     const { t } = useTranslation()
     const { feedInfo, relayUrls } = useFeed()
     const { relaySets } = useFavoriteRelays()
+    const { customFeeds } = useCustomFeeds()
     const activeRelaySet = useMemo(() => {
       return feedInfo.feedType === 'relays' && feedInfo.id
         ? relaySets.find((set) => set.id === feedInfo.id)
         : undefined
     }, [feedInfo, relaySets])
+    const activeCustomFeed = useMemo(() => {
+      return feedInfo.feedType === 'custom' && feedInfo.id
+        ? customFeeds.find((feed) => feed.id === feedInfo.id)
+        : undefined
+    }, [feedInfo, customFeeds])
     const title = useMemo(() => {
       if (feedInfo.feedType === 'following') {
         return t('Following')
@@ -65,8 +72,8 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
       if (feedInfo.feedType === 'bookmarks') {
         return t('Bookmarks')
       }
-      if (relayUrls.length === 0) {
-        return t('Choose a relay')
+      if (feedInfo.feedType === 'custom') {
+        return activeCustomFeed?.name ?? t('Custom Feed')
       }
       if (feedInfo.feedType === 'relay') {
         return simplifyUrl(feedInfo.id ?? '')
@@ -74,7 +81,25 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
       if (feedInfo.feedType === 'relays') {
         return activeRelaySet?.name ?? activeRelaySet?.id
       }
-    }, [feedInfo, activeRelaySet])
+      // Fallback
+      return t('Choose a relay')
+    }, [feedInfo, activeRelaySet, activeCustomFeed, relayUrls])
+
+    const icon = useMemo(() => {
+      if (feedInfo.feedType === 'following') {
+        return <UsersRound />
+      }
+      if (feedInfo.feedType === 'bookmarks') {
+        return <BookmarkIcon />
+      }
+      if (feedInfo.feedType === 'custom') {
+        if (activeCustomFeed?.searchParams.type === 'hashtag') {
+          return <Hash />
+        }
+        return <Search />
+      }
+      return <Server />
+    }, [feedInfo, activeCustomFeed])
 
     return (
       <div
@@ -82,14 +107,8 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
         ref={ref}
         {...props}
       >
-        {feedInfo.feedType === 'following' ? (
-          <UsersRound />
-        ) : feedInfo.feedType === 'bookmarks' ? (
-          <BookmarkIcon />
-        ) : (
-          <Server />
-        )}
-        <div className="text-lg font-semibold truncate">{title}</div>
+        {icon}
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{title}</div>
         <ChevronDown />
       </div>
     )

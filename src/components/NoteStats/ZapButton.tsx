@@ -1,3 +1,4 @@
+import { ACTUAL_ZAP_SOUNDS, ZAP_SOUNDS } from '@/constants'
 import { useNoteStatsById } from '@/hooks/useNoteStatsById'
 import { getLightningAddressFromProfile } from '@/lib/lightning'
 import { cn } from '@/lib/utils'
@@ -17,7 +18,7 @@ export default function ZapButton({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { checkLogin, pubkey } = useNostr()
   const noteStats = useNoteStatsById(event.id)
-  const { defaultZapSats, defaultZapComment, quickZap } = useZap()
+  const { defaultZapSats, defaultZapComment, quickZap, zapSound } = useZap()
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [openZapDialog, setOpenZapDialog] = useState(false)
   const [zapping, setZapping] = useState(false)
@@ -46,6 +47,21 @@ export default function ZapButton({ event }: { event: Event }) {
         throw new Error('You need to be logged in to zap')
       }
       if (zapping) return
+
+      // Play zap sound IMMEDIATELY when button is pressed
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        let soundToPlay = zapSound
+        // If random is selected, pick a random sound
+        if (zapSound === ZAP_SOUNDS.RANDOM) {
+          const randomIndex = Math.floor(Math.random() * ACTUAL_ZAP_SOUNDS.length)
+          soundToPlay = ACTUAL_ZAP_SOUNDS[randomIndex]
+        }
+        const audio = new Audio(`/sounds/${soundToPlay}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
+      }
 
       setZapping(true)
       const zapResult = await lightning.zap(pubkey, event, defaultZapSats, defaultZapComment)

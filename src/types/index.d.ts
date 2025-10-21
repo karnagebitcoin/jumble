@@ -8,6 +8,12 @@ export type TFeedSubRequest = {
   filter: Omit<Filter, 'since' | 'until'>
 }
 
+export type TGalleryImage = {
+  url: string
+  description?: string
+  link?: string
+}
+
 export type TProfile = {
   username: string
   pubkey: string
@@ -22,6 +28,7 @@ export type TProfile = {
   lud16?: string
   lightningAddress?: string
   created_at?: number
+  gallery?: TGalleryImage[]
 }
 export type TMailboxRelayScope = 'read' | 'write' | 'both'
 export type TMailboxRelay = {
@@ -74,6 +81,24 @@ export type TConfig = {
 export type TThemeSetting = 'light' | 'dark' | 'system'
 export type TTheme = 'light' | 'dark'
 
+export type TPageTheme = 'default' | 'pure-black'
+
+export type TPrimaryColor = 'RED' | 'ORANGE' | 'AMBER' | 'YELLOW' | 'LIME' | 'GREEN' | 'EMERALD' | 'TEAL' | 'CYAN' | 'SKY' | 'BLUE' | 'INDIGO' | 'VIOLET' | 'PURPLE' | 'FUCHSIA' | 'PINK' | 'ROSE'
+
+export type TFontFamily = 'DEFAULT' | 'SYSTEM' | 'IBM_PLEX_SANS' | 'LATO' | 'OUTFIT' | 'ROBOTO'
+
+export type TLayoutMode = 'boxed' | 'full-width'
+
+export type TDeckViewMode = 'standard' | 'multi-column'
+
+export type TPinnedColumnType = 'explore' | 'notifications' | 'profile' | 'search' | 'relay' | 'relays' | 'custom' | 'bookmarks'
+
+export type TPinnedColumn = {
+  id: string
+  type: TPinnedColumnType
+  props?: any
+}
+
 export type TDraftEvent = Pick<Event, 'content' | 'created_at' | 'kind' | 'tags'>
 
 export type TNip07 = {
@@ -106,8 +131,14 @@ export type TAccount = {
 
 export type TAccountPointer = Pick<TAccount, 'pubkey' | 'signerType'>
 
-export type TFeedType = 'following' | 'relays' | 'relay' | 'bookmarks'
+export type TFeedType = 'following' | 'relays' | 'relay' | 'bookmarks' | 'custom'
 export type TFeedInfo = { feedType: TFeedType; id?: string }
+
+export type TCustomFeed = {
+  id: string
+  name: string
+  searchParams: TSearchParams
+}
 
 export type TLanguage = 'en' | 'zh' | 'pl'
 

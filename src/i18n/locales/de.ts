@@ -69,6 +69,7 @@ export default {
     'invalid relay URL': 'Ungültige Relay-URL',
     'Add a new relay': 'Neues Relay hinzufügen',
     back: 'Zurück',
+    close: 'Schließen',
     'Lost in the void': 'Verloren im Nichts',
     'Carry me home': 'Bring mich nach Hause',
     'no replies': 'keine Antworten',
@@ -381,6 +382,7 @@ export default {
     'Suitable Relays': 'Geeignete Relays',
     'People, keywords, or relays': 'Personen, Schlüsselwörter oder Relays',
     'Hide content mentioning muted users': 'Inhalte ausblenden, die stumme Benutzer erwähnen',
+    'Hide notifications from muted users': 'Benachrichtigungen von stummgeschalteten Benutzern ausblenden',
     'This note mentions a user you muted':
       'Diese Notiz erwähnt einen Benutzer, den Sie stumm geschaltet haben',
     Filter: 'Filter',

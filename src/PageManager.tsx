@@ -1,8 +1,13 @@
 import Sidebar from '@/components/Sidebar'
+import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 import { cn } from '@/lib/utils'
 import NoteListPage from '@/pages/primary/NoteListPage'
 import HomePage from '@/pages/secondary/HomePage'
 import { CurrentRelaysProvider } from '@/providers/CurrentRelaysProvider'
+import { useDeckView } from '@/providers/DeckViewProvider'
+import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { usePageTheme } from '@/providers/PageThemeProvider'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { TPageRef } from '@/types'
 import {
   cloneElement,
@@ -18,6 +23,7 @@ import {
 import BackgroundAudio from './components/BackgroundAudio'
 import BottomNavigationBar from './components/BottomNavigationBar'
 import CreateWalletGuideToast from './components/CreateWalletGuideToast'
+import DeckColumn from './components/DeckColumn'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import ExplorePage from './pages/primary/ExplorePage'
@@ -28,8 +34,10 @@ import RelayPage from './pages/primary/RelayPage'
 import SearchPage from './pages/primary/SearchPage'
 import { NotificationProvider } from './providers/NotificationProvider'
 import { useScreenSize } from './providers/ScreenSizeProvider'
+import { useWidgetSidebarDismissed } from './providers/WidgetSidebarDismissedProvider'
 import { routes } from './routes'
 import modalManager from './services/modal-manager.service'
+import { Sheet, SheetContent } from './components/ui/sheet'
 
 export type TPrimaryPageName = keyof typeof PRIMARY_PAGE_MAP
 
@@ -42,6 +50,7 @@ type TPrimaryPageContext = {
 type TSecondaryPageContext = {
   push: (url: string) => void
   pop: () => void
+  clear: () => void
   currentIndex: number
 }
 
@@ -93,6 +102,7 @@ export function useSecondaryPage() {
 }
 
 export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
+  const { pageTheme } = usePageTheme()
   const [currentPrimaryPage, setCurrentPrimaryPage] = useState<TPrimaryPageName>('home')
   const [primaryPages, setPrimaryPages] = useState<
     { name: TPrimaryPageName; element: ReactNode; props?: any }[]
@@ -104,7 +114,18 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
   ])
   const [secondaryStack, setSecondaryStack] = useState<TStackItem[]>([])
   const { isSmallScreen } = useScreenSize()
+  const { layoutMode } = useLayoutMode()
+  const { deckViewMode, pinnedColumns, unpinColumn } = useDeckView()
+  const { setCompactSidebar } = useCompactSidebar()
+  const { widgetSidebarDismissed } = useWidgetSidebarDismissed()
   const ignorePopStateRef = useRef(false)
+
+  // Auto-collapse sidebar when in multi-column mode
+  useEffect(() => {
+    if (layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN) {
+      setCompactSidebar(true)
+    }
+  }, [layoutMode, deckViewMode, setCompactSidebar])
 
   useEffect(() => {
     if (['/npub1', '/nprofile1'].some((prefix) => window.location.pathname.startsWith(prefix))) {
@@ -170,13 +191,25 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         const currentItem = pre[pre.length - 1] as TStackItem | undefined
         const currentIndex = currentItem?.index
         if (!state) {
-          if (window.location.pathname + window.location.search + window.location.hash !== '/') {
-            // Just change the URL
-            return pre
+          const currentUrl = window.location.pathname + window.location.search + window.location.hash
+          if (currentUrl !== '/') {
+            // State is null but URL is not root - this shouldn't happen normally
+            // Clear the stack and let the system navigate to the URL
+            return []
           } else {
             // Back to root
             state = { index: -1, url: '/' }
           }
+        }
+
+        // Ensure state has a valid URL
+        if (!state.url) {
+          const currentUrl = window.location.pathname + window.location.search + window.location.hash
+          if (currentUrl === '/') {
+            return []
+          }
+          // Try to use the current URL from the browser
+          state.url = currentUrl
         }
 
         // Go forward
@@ -190,20 +223,22 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         }
 
         // Go back
-        const newStack = pre.filter((item) => item.index <= state!.index)
+        const newStack = pre.filter((item) => item.index <= state.index)
         const topItem = newStack[newStack.length - 1] as TStackItem | undefined
         if (!topItem) {
           // Create a new stack item if it's not exist (e.g. when the user refreshes the page, the stack will be empty)
-          const { component, ref } = findAndCreateComponent(state.url, state.index)
-          if (component) {
-            newStack.push({
-              index: state.index,
-              url: state.url,
-              component,
-              ref
-            })
+          if (state.url) {
+            const { component, ref } = findAndCreateComponent(state.url, state.index)
+            if (component) {
+              newStack.push({
+                index: state.index,
+                url: state.url,
+                component,
+                ref
+              })
+            }
           }
-        } else if (!topItem.component) {
+        } else if (!topItem.component && topItem.url) {
           // Load the component if it's not cached
           const { component, ref } = findAndCreateComponent(topItem.url, state.index)
           if (component) {
@@ -292,6 +327,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
           value={{
             push: pushSecondaryPage,
             pop: popSecondaryPage,
+            clear: clearSecondaryPages,
             currentIndex: secondaryStack.length
               ? secondaryStack[secondaryStack.length - 1].index
               : 0
@@ -299,28 +335,30 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         >
           <CurrentRelaysProvider>
             <NotificationProvider>
-              {!!secondaryStack.length &&
-                secondaryStack.map((item, index) => (
+              <div className={cn(layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl mx-auto")}>
+                {!!secondaryStack.length &&
+                  secondaryStack.map((item, index) => (
+                    <div
+                      key={item.index}
+                      style={{
+                        display: index === secondaryStack.length - 1 ? 'block' : 'none'
+                      }}
+                    >
+                      {item.component}
+                    </div>
+                  ))}
+                {primaryPages.map(({ name, element, props }) => (
                   <div
-                    key={item.index}
+                    key={name}
                     style={{
-                      display: index === secondaryStack.length - 1 ? 'block' : 'none'
+                      display:
+                        secondaryStack.length === 0 && currentPrimaryPage === name ? 'block' : 'none'
                     }}
                   >
-                    {item.component}
+                    {props ? cloneElement(element as React.ReactElement, props) : element}
                   </div>
                 ))}
-              {primaryPages.map(({ name, element, props }) => (
-                <div
-                  key={name}
-                  style={{
-                    display:
-                      secondaryStack.length === 0 && currentPrimaryPage === name ? 'block' : 'none'
-                  }}
-                >
-                  {props ? cloneElement(element as React.ReactElement, props) : element}
-                </div>
-              ))}
+              </div>
               <BottomNavigationBar />
               <TooManyRelaysAlertDialog />
               <CreateWalletGuideToast />
@@ -343,6 +381,7 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
         value={{
           push: pushSecondaryPage,
           pop: popSecondaryPage,
+          clear: clearSecondaryPages,
           currentIndex: secondaryStack.length ? secondaryStack[secondaryStack.length - 1].index : 0
         }}
       >
@@ -388,8 +427,28 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                       <HomePage />
                     </div>
                   </div>
+                  <HomePageWrapper secondaryStackLength={secondaryStack.length} widgetSidebarDismissed={widgetSidebarDismissed}>
+                    {secondaryStack.map((item, index) => (
+                      <div
+                        key={item.index}
+                        className="flex flex-col h-full w-full"
+                        style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+                      >
+                        {item.component}
+                      </div>
+                    ))}
+                    {!widgetSidebarDismissed && (
+                      <div
+                        key="home"
+                        className="w-full"
+                        style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+                      >
+                        <HomePage />
+                      </div>
+                    )}
+                  </HomePageWrapper>
                 </div>
-              </div>
+              )}
             </div>
             <TooManyRelaysAlertDialog />
             <CreateWalletGuideToast />
@@ -436,7 +495,8 @@ function isCurrentPage(stack: TStackItem[], url: string) {
   return currentPage.url === url
 }
 
-function findAndCreateComponent(url: string, index: number) {
+function findAndCreateComponent(url: string | undefined, index: number) {
+  if (!url) return {}
   const path = url.split('?')[0].split('#')[0]
   for (const { matcher, element } of routes) {
     const match = matcher(path)
@@ -451,10 +511,12 @@ function findAndCreateComponent(url: string, index: number) {
 
 function pushNewPageToStack(
   stack: TStackItem[],
-  url: string,
+  url: string | undefined,
   maxStackSize = 5,
   specificIndex?: number
 ) {
+  if (!url) return { newStack: stack, newItem: null }
+
   const currentItem = stack[stack.length - 1]
   const currentIndex = specificIndex ?? (currentItem ? currentItem.index + 1 : 0)
 
@@ -469,4 +531,143 @@ function pushNewPageToStack(
     newStack[lastCachedIndex].component = null
   }
   return { newStack, newItem }
+}
+
+function HomePageWrapper({
+  children,
+  secondaryStackLength,
+  widgetSidebarDismissed
+}: {
+  children: ReactNode
+  secondaryStackLength: number
+  widgetSidebarDismissed: boolean
+}) {
+  const { pageTheme } = usePageTheme()
+
+  // We're on the home page (widgets sidebar) when secondaryStackLength === 0 and not dismissed
+  const isHomePage = secondaryStackLength === 0 && !widgetSidebarDismissed
+  // We're in empty/dismissed state when secondaryStackLength === 0 and dismissed
+  const isDismissed = secondaryStackLength === 0 && widgetSidebarDismissed
+
+  return (
+    <div
+      className={cn(
+        'rounded-lg overflow-hidden',
+        // Make the wrapper transparent when on home page or when dismissed
+        isHomePage || isDismissed ? 'bg-transparent shadow-none' : 'bg-background shadow-lg',
+        pageTheme === 'pure-black' && !isHomePage && !isDismissed && 'border border-neutral-900'
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+function DeckLayout({
+  primaryPages,
+  currentPrimaryPage,
+  secondaryStack,
+  pinnedColumns
+}: {
+  primaryPages: { name: TPrimaryPageName; element: ReactNode; props?: any }[]
+  currentPrimaryPage: TPrimaryPageName
+  secondaryStack: TStackItem[]
+  pinnedColumns: any[]
+}) {
+  const { pageTheme } = usePageTheme()
+  const { pop } = useSecondaryPage()
+
+  // Filter out pinned columns that fail to render (no content)
+  const validPinnedColumns = pinnedColumns.filter((column) => {
+    // Check if the column would have content
+    switch (column.type) {
+      case 'custom':
+        return !!column.props?.customFeedId
+      case 'relay':
+        return !!column.props?.url
+      case 'relays':
+        return !!column.props?.activeRelaySetId
+      case 'profile':
+        return !!column.props?.pubkey
+      case 'search':
+        return !!column.props?.searchParams
+      default:
+        // explore, notifications, bookmarks always have content
+        return true
+    }
+  })
+
+  // Calculate the number of columns (no right sidebar in multi-column mode)
+  const columnCount = 1 + validPinnedColumns.length // main + valid pinned only
+
+  console.log('DeckLayout - pinnedColumns.length:', pinnedColumns.length)
+  console.log('DeckLayout - validPinnedColumns.length:', validPinnedColumns.length)
+  console.log('DeckLayout - columnCount:', columnCount)
+  console.log('DeckLayout - pinnedColumns:', pinnedColumns)
+  console.log('DeckLayout - validPinnedColumns:', validPinnedColumns)
+
+  // Check if drawer should be open
+  const isDrawerOpen = secondaryStack.length > 0
+
+  return (
+    <>
+      <div
+        className="gap-2 w-full px-2 py-2 overflow-x-auto"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columnCount}, 1fr)`
+        }}
+      >
+        {/* Main column */}
+        <div className={cn(
+          "rounded-lg shadow-lg bg-background overflow-hidden w-full",
+          pageTheme === 'pure-black' && "border border-neutral-900"
+        )}>
+          {primaryPages.map(({ name, element, props }) => (
+            <div
+              key={name}
+              className="flex flex-col h-full w-full"
+              style={{
+                display: currentPrimaryPage === name ? 'block' : 'none'
+              }}
+            >
+              {props ? cloneElement(element as React.ReactElement, props) : element}
+            </div>
+          ))}
+        </div>
+
+        {/* Pinned columns */}
+        {validPinnedColumns.map((column) => (
+          <DeckColumn key={column.id} column={column} />
+        ))}
+      </div>
+
+      {/* Right drawer for secondary pages in multi-column mode */}
+      <Sheet open={isDrawerOpen} onOpenChange={(open) => {
+        if (!open) {
+          // Close the drawer by popping the page
+          pop()
+        }
+      }}>
+        <SheetContent
+          side="right"
+          className={cn(
+            "min-w-[520px] sm:min-w-[520px] p-0 gap-0",
+            pageTheme === 'pure-black' && "border-l border-neutral-900"
+          )}
+          hideClose
+        >
+          {secondaryStack.map((item, index) => (
+            <div
+              key={item.index}
+              className="flex flex-col h-full w-full"
+              style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+            >
+              {item.component}
+            </div>
+          ))}
+        </SheetContent>
+      </Sheet>
+    </>
+  )
 }

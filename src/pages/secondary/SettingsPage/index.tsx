@@ -1,12 +1,13 @@
 import AboutInfoDialog from '@/components/AboutInfoDialog'
-import Donation from '@/components/Donation'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import {
+  toAppearanceSettings,
   toGeneralSettings,
   toPostSettings,
   toRelaySettings,
   toTranslation,
-  toWallet
+  toWallet,
+  toWidgetsSettings
 } from '@/lib/link'
 import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
@@ -18,6 +19,8 @@ import {
   Info,
   KeyRound,
   Languages,
+  LayoutGrid,
+  Palette,
   PencilLine,
   Server,
   Settings2,
@@ -39,6 +42,20 @@ const SettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
         <div className="flex items-center gap-4">
           <Settings2 />
           <div>{t('General')}</div>
+        </div>
+        <ChevronRight />
+      </SettingItem>
+      <SettingItem className="clickable" onClick={() => push(toAppearanceSettings())}>
+        <div className="flex items-center gap-4">
+          <Palette />
+          <div>{t('Appearance')}</div>
+        </div>
+        <ChevronRight />
+      </SettingItem>
+      <SettingItem className="clickable" onClick={() => push(toWidgetsSettings())}>
+        <div className="flex items-center gap-4">
+          <LayoutGrid />
+          <div>{t('Widgets')}</div>
         </div>
         <ChevronRight />
       </SettingItem>
@@ -122,9 +139,6 @@ const SettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
           </div>
         </SettingItem>
       </AboutInfoDialog>
-      <div className="px-4 mt-4">
-        <Donation />
-      </div>
     </SecondaryPageLayout>
   )
 })

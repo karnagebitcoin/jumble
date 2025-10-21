@@ -15,7 +15,7 @@ type TFeedContext = {
   isReady: boolean
   switchFeed: (
     feedType: TFeedType,
-    options?: { activeRelaySetId?: string; pubkey?: string; relay?: string | null }
+    options?: { activeRelaySetId?: string; pubkey?: string; relay?: string | null; customFeedId?: string }
   ) => Promise<void>
 }
 
@@ -46,14 +46,23 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      let feedInfo: TFeedInfo = {
-        feedType: 'relay',
-        id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
-      }
+      let feedInfo: TFeedInfo
       if (pubkey) {
+        // For logged in users, check stored feed or default to following
         const storedFeedInfo = storage.getFeedInfo(pubkey)
         if (storedFeedInfo) {
           feedInfo = storedFeedInfo
+        } else {
+          // Default to following feed for logged in users
+          feedInfo = { feedType: 'following' }
+          // Initialize with following feed
+          return await switchFeed('following', { pubkey })
+        }
+      } else {
+        // For logged out users, default to a relay feed
+        feedInfo = {
+          feedType: 'relay',
+          id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
         }
       }
 
@@ -73,6 +82,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       if (feedInfo.feedType === 'bookmarks' && pubkey) {
         return await switchFeed('bookmarks', { pubkey })
       }
+
+      if (feedInfo.feedType === 'custom') {
+        return await switchFeed('custom', { customFeedId: feedInfo.id })
+      }
     }
 
     init()
@@ -84,6 +97,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       activeRelaySetId?: string | null
       pubkey?: string | null
       relay?: string | null
+      customFeedId?: string | null
     } = {}
   ) => {
     setIsReady(false)
@@ -154,6 +168,21 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
       }
 
       const newFeedInfo = { feedType }
+      setFeedInfo(newFeedInfo)
+      feedInfoRef.current = newFeedInfo
+      storage.setFeedInfo(newFeedInfo, pubkey)
+
+      setRelayUrls([])
+      setIsReady(true)
+      return
+    }
+    if (feedType === 'custom') {
+      if (!options.customFeedId) {
+        setIsReady(true)
+        return
+      }
+
+      const newFeedInfo = { feedType, id: options.customFeedId }
       setFeedInfo(newFeedInfo)
       feedInfoRef.current = newFeedInfo
       storage.setFeedInfo(newFeedInfo, pubkey)

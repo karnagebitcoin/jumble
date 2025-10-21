@@ -1,5 +1,6 @@
 import Explore from '@/components/Explore'
 import FollowingFavoriteRelayList from '@/components/FollowingFavoriteRelayList'
+import PinButton from '@/components/PinButton'
 import Tabs from '@/components/Tabs'
 import { Button } from '@/components/ui/button'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
@@ -41,22 +42,25 @@ function ExplorePageTitlebar() {
     <div className="flex gap-2 justify-between h-full">
       <div className="flex gap-2 items-center h-full pl-3">
         <Compass />
-        <div className="text-lg font-semibold">{t('Explore')}</div>
+        <div className="text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{t('Explore')}</div>
       </div>
-      <Button
-        variant="ghost"
-        size="titlebar-icon"
-        className="relative w-fit px-3"
-        onClick={() => {
-          window.open(
-            'https://github.com/CodyTseng/awesome-nostr-relays/issues/new?template=add-relay.md',
-            '_blank'
-          )
-        }}
-      >
-        <Plus size={16} />
-        {t('Submit Relay')}
-      </Button>
+      <div className="flex gap-1 items-center">
+        <PinButton column={{ type: 'explore' }} />
+        <Button
+          variant="ghost"
+          size="titlebar-icon"
+          className="relative w-fit px-3"
+          onClick={() => {
+            window.open(
+              'https://github.com/CodyTseng/awesome-nostr-relays/issues/new?template=add-relay.md',
+              '_blank'
+            )
+          }}
+        >
+          <Plus size={16} />
+          {t('Submit Relay')}
+        </Button>
+      </div>
     </div>
   )
 }

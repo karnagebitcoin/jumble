@@ -1,5 +1,6 @@
 import HideUntrustedContentButton from '@/components/HideUntrustedContentButton'
 import NotificationList from '@/components/NotificationList'
+import PinButton from '@/components/PinButton'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
 import { usePrimaryPage } from '@/PageManager'
 import { Bell } from 'lucide-react'
@@ -39,9 +40,12 @@ function NotificationListPageTitlebar() {
     <div className="flex gap-2 items-center justify-between h-full pl-3">
       <div className="flex items-center gap-2">
         <Bell />
-        <div className="text-lg font-semibold">{t('Notifications')}</div>
+        <div className="text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{t('Notifications')}</div>
       </div>
-      <HideUntrustedContentButton type="notifications" size="titlebar-icon" />
+      <div className="flex gap-1 items-center">
+        <PinButton column={{ type: 'notifications' }} />
+        <HideUntrustedContentButton type="notifications" size="titlebar-icon" />
+      </div>
     </div>
   )
 }

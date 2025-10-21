@@ -1,11 +1,15 @@
 import { useSecondaryPage } from '@/PageManager'
 import BookmarkList from '@/components/BookmarkList'
+import NormalFeed from '@/components/NormalFeed'
 import PostEditor from '@/components/PostEditor'
 import RelayInfo from '@/components/RelayInfo'
+import PinButton from '@/components/PinButton'
 import { Button } from '@/components/ui/button'
+import { BIG_RELAY_URLS, SEARCHABLE_RELAY_URLS } from '@/constants'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
 import { toSearch } from '@/lib/link'
 import { useCurrentRelays } from '@/providers/CurrentRelaysProvider'
+import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
@@ -31,6 +35,7 @@ const NoteListPage = forwardRef((_, ref) => {
   const layoutRef = useRef<TPageRef>(null)
   const { pubkey, checkLogin } = useNostr()
   const { feedInfo, relayUrls, isReady } = useFeed()
+  const { customFeeds } = useCustomFeeds()
   const [showRelayDetails, setShowRelayDetails] = useState(false)
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -71,6 +76,33 @@ const NoteListPage = forwardRef((_, ref) => {
       )
     } else {
       content = <BookmarkList />
+    }
+  } else if (feedInfo.feedType === 'custom') {
+    const customFeed = customFeeds.find((f) => f.id === feedInfo.id)
+    if (!customFeed) {
+      content = (
+        <div className="text-center text-sm text-muted-foreground">
+          {t('Custom feed not found')}
+        </div>
+      )
+    } else {
+      // Render the feed based on search params
+      const { searchParams } = customFeed
+      if (searchParams.type === 'notes') {
+        content = (
+          <NormalFeed
+            subRequests={[{ urls: SEARCHABLE_RELAY_URLS, filter: { search: searchParams.search } }]}
+            showRelayCloseReason
+          />
+        )
+      } else if (searchParams.type === 'hashtag') {
+        content = (
+          <NormalFeed
+            subRequests={[{ urls: BIG_RELAY_URLS, filter: { '#t': [searchParams.search] } }]}
+            showRelayCloseReason
+          />
+        )
+      }
     }
   } else if (feedInfo.feedType === 'following') {
     content = <FollowingFeed />
@@ -117,11 +149,30 @@ function NoteListPageTitlebar({
   setShowRelayDetails?: Dispatch<SetStateAction<boolean>>
 }) {
   const { isSmallScreen } = useScreenSize()
+  const { feedInfo } = useFeed()
+  const { customFeeds } = useCustomFeeds()
+
+  // Determine pin button based on feed type
+  let pinButton: React.ReactNode = null
+
+  if (feedInfo.feedType === 'bookmarks') {
+    pinButton = <PinButton column={{ type: 'bookmarks' }} />
+  } else if (feedInfo.feedType === 'relay' && feedInfo.id) {
+    pinButton = <PinButton column={{ type: 'relay', props: { url: feedInfo.id } }} />
+  } else if (feedInfo.feedType === 'relays' && feedInfo.id) {
+    pinButton = <PinButton column={{ type: 'relays', props: { activeRelaySetId: feedInfo.id } }} />
+  } else if (feedInfo.feedType === 'custom' && feedInfo.id) {
+    const customFeed = customFeeds.find((f) => f.id === feedInfo.id)
+    if (customFeed) {
+      pinButton = <PinButton column={{ type: 'custom', props: { customFeedId: feedInfo.id } }} />
+    }
+  }
 
   return (
     <div className="flex gap-1 items-center h-full justify-between">
       <FeedButton className="flex-1 max-w-fit w-0" />
       <div className="shrink-0 flex gap-1 items-center">
+        {pinButton}
         {setShowRelayDetails && (
           <Button
             variant="ghost"

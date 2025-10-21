@@ -13,6 +13,12 @@ type TContentPolicyContext = {
   hideContentMentioningMutedUsers?: boolean
   setHideContentMentioningMutedUsers?: (hide: boolean) => void
 
+  alwaysHideMutedNotes?: boolean
+  setAlwaysHideMutedNotes?: (hide: boolean) => void
+
+  hideNotificationsFromMutedUsers?: boolean
+  setHideNotificationsFromMutedUsers?: (hide: boolean) => void
+
   autoLoadMedia: boolean
   mediaAutoLoadPolicy: TMediaAutoLoadPolicy
   setMediaAutoLoadPolicy: (policy: TMediaAutoLoadPolicy) => void
@@ -33,6 +39,12 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
   const [defaultShowNsfw, setDefaultShowNsfw] = useState(storage.getDefaultShowNsfw())
   const [hideContentMentioningMutedUsers, setHideContentMentioningMutedUsers] = useState(
     storage.getHideContentMentioningMutedUsers()
+  )
+  const [alwaysHideMutedNotes, setAlwaysHideMutedNotes] = useState(
+    storage.getAlwaysHideMutedNotes()
+  )
+  const [hideNotificationsFromMutedUsers, setHideNotificationsFromMutedUsers] = useState(
+    storage.getHideNotificationsFromMutedUsers()
   )
   const [mediaAutoLoadPolicy, setMediaAutoLoadPolicy] = useState(storage.getMediaAutoLoadPolicy())
   const [connectionType, setConnectionType] = useState((navigator as any).connection?.type)
@@ -78,6 +90,16 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
     setHideContentMentioningMutedUsers(hide)
   }
 
+  const updateAlwaysHideMutedNotes = (hide: boolean) => {
+    storage.setAlwaysHideMutedNotes(hide)
+    setAlwaysHideMutedNotes(hide)
+  }
+
+  const updateHideNotificationsFromMutedUsers = (hide: boolean) => {
+    storage.setHideNotificationsFromMutedUsers(hide)
+    setHideNotificationsFromMutedUsers(hide)
+  }
+
   const updateMediaAutoLoadPolicy = (policy: TMediaAutoLoadPolicy) => {
     storage.setMediaAutoLoadPolicy(policy)
     setMediaAutoLoadPolicy(policy)
@@ -92,6 +114,10 @@ export function ContentPolicyProvider({ children }: { children: React.ReactNode 
         setDefaultShowNsfw: updateDefaultShowNsfw,
         hideContentMentioningMutedUsers,
         setHideContentMentioningMutedUsers: updateHideContentMentioningMutedUsers,
+        alwaysHideMutedNotes,
+        setAlwaysHideMutedNotes: updateAlwaysHideMutedNotes,
+        hideNotificationsFromMutedUsers,
+        setHideNotificationsFromMutedUsers: updateHideNotificationsFromMutedUsers,
         autoLoadMedia,
         mediaAutoLoadPolicy,
         setMediaAutoLoadPolicy: updateMediaAutoLoadPolicy

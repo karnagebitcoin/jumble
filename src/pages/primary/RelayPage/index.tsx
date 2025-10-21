@@ -1,3 +1,4 @@
+import PinButton from '@/components/PinButton'
 import Relay from '@/components/Relay'
 import PrimaryPageLayout from '@/layouts/PrimaryPageLayout'
 import { normalizeUrl, simplifyUrl } from '@/lib/url'
@@ -23,9 +24,12 @@ export default RelayPage
 
 function RelayPageTitlebar({ url }: { url?: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 h-full">
-      <Server />
-      <div className="text-lg font-semibold truncate">{simplifyUrl(url ?? '')}</div>
+    <div className="flex items-center justify-between gap-2 px-3 h-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Server className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{simplifyUrl(url ?? '')}</div>
+      </div>
+      {url && <PinButton column={{ type: 'relay', props: { url } }} />}
     </div>
   )
 }

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ACTUAL_ZAP_SOUNDS, ZAP_SOUNDS } from '@/constants'
 import { useNostr } from '@/providers/NostrProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useZap } from '@/providers/ZapProvider'
@@ -136,7 +137,7 @@ function ZapDialogContent({
 }) {
   const { t, i18n } = useTranslation()
   const { pubkey } = useNostr()
-  const { defaultZapSats, defaultZapComment } = useZap()
+  const { defaultZapSats, defaultZapComment, zapSound } = useZap()
   const [sats, setSats] = useState(defaultAmount ?? defaultZapSats)
   const [comment, setComment] = useState(defaultComment ?? defaultZapComment)
   const [zapping, setZapping] = useState(false)
@@ -179,6 +180,22 @@ function ZapDialogContent({
       if (!pubkey) {
         throw new Error('You need to be logged in to zap')
       }
+
+      // Play zap sound IMMEDIATELY when zap button is pressed
+      if (zapSound !== ZAP_SOUNDS.NONE) {
+        let soundToPlay = zapSound
+        // If random is selected, pick a random sound
+        if (zapSound === ZAP_SOUNDS.RANDOM) {
+          const randomIndex = Math.floor(Math.random() * ACTUAL_ZAP_SOUNDS.length)
+          soundToPlay = ACTUAL_ZAP_SOUNDS[randomIndex]
+        }
+        const audio = new Audio(`/sounds/${soundToPlay}.mp3`)
+        audio.volume = 0.5
+        audio.play().catch(() => {
+          // Ignore errors (e.g., autoplay policy restrictions)
+        })
+      }
+
       setZapping(true)
       const zapResult = await lightning.zap(pubkey, event ?? recipient, sats, comment, () =>
         setOpen(false)

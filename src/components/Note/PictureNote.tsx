@@ -4,13 +4,13 @@ import { useMemo } from 'react'
 import Content from '../Content'
 import ImageGallery from '../ImageGallery'
 
-export default function PictureNote({ event, className }: { event: Event; className?: string }) {
+export default function PictureNote({ event, className, compactMedia = false }: { event: Event; className?: string; compactMedia?: boolean }) {
   const imageInfos = useMemo(() => getImetaInfosFromEvent(event), [event])
 
   return (
     <div className={className}>
-      <Content event={event} />
-      {imageInfos.length > 0 && <ImageGallery images={imageInfos} />}
+      <Content event={event} compactMedia={compactMedia} />
+      {imageInfos.length > 0 && <ImageGallery images={imageInfos} compactMedia={compactMedia} />}
     </div>
   )
 }

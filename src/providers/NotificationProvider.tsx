@@ -35,7 +35,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const { pubkey, notificationsSeenAt, updateNotificationsSeenAt } = useNostr()
   const { hideUntrustedNotifications, isUserTrusted } = useUserTrust()
   const { mutePubkeySet } = useMuteList()
-  const { hideContentMentioningMutedUsers } = useContentPolicy()
+  const { hideContentMentioningMutedUsers, hideNotificationsFromMutedUsers } = useContentPolicy()
   const [newNotifications, setNewNotifications] = useState<NostrEvent[]>([])
   const [readNotificationIdSet, setReadNotificationIdSet] = useState<Set<string>>(new Set())
   const filteredNewNotifications = useMemo(() => {
@@ -52,6 +52,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           pubkey,
           mutePubkeySet,
           hideContentMentioningMutedUsers,
+          hideNotificationsFromMutedUsers,
           hideUntrustedNotifications,
           isUserTrusted
         })
@@ -66,6 +67,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     notificationsSeenAt,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    hideNotificationsFromMutedUsers,
     hideUntrustedNotifications,
     isUserTrusted,
     active

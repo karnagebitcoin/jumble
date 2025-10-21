@@ -2,6 +2,7 @@ import { useSecondaryPage } from '@/PageManager'
 import { ExtendedKind, SUPPORTED_KINDS } from '@/constants'
 import { getParentBech32Id, isNsfwEvent } from '@/lib/event'
 import { toNote } from '@/lib/link'
+import { cn } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
@@ -39,7 +40,9 @@ export default function Note({
   size = 'normal',
   className,
   hideParentNotePreview = false,
-  showFull = false
+  showFull = false,
+  compactMedia = false,
+  metadataClassName
 }: {
   event: Event
   originalNoteId?: string
@@ -47,6 +50,8 @@ export default function Note({
   className?: string
   hideParentNotePreview?: boolean
   showFull?: boolean
+  compactMedia?: boolean
+  metadataClassName?: string
 }) {
   const { push } = useSecondaryPage()
   const { isSmallScreen } = useScreenSize()
@@ -54,10 +59,15 @@ export default function Note({
     () => (hideParentNotePreview ? undefined : getParentBech32Id(event)),
     [event, hideParentNotePreview]
   )
-  const { defaultShowNsfw } = useContentPolicy()
+  const { defaultShowNsfw, alwaysHideMutedNotes } = useContentPolicy()
   const [showNsfw, setShowNsfw] = useState(false)
   const { mutePubkeySet } = useMuteList()
   const [showMuted, setShowMuted] = useState(false)
+
+  // If alwaysHideMutedNotes is enabled, completely hide the note
+  if (alwaysHideMutedNotes && mutePubkeySet.has(event.pubkey)) {
+    return null
+  }
 
   let content: React.ReactNode
   if (
@@ -90,20 +100,20 @@ export default function Note({
   } else if (event.kind === ExtendedKind.POLL) {
     content = (
       <>
-        <Content className="mt-2" event={event} />
+        <Content className="mt-2" event={event} compactMedia={compactMedia} />
         <Poll className="mt-2" event={event} />
       </>
     )
   } else if (event.kind === ExtendedKind.VOICE || event.kind === ExtendedKind.VOICE_COMMENT) {
     content = <AudioPlayer className="mt-2" src={event.content} />
   } else if (event.kind === ExtendedKind.PICTURE) {
-    content = <PictureNote className="mt-2" event={event} />
+    content = <PictureNote className="mt-2" event={event} compactMedia={compactMedia} />
   } else if (event.kind === ExtendedKind.VIDEO || event.kind === ExtendedKind.SHORT_VIDEO) {
-    content = <VideoNote className="mt-2" event={event} />
+    content = <VideoNote className="mt-2" event={event} compactMedia={compactMedia} />
   } else if (event.kind === ExtendedKind.RELAY_REVIEW) {
     content = <RelayReview className="mt-2" event={event} />
   } else {
-    content = <Content className="mt-2" event={event} />
+    content = <Content className="mt-2" event={event} compactMedia={compactMedia} />
   }
 
   return (
@@ -121,7 +131,7 @@ export default function Note({
               <FollowingBadge pubkey={event.pubkey} />
               <ClientTag event={event} />
             </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className={cn("flex items-center gap-1 text-sm", metadataClassName || "text-muted-foreground")}>
               <Nip05 pubkey={event.pubkey} append="·" />
               <FormattedTimestamp
                 timestamp={event.created_at}

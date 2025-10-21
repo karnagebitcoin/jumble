@@ -7,6 +7,7 @@ import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinList } from '@/providers/PinListProvider'
+import { useWidgets } from '@/providers/WidgetsProvider'
 import client from '@/services/client.service'
 import {
   Bell,
@@ -17,8 +18,10 @@ import {
   Pin,
   PinOff,
   SatelliteDish,
+  StickyNote,
   Trash2,
-  TriangleAlert
+  TriangleAlert,
+  PanelRightClose
 } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
@@ -48,6 +51,7 @@ interface UseMenuActionsProps {
   showSubMenuActions: (subMenu: SubMenuAction[], title: string) => void
   setIsRawEventDialogOpen: (open: boolean) => void
   setIsReportDialogOpen: (open: boolean) => void
+  setIsPrivateNoteDialogOpen?: (open: boolean) => void
   isSmallScreen: boolean
 }
 
@@ -57,6 +61,7 @@ export function useMenuActions({
   showSubMenuActions,
   setIsRawEventDialogOpen,
   setIsReportDialogOpen,
+  setIsPrivateNoteDialogOpen,
   isSmallScreen
 }: UseMenuActionsProps) {
   const { t } = useTranslation()
@@ -68,7 +73,9 @@ export function useMenuActions({
   }, [currentBrowsingRelayUrls, favoriteRelays])
   const { mutePubkeyPublicly, mutePubkeyPrivately, unmutePubkey, mutePubkeySet } = useMuteList()
   const { pinnedEventHexIdSet, pin, unpin } = usePinList()
+  const { pinNoteWidget, unpinNoteByEventId, isPinned: isWidgetPinned } = useWidgets()
   const isMuted = useMemo(() => mutePubkeySet.has(event.pubkey), [mutePubkeySet, event])
+  const isPinnedToSidebar = useMemo(() => isWidgetPinned(event.id), [isWidgetPinned, event.id])
 
   const broadcastSubMenu: SubMenuAction[] = useMemo(() => {
     const items = []
@@ -220,6 +227,37 @@ export function useMenuActions({
       })
     }
 
+    // Pin to sidebar option (available for all users)
+    if (pubkey) {
+      actions.push({
+        icon: isPinnedToSidebar ? PinOff : PanelRightClose,
+        label: isPinnedToSidebar ? t('Unpin from sidebar') : t('Pin to sidebar'),
+        onClick: () => {
+          closeDrawer()
+          if (isPinnedToSidebar) {
+            unpinNoteByEventId(event.id)
+            toast.success(t('Note unpinned from sidebar'))
+          } else {
+            pinNoteWidget(event.id)
+            toast.success(t('Note pinned to sidebar'))
+          }
+        },
+        separator: event.pubkey === pubkey && event.kind === kinds.ShortTextNote ? false : true
+      })
+    }
+
+    if (pubkey && event.pubkey !== pubkey && setIsPrivateNoteDialogOpen) {
+      actions.push({
+        icon: StickyNote,
+        label: t('Pin to profile'),
+        onClick: () => {
+          closeDrawer()
+          setIsPrivateNoteDialogOpen(true)
+        },
+        separator: true
+      })
+    }
+
     if (pubkey && event.pubkey !== pubkey) {
       actions.push({
         icon: TriangleAlert,
@@ -229,7 +267,7 @@ export function useMenuActions({
           closeDrawer()
           setIsReportDialogOpen(true)
         },
-        separator: true
+        separator: !setIsPrivateNoteDialogOpen
       })
     }
 

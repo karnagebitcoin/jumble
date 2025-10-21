@@ -21,13 +21,14 @@ export function NotificationItem({
 }) {
   const { pubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
-  const { hideContentMentioningMutedUsers } = useContentPolicy()
+  const { hideContentMentioningMutedUsers, hideNotificationsFromMutedUsers } = useContentPolicy()
   const { hideUntrustedNotifications, isUserTrusted } = useUserTrust()
   const canShow = useMemo(() => {
     return notificationFilter(notification, {
       pubkey,
       mutePubkeySet,
       hideContentMentioningMutedUsers,
+      hideNotificationsFromMutedUsers,
       hideUntrustedNotifications,
       isUserTrusted
     })
@@ -35,6 +36,7 @@ export function NotificationItem({
     notification,
     mutePubkeySet,
     hideContentMentioningMutedUsers,
+    hideNotificationsFromMutedUsers,
     hideUntrustedNotifications,
     isUserTrusted
   ])

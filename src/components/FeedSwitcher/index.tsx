@@ -1,11 +1,14 @@
 import { toRelaySettings } from '@/lib/link'
 import { simplifyUrl } from '@/lib/url'
 import { SecondaryPageLink } from '@/PageManager'
+import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useNostr } from '@/providers/NostrProvider'
-import { BookmarkIcon, UsersRound } from 'lucide-react'
+import { BookmarkIcon, Hash, Search, Trash2, UsersRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import PinButton from '../PinButton'
+import { Button } from '../ui/button'
 import RelayIcon from '../RelayIcon'
 import RelaySetCard from '../RelaySetCard'
 
@@ -14,6 +17,7 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
   const { pubkey } = useNostr()
   const { relaySets, favoriteRelays } = useFavoriteRelays()
   const { feedInfo, switchFeed } = useFeed()
+  const { customFeeds, removeCustomFeed } = useCustomFeeds()
 
   return (
     <div className="space-y-2">
@@ -43,6 +47,12 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             switchFeed('bookmarks', { pubkey })
             close?.()
           }}
+          controls={
+            <PinButton
+              column={{ type: 'bookmarks' }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          }
         >
           <div className="flex gap-2 items-center">
             <div className="flex justify-center items-center w-6 h-6 shrink-0">
@@ -51,6 +61,57 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             <div>{t('Bookmarks')}</div>
           </div>
         </FeedSwitcherItem>
+      )}
+
+      {customFeeds.length > 0 && (
+        <>
+          <div className="text-xs font-semibold text-muted-foreground mt-4 mb-2">
+            {t('Custom Feeds')}
+          </div>
+          {customFeeds.map((feed) => (
+            <FeedSwitcherItem
+              key={feed.id}
+              isActive={feedInfo.feedType === 'custom' && feedInfo.id === feed.id}
+              onClick={() => {
+                switchFeed('custom', { customFeedId: feed.id })
+                close?.()
+              }}
+              controls={
+                <div className="flex gap-1 items-center">
+                  <PinButton
+                    column={{
+                      type: 'custom',
+                      props: { customFeedId: feed.id }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeCustomFeed(feed.id)
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              }
+            >
+              <div className="flex gap-2 items-center">
+                <div className="flex justify-center items-center w-6 h-6 shrink-0">
+                  {feed.searchParams.type === 'hashtag' ? (
+                    <Hash className="size-4" />
+                  ) : (
+                    <Search className="size-4" />
+                  )}
+                </div>
+                <div className="truncate">{feed.name}</div>
+              </div>
+            </FeedSwitcherItem>
+          ))}
+        </>
       )}
 
       <div className="flex justify-end items-center text-sm">
@@ -84,6 +145,15 @@ export default function FeedSwitcher({ close }: { close?: () => void }) {
             switchFeed('relay', { relay })
             close?.()
           }}
+          controls={
+            <PinButton
+              column={{
+                type: 'relay',
+                props: { url: relay }
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          }
         >
           <div className="flex gap-2 items-center w-full">
             <RelayIcon url={relay} />
@@ -108,8 +178,9 @@ function FeedSwitcherItem({
 }) {
   return (
     <div
-      className={`w-full border rounded-lg p-4 ${isActive ? 'border-primary bg-primary/5' : 'clickable'}`}
+      className={`w-full border rounded-lg py-1 px-3 group ${isActive ? 'border-primary bg-primary/5' : 'clickable'}`}
       onClick={onClick}
+      style={{ fontSize: 'var(--font-size, 14px)' }}
     >
       <div className="flex justify-between items-center">
         <div className="font-semibold flex-1">{children}</div>

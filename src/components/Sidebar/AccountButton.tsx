@@ -7,13 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import { toWallet } from '@/lib/link'
 import { formatPubkey, generateImageByPubkey } from '@/lib/pubkey'
 import { cn } from '@/lib/utils'
 import { usePrimaryPage, useSecondaryPage } from '@/PageManager'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { ArrowDownUp, LogIn, LogOut, UserRound, Wallet } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import LoginDialog from '../LoginDialog'
 import LogoutDialog from '../LogoutDialog'

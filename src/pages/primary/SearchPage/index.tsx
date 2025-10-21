@@ -1,5 +1,6 @@
 import SearchBar, { TSearchBarRef } from '@/components/SearchBar'
 import SearchResult from '@/components/SearchResult'
+import PinButton from '@/components/PinButton'
 import PrimaryPageLayout, { TPrimaryPageLayoutRef } from '@/layouts/PrimaryPageLayout'
 import { usePrimaryPage } from '@/PageManager'
 import { TSearchParams } from '@/types'
@@ -40,7 +41,23 @@ const SearchPage = forwardRef((_, ref) => {
       ref={layoutRef}
       pageName="search"
       titlebar={
-        <SearchBar ref={searchBarRef} onSearch={onSearch} input={input} setInput={setInput} />
+        <div className="flex gap-2 items-center h-full w-full">
+          <SearchBar
+            ref={searchBarRef}
+            onSearch={onSearch}
+            input={input}
+            setInput={setInput}
+            currentSearchParams={searchParams}
+          />
+          {searchParams && (
+            <PinButton
+              column={{
+                type: 'search',
+                props: { searchParams }
+              }}
+            />
+          )}
+        </div>
       }
       displayScrollToTopButton
     >
