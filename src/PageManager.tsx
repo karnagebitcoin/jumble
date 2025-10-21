@@ -387,26 +387,16 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
       >
         <CurrentRelaysProvider>
           <NotificationProvider>
-            <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background justify-center">
-              <div className={cn(
-                "shrink-0",
-                pageTheme === 'pure-black' && "border-r border-neutral-900"
-              )}>
+            <div className="flex flex-col items-center bg-surface-background">
+              <div
+                className="flex h-[var(--vh)] w-full bg-surface-background"
+                style={{
+                  maxWidth: '1920px'
+                }}
+              >
                 <Sidebar />
-              </div>
-              {layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN ? (
-                <DeckLayout
-                  primaryPages={primaryPages}
-                  currentPrimaryPage={currentPrimaryPage}
-                  secondaryStack={secondaryStack}
-                  pinnedColumns={pinnedColumns}
-                />
-              ) : (
-                <div className={cn("grid grid-cols-2 gap-2 w-full px-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
-                  <div className={cn(
-                    "rounded-lg shadow-lg bg-background overflow-hidden",
-                    pageTheme === 'pure-black' && "border border-neutral-900"
-                  )}>
+                <div className="grid grid-cols-2 gap-2 w-full pr-2 py-2">
+                  <div className="rounded-lg shadow-lg bg-background overflow-hidden">
                     {primaryPages.map(({ name, element, props }) => (
                       <div
                         key={name}
@@ -418,6 +408,24 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                         {props ? cloneElement(element as React.ReactElement, props) : element}
                       </div>
                     ))}
+                  </div>
+                  <div className="rounded-lg shadow-lg bg-background overflow-hidden">
+                    {secondaryStack.map((item, index) => (
+                      <div
+                        key={item.index}
+                        className="flex flex-col h-full w-full"
+                        style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+                      >
+                        {item.component}
+                      </div>
+                    ))}
+                    <div
+                      key="home"
+                      className="w-full"
+                      style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+                    >
+                      <HomePage />
+                    </div>
                   </div>
                   <HomePageWrapper secondaryStackLength={secondaryStack.length} widgetSidebarDismissed={widgetSidebarDismissed}>
                     {secondaryStack.map((item, index) => (

@@ -11,6 +11,14 @@ A user-friendly Nostr client for exploring relay feeds
 
 Experience Jumble at [https://jumble.social](https://jumble.social)
 
+## Forks
+
+> Some interesting forks of Jumble.
+
+- [https://jumble.imwald.eu/](https://jumble.imwald.eu/) Repo: [Silberengel/jumble](https://github.com/Silberengel/jumble) - Discussions support
+- [https://grouped-notes.dtonon.com/](https://grouped-notes.dtonon.com/) - "Grouped Notes" mode: organizes posts by user and timeframe for cleaner browsing and easier discovery
+- [https://jumblekat.shakespeare.wtf/](https://jumblekat.shakespeare.wtf/) - Supports custom styles
+
 ## Run Locally
 
 ```bash

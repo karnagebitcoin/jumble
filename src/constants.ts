@@ -50,28 +50,7 @@ export const StorageKey = {
   NOTIFICATION_LIST_STYLE: 'notificationListStyle',
   MEDIA_AUTO_LOAD_POLICY: 'mediaAutoLoadPolicy',
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
-  FONT_SIZE: 'fontSize',
-  PRIMARY_COLOR: 'primaryColor',
-  LAYOUT_MODE: 'layoutMode',
-  BUTTON_RADIUS: 'buttonRadius',
-  PAGE_THEME: 'pageTheme',
-  PRIVATE_NOTES: 'privateNotes',
-  TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
-  TRENDING_NOTES_HEIGHT: 'trendingNotesHeight',
-  BITCOIN_TICKER_ALIGNMENT: 'bitcoinTickerAlignment',
-  BITCOIN_TICKER_TEXT_SIZE: 'bitcoinTickerTextSize',
-  COMPACT_SIDEBAR: 'compactSidebar',
-  ENABLED_WIDGETS: 'enabledWidgets',
-  PINNED_NOTE_WIDGETS: 'pinnedNoteWidgets',
-  ZAP_SOUND: 'zapSound',
-  FONT_FAMILY: 'fontFamily',
-  CUSTOM_FEEDS: 'customFeeds',
-  CHARGE_ZAP_ENABLED: 'chargeZapEnabled',
-  CHARGE_ZAP_LIMIT: 'chargeZapLimit',
-  ZAP_ON_REACTIONS: 'zapOnReactions',
-  ONLY_ZAPS_MODE: 'onlyZapsMode',
-  DECK_VIEW_MODE: 'deckViewMode',
-  PINNED_COLUMNS: 'pinnedColumns',
+  SIDEBAR_COLLAPSE: 'sidebarCollapse',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -129,9 +108,9 @@ export const SUPPORTED_KINDS = [
 ]
 
 export const URL_REGEX =
-  /https?:\/\/[\w\p{L}\p{N}\p{M}&.\-/?=#@%+_:!~*]+[^\s.,;:'")\]}!?，。；："'！？】）]/gu
+  /https?:\/\/[\w\p{L}\p{N}\p{M}&.\-/?=#@%+_:!~*]+[^\s.,;:'")\]}!?，。；："'！？】）]/giu
 export const WS_URL_REGEX =
-  /wss?:\/\/[\w\p{L}\p{N}\p{M}&.\-/?=#@%+_:!~*]+[^\s.,;:'")\]}!?，。；："'！？】）]/gu
+  /wss?:\/\/[\w\p{L}\p{N}\p{M}&.\-/?=#@%+_:!~*]+[^\s.,;:'")\]}!?，。；："'！？】）]/giu
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 export const EMOJI_SHORT_CODE_REGEX = /:[a-zA-Z0-9_-]+:/g
 export const EMBEDDED_EVENT_REGEX = /nostr:(note1[a-z0-9]{58}|nevent1[a-z0-9]+|naddr1[a-z0-9]+)/g
@@ -141,7 +120,7 @@ export const LN_INVOICE_REGEX = /(ln(?:bc|tb|bcrt))([0-9]+[munp]?)?1([02-9ac-hj-
 export const EMOJI_REGEX =
   /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{1F004}]|[\u{1F0CF}]|[\u{1F18E}]|[\u{3030}]|[\u{2B50}]|[\u{2B55}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{3297}]|[\u{3299}]|[\u{303D}]|[\u{00A9}]|[\u{00AE}]|[\u{2122}]|[\u{23E9}-\u{23EF}]|[\u{23F0}]|[\u{23F3}]|[\u{FE00}-\u{FE0F}]|[\u{200D}]/gu
 export const YOUTUBE_URL_REGEX =
-  /https?:\/\/(?:(?:www|m)\.)?(?:youtube\.com\/(?:watch\?[^#\s]*|embed\/[\w-]+|shorts\/[\w-]+|live\/[\w-]+)|youtu\.be\/[\w-]+)(?:\?[^#\s]*)?(?:#[^\s]*)?/g
+  /https?:\/\/(?:(?:www|m)\.)?(?:youtube\.com\/(?:watch\?[^#\s]*|embed\/[\w-]+|shorts\/[\w-]+|live\/[\w-]+)|youtu\.be\/[\w-]+)(?:\?[^#\s]*)?(?:#[^\s]*)?/gi
 
 export const JUMBLE_PUBKEY = 'f4eb8e62add1340b9cadcd9861e669b2e907cea534e0f7f3ac974c11c758a51a'
 export const CODY_PUBKEY = '8125b911ed0e94dbe3008a0be48cfe5cd0c0b05923cfff917ae7e87da8400883'
