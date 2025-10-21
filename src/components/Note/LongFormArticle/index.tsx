@@ -6,6 +6,7 @@ import { ExternalLink } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
 import Markdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import NostrNode from './NostrNode'
 import { remarkNostr } from './remarkNostr'
@@ -61,9 +62,26 @@ export default function LongFormArticle({
             </a>
           )
         },
+        h1: (props) => <h1 {...props} className="break-words" />,
+        h2: (props) => <h2 {...props} className="break-words" />,
+        h3: (props) => <h3 {...props} className="break-words" />,
+        h4: (props) => <h4 {...props} className="break-words" />,
+        h5: (props) => <h5 {...props} className="break-words" />,
+        h6: (props) => <h6 {...props} className="break-words" />,
         p: (props) => <p {...props} className="break-words" />,
         div: (props) => <div {...props} className="break-words" />,
+        ul: (props) => <ul {...props} className="break-words" />,
+        ol: (props) => <ol {...props} className="break-words" />,
+        li: (props) => <li {...props} className="break-words" />,
+        blockquote: (props) => <blockquote {...props} className="break-words" />,
+        pre: (props) => <pre {...props} className="break-words overflow-x-auto" />,
         code: (props) => <code {...props} className="break-words whitespace-pre-wrap" />,
+        table: (props) => <table {...props} className="break-words" />,
+        thead: (props) => <thead {...props} className="break-words" />,
+        tbody: (props) => <tbody {...props} className="break-words" />,
+        tr: (props) => <tr {...props} className="break-words" />,
+        td: (props) => <td {...props} className="break-words" />,
+        th: (props) => <th {...props} className="break-words" />,
         img: (props) => (
           <ImageWithLightbox
             image={{ url: props.src || '', pubkey: event.pubkey }}
@@ -74,7 +92,7 @@ export default function LongFormArticle({
           />
         )
       }) as Components,
-    []
+    [event.pubkey]
   )
 
   return (
@@ -95,6 +113,7 @@ export default function LongFormArticle({
       )}
       <Markdown
         remarkPlugins={[remarkGfm, remarkNostr]}
+        rehypePlugins={[rehypeRaw]}
         urlTransform={(url) => {
           if (url.startsWith('nostr:')) {
             return url.slice(6) // Remove 'nostr:' prefix for rendering

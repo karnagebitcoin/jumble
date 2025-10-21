@@ -569,8 +569,34 @@ function DeckLayout({
   const { pageTheme } = usePageTheme()
   const { pop } = useSecondaryPage()
 
+  // Filter out pinned columns that fail to render (no content)
+  const validPinnedColumns = pinnedColumns.filter((column) => {
+    // Check if the column would have content
+    switch (column.type) {
+      case 'custom':
+        return !!column.props?.customFeedId
+      case 'relay':
+        return !!column.props?.url
+      case 'relays':
+        return !!column.props?.activeRelaySetId
+      case 'profile':
+        return !!column.props?.pubkey
+      case 'search':
+        return !!column.props?.searchParams
+      default:
+        // explore, notifications, bookmarks always have content
+        return true
+    }
+  })
+
   // Calculate the number of columns (no right sidebar in multi-column mode)
-  const columnCount = 1 + pinnedColumns.length // main + pinned only
+  const columnCount = 1 + validPinnedColumns.length // main + valid pinned only
+
+  console.log('DeckLayout - pinnedColumns.length:', pinnedColumns.length)
+  console.log('DeckLayout - validPinnedColumns.length:', validPinnedColumns.length)
+  console.log('DeckLayout - columnCount:', columnCount)
+  console.log('DeckLayout - pinnedColumns:', pinnedColumns)
+  console.log('DeckLayout - validPinnedColumns:', validPinnedColumns)
 
   // Check if drawer should be open
   const isDrawerOpen = secondaryStack.length > 0
@@ -603,7 +629,7 @@ function DeckLayout({
         </div>
 
         {/* Pinned columns */}
-        {pinnedColumns.map((column) => (
+        {validPinnedColumns.map((column) => (
           <DeckColumn key={column.id} column={column} />
         ))}
       </div>
