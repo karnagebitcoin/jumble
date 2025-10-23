@@ -135,7 +135,7 @@ function SortableWidgetCard({
           <RadioGroup
             value={trendingNotesHeight}
             onValueChange={onTrendingNotesHeightChange}
-            className="flex gap-4"
+            className="flex flex-wrap gap-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="short" id={`${id}-short`} />
@@ -153,6 +153,12 @@ function SortableWidgetCard({
               <RadioGroupItem value="tall" id={`${id}-tall`} />
               <Label htmlFor={`${id}-tall`} className="cursor-pointer font-normal">
                 Tall (480px)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="remaining" id={`${id}-remaining`} />
+              <Label htmlFor={`${id}-remaining`} className="cursor-pointer font-normal">
+                Remaining space
               </Label>
             </div>
           </RadioGroup>

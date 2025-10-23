@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'
 const HEIGHT_CLASSES = {
   short: 'max-h-[220px]',
   medium: 'max-h-[320px]',
-  tall: 'max-h-[480px]'
+  tall: 'max-h-[480px]',
+  remaining: 'h-full'
 }
 
 export default function TrendingNotesWidget() {
@@ -22,14 +23,17 @@ export default function TrendingNotesWidget() {
   const otherWidgets = enabledWidgets.filter(id => id !== 'trending-notes')
   const isOnlyWidget = otherWidgets.length === 0
 
-  // Use full height if it's the only widget, otherwise use the configured height
+  // Use configured height, with special handling for 'remaining' to force full height
   const heightClass = isOnlyWidget ? 'h-full' : HEIGHT_CLASSES[trendingNotesHeight]
 
   // Get the widget name from AVAILABLE_WIDGETS
   const widgetName = AVAILABLE_WIDGETS.find(w => w.id === 'trending-notes')?.name || 'Trending Notes'
 
+  // Use full height for container if 'remaining' is selected or it's the only widget
+  const useFullHeight = trendingNotesHeight === 'remaining' || isOnlyWidget
+
   return (
-    <WidgetContainer className={isOnlyWidget ? 'h-full' : ''}>
+    <WidgetContainer className={useFullHeight ? 'h-full flex flex-col' : ''}>
       <CardHeader
         className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b group"
         onMouseEnter={() => setIsHovered(true)}
@@ -46,7 +50,7 @@ export default function TrendingNotesWidget() {
           </button>
         )}
       </CardHeader>
-      <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4`}>
+      <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4 ${useFullHeight ? 'flex-1' : ''}`}>
         <CompactTrendingNotes />
       </div>
     </WidgetContainer>

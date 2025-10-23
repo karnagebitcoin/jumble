@@ -76,7 +76,7 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private pinnedNoteWidgets: { id: string; eventId: string }[] = []
-  private trendingNotesHeight: 'short' | 'medium' | 'tall' = 'medium'
+  private trendingNotesHeight: 'short' | 'medium' | 'tall' | 'remaining' = 'medium'
   private bitcoinTickerAlignment: 'left' | 'center' = 'left'
   private bitcoinTickerTextSize: 'large' | 'small' = 'large'
   private zapSound: TZapSound = ZAP_SOUNDS.NONE
@@ -289,8 +289,8 @@ class LocalStorageService {
     }
 
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
-    if (trendingNotesHeight && ['short', 'medium', 'tall'].includes(trendingNotesHeight)) {
-      this.trendingNotesHeight = trendingNotesHeight as 'short' | 'medium' | 'tall'
+    if (trendingNotesHeight && ['short', 'medium', 'tall', 'remaining'].includes(trendingNotesHeight)) {
+      this.trendingNotesHeight = trendingNotesHeight as 'short' | 'medium' | 'tall' | 'remaining'
     }
 
     const bitcoinTickerAlignment = window.localStorage.getItem(StorageKey.BITCOIN_TICKER_ALIGNMENT)
@@ -749,7 +749,7 @@ class LocalStorageService {
     return this.trendingNotesHeight
   }
 
-  setTrendingNotesHeight(height: 'short' | 'medium' | 'tall') {
+  setTrendingNotesHeight(height: 'short' | 'medium' | 'tall' | 'remaining') {
     this.trendingNotesHeight = height
     window.localStorage.setItem(StorageKey.TRENDING_NOTES_HEIGHT, height)
   }
