@@ -303,10 +303,10 @@ class LocalStorageService {
       this.pinnedNoteWidgets = JSON.parse(pinnedNoteWidgetsStr)
     }
 
-    const aiPromptWidgetsStr = window.localStorage.getItem(StorageKey.AI_PROMPT_WIDGETS)
-    if (aiPromptWidgetsStr) {
-      this.aiPromptWidgets = JSON.parse(aiPromptWidgetsStr)
-    }
+    // AI Prompt widgets are session-only and should not persist across page reloads
+    // Clear any stored AI prompt widgets
+    this.aiPromptWidgets = []
+    window.localStorage.removeItem(StorageKey.AI_PROMPT_WIDGETS)
 
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
     if (trendingNotesHeight && ['short', 'medium', 'tall', 'remaining'].includes(trendingNotesHeight)) {
@@ -818,20 +818,20 @@ class LocalStorageService {
   }
 
   setAIPromptWidgets(widgets: { id: string; eventId: string; messages: any[] }[]) {
+    // AI Prompt widgets are session-only, no localStorage persistence
     this.aiPromptWidgets = widgets
-    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(widgets))
   }
 
   addAIPromptWidget(eventId: string) {
     const id = `ai-prompt-${Date.now()}`
     this.aiPromptWidgets.push({ id, eventId, messages: [] })
-    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(this.aiPromptWidgets))
+    // AI Prompt widgets are session-only, no localStorage persistence
     return id
   }
 
   removeAIPromptWidget(id: string) {
     this.aiPromptWidgets = this.aiPromptWidgets.filter((widget) => widget.id !== id)
-    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(this.aiPromptWidgets))
+    // AI Prompt widgets are session-only, no localStorage persistence
   }
 
   getZapSound() {

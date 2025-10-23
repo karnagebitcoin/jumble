@@ -108,9 +108,7 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     localStorageService.setPinnedNoteWidgets(pinnedNoteWidgets)
   }, [pinnedNoteWidgets])
 
-  useEffect(() => {
-    localStorageService.setAIPromptWidgets(aiPromptWidgets)
-  }, [aiPromptWidgets])
+  // AI Prompt widgets are session-only and don't need to persist to localStorage
 
   useEffect(() => {
     localStorageService.setTrendingNotesHeight(trendingNotesHeight)
