@@ -23,25 +23,27 @@ function NotePreview({ event }: { event: Event }) {
   const imetaInfos = getImetaInfosFromEvent(event)
 
   // Check if note has images
-  if (imetaInfos.length > 0) {
+  if (imetaInfos && imetaInfos.length > 0) {
     const firstImage = imetaInfos[0]
-    return (
-      <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
-        <div className="w-12 h-12 rounded overflow-hidden flex-shrink-0">
-          <Image
-            src={firstImage.url}
-            alt="Note preview"
-            className="w-full h-full object-cover"
-            blurHash={firstImage.blurHash}
-          />
+    if (firstImage && firstImage.url) {
+      return (
+        <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+          <div className="w-12 h-12 rounded overflow-hidden flex-shrink-0">
+            <Image
+              src={firstImage.url}
+              alt="Note preview"
+              className="w-full h-full object-cover"
+              blurHash={firstImage.blurHash}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">
+              {event.content.substring(0, 100) || t('Image note')}
+            </p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted-foreground truncate">
-            {event.content.substring(0, 100) || t('Image note')}
-          </p>
-        </div>
-      </div>
-    )
+      )
+    }
   }
 
   // Text-only note - show first line
