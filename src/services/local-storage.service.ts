@@ -23,6 +23,8 @@ import { randomString } from '@/lib/random'
 import {
   TAccount,
   TAccountPointer,
+  TAIServiceConfig,
+  TAIToolsConfig,
   TCustomFeed,
   TDistractionFreeMode,
   TFeedInfo,
@@ -58,6 +60,8 @@ class LocalStorageService {
   private hideUntrustedNotes: boolean = false
   private translationServiceConfigMap: Record<string, TTranslationServiceConfig> = {}
   private mediaUploadServiceConfigMap: Record<string, TMediaUploadServiceConfig> = {}
+  private aiServiceConfigMap: Record<string, TAIServiceConfig> = {}
+  private aiToolsConfigMap: Record<string, TAIToolsConfig> = {}
   private defaultShowNsfw: boolean = false
   private dismissedTooManyRelaysAlert: boolean = false
   private showKinds: number[] = []
@@ -185,6 +189,16 @@ class LocalStorageService {
     )
     if (mediaUploadServiceConfigMapStr) {
       this.mediaUploadServiceConfigMap = JSON.parse(mediaUploadServiceConfigMapStr)
+    }
+
+    const aiServiceConfigMapStr = window.localStorage.getItem(StorageKey.AI_SERVICE_CONFIG_MAP)
+    if (aiServiceConfigMapStr) {
+      this.aiServiceConfigMap = JSON.parse(aiServiceConfigMapStr)
+    }
+
+    const aiToolsConfigMapStr = window.localStorage.getItem(StorageKey.AI_TOOLS_CONFIG_MAP)
+    if (aiToolsConfigMapStr) {
+      this.aiToolsConfigMap = JSON.parse(aiToolsConfigMapStr)
     }
 
     this.defaultShowNsfw = window.localStorage.getItem(StorageKey.DEFAULT_SHOW_NSFW) === 'true'
@@ -840,6 +854,24 @@ class LocalStorageService {
   setOnlyZapsMode(enabled: boolean) {
     this.onlyZapsMode = enabled
     window.localStorage.setItem(StorageKey.ONLY_ZAPS_MODE, enabled.toString())
+  }
+
+  getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {
+    return this.aiServiceConfigMap[pubkey ?? '_'] ?? { provider: 'openrouter' }
+  }
+
+  setAIServiceConfig(config: TAIServiceConfig, pubkey?: string | null) {
+    this.aiServiceConfigMap[pubkey ?? '_'] = config
+    window.localStorage.setItem(StorageKey.AI_SERVICE_CONFIG_MAP, JSON.stringify(this.aiServiceConfigMap))
+  }
+
+  getAIToolsConfig(pubkey?: string | null): TAIToolsConfig {
+    return this.aiToolsConfigMap[pubkey ?? '_'] ?? { enableSummary: false }
+  }
+
+  setAIToolsConfig(config: TAIToolsConfig, pubkey?: string | null) {
+    this.aiToolsConfigMap[pubkey ?? '_'] = config
+    window.localStorage.setItem(StorageKey.AI_TOOLS_CONFIG_MAP, JSON.stringify(this.aiToolsConfigMap))
   }
 }
 
