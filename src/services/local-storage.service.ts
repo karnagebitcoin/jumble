@@ -822,11 +822,11 @@ class LocalStorageService {
     this.aiPromptWidgets = widgets
   }
 
-  addAIPromptWidget(eventId: string) {
-    const id = `ai-prompt-${Date.now()}`
-    this.aiPromptWidgets.push({ id, eventId, messages: [] })
+  addAIPromptWidget(eventId: string, id?: string) {
+    const widgetId = id ?? `ai-prompt-${Date.now()}`
+    this.aiPromptWidgets.push({ id: widgetId, eventId, messages: [] })
     // AI Prompt widgets are session-only, no localStorage persistence
-    return id
+    return widgetId
   }
 
   removeAIPromptWidget(id: string) {

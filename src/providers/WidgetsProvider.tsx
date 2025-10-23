@@ -185,13 +185,27 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
   }
 
   const openAIPrompt = (eventId: string) => {
-    const id = localStorageService.addAIPromptWidget(eventId)
-    setAIPromptWidgets((prev) => [...prev, { id, eventId, messages: [] }])
-    // Auto-enable the widget
-    if (!enabledWidgets.includes(id)) {
-      setEnabledWidgets((prev) => [...prev, id])
+    // Check if there's already an AI prompt widget open
+    const existingWidget = aiPromptWidgets[0]
+
+    if (existingWidget) {
+      // Replace the existing widget with the new one
+      const id = existingWidget.id
+      setAIPromptWidgets([{ id, eventId, messages: [] }])
+      // Update localStorage
+      localStorageService.removeAIPromptWidget(id)
+      localStorageService.addAIPromptWidget(eventId, id)
+      return id
+    } else {
+      // Create new widget if none exists
+      const id = localStorageService.addAIPromptWidget(eventId)
+      setAIPromptWidgets([{ id, eventId, messages: [] }])
+      // Auto-enable the widget
+      if (!enabledWidgets.includes(id)) {
+        setEnabledWidgets((prev) => [...prev, id])
+      }
+      return id
     }
-    return id
   }
 
   const closeAIPrompt = (widgetId: string) => {
