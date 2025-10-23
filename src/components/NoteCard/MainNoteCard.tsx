@@ -32,6 +32,11 @@ export default function MainNoteCard({
     <div
       className={className}
       onClick={(e) => {
+        // Don't navigate if clicking on a button or interactive element
+        const target = e.target as HTMLElement
+        if (target.closest('button') || target.closest('a')) {
+          return
+        }
         e.stopPropagation()
         push(toNote(originalNoteId ?? event))
       }}

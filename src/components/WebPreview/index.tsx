@@ -58,6 +58,7 @@ export default function WebPreview({ url, className }: { url: string; className?
             <button
               onClick={(e) => {
                 e.stopPropagation()
+                e.preventDefault()
                 setShowSummary(true)
               }}
               className="absolute top-2 right-2 p-1.5 rounded-md bg-background/80 backdrop-blur-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors opacity-0 group-hover:opacity-100"
