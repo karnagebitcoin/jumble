@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import React, { useState, useRef, useEffect } from 'react'
 import { Event } from 'nostr-tools'
 import { cn } from '@/lib/utils'
-import Image from '@/components/Image'
 import { getImetaInfosFromEvent } from '@/lib/event'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
@@ -24,22 +23,24 @@ function NotePreview({ event }: { event: Event }) {
 
   // Check if note has images
   if (imetaInfos && imetaInfos.length > 0) {
-    const firstImage = imetaInfos[0]
-    if (firstImage && firstImage.url) {
+    const imageUrls = imetaInfos.map(info => info.url).filter(Boolean)
+    if (imageUrls.length > 0) {
       return (
-        <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
-          <div className="w-12 h-12 rounded overflow-hidden flex-shrink-0">
-            <Image
-              src={firstImage.url}
-              alt="Note preview"
-              className="w-full h-full object-cover"
-              blurHash={firstImage.blurHash}
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground truncate">
-              {event.content.substring(0, 100) || t('Image note')}
-            </p>
+        <div className="p-2 bg-muted/50 rounded-md space-y-1">
+          <p className="text-xs text-muted-foreground">
+            {event.content.substring(0, 100) || t('Image note')}
+          </p>
+          <div className="text-xs text-muted-foreground/70 space-y-0.5">
+            {imageUrls.slice(0, 3).map((url, idx) => (
+              <div key={idx} className="truncate">
+                📷 {url}
+              </div>
+            ))}
+            {imageUrls.length > 3 && (
+              <div className="text-muted-foreground/50">
+                +{imageUrls.length - 3} more {imageUrls.length - 3 === 1 ? 'image' : 'images'}
+              </div>
+            )}
           </div>
         </div>
       )
