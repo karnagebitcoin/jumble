@@ -13,6 +13,23 @@ Experience Jumble at [https://jumble.social](https://jumble.social)
 
 ## Run Locally
 
+### Option 1: With URL Preview Cards (Recommended)
+
+```bash
+# Clone this repository
+git clone https://github.com/CodyTseng/jumble.git
+
+# Go into the repository
+cd jumble
+
+# Run with Docker (includes proxy server for URL previews)
+docker compose up -d
+
+# Access at http://localhost:8089
+```
+
+### Option 2: Without Docker (No URL previews)
+
 ```bash
 # Clone this repository
 git clone https://github.com/CodyTseng/jumble.git
@@ -25,6 +42,8 @@ npm install
 
 # Run the app
 npm run dev
+
+# Note: URL preview cards won't work without the proxy server
 ```
 
 ## Run Docker
@@ -45,7 +64,7 @@ After finishing, access: http://localhost:8089
 ## Sponsors
 
 <a target="_blank" href="https://opensats.org/">
-  <img alt="open-sats-logo" src="./resources/open-sats-logo.svg" height="44"> 
+  <img alt="open-sats-logo" src="./resources/open-sats-logo.svg" height="44">
 </a>
 
 ## Donate
