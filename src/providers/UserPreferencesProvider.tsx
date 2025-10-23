@@ -8,6 +8,9 @@ type TUserPreferencesContext = {
 
   muteMedia: boolean
   updateMuteMedia: (mute: boolean) => void
+
+  sidebarCollapse: boolean
+  updateSidebarCollapse: (collapse: boolean) => void
 }
 
 const UserPreferencesContext = createContext<TUserPreferencesContext | undefined>(undefined)
@@ -25,10 +28,16 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     storage.getNotificationListStyle()
   )
   const [muteMedia, setMuteMedia] = useState(true)
+  const [sidebarCollapse, setSidebarCollapse] = useState(storage.getSidebarCollapse())
 
   const updateNotificationListStyle = (style: TNotificationStyle) => {
     setNotificationListStyle(style)
     storage.setNotificationListStyle(style)
+  }
+
+  const updateSidebarCollapse = (collapse: boolean) => {
+    setSidebarCollapse(collapse)
+    storage.setSidebarCollapse(collapse)
   }
 
   return (
@@ -37,7 +46,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         notificationListStyle,
         updateNotificationListStyle,
         muteMedia,
-        updateMuteMedia: setMuteMedia
+        updateMuteMedia: setMuteMedia,
+        sidebarCollapse,
+        updateSidebarCollapse: updateSidebarCollapse
       }}
     >
       {children}

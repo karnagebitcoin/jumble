@@ -5,7 +5,7 @@ import { useNotification } from '@/providers/NotificationProvider'
 import { Bell } from 'lucide-react'
 import SidebarItem from './SidebarItem'
 
-export default function NotificationsButton() {
+export default function NotificationsButton({ collapse }: { collapse: boolean }) {
   const { checkLogin } = useNostr()
   const { navigate, current } = usePrimaryPage()
   const { hasNewNotification } = useNotification()
@@ -16,6 +16,7 @@ export default function NotificationsButton() {
       title="Notifications"
       onClick={() => checkLogin(() => navigate('notifications'))}
       active={current === 'notifications'}
+      collapse={collapse}
     >
       <div className="relative">
         <Bell strokeWidth={1.3} />
