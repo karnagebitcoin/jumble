@@ -223,3 +223,19 @@ export type TMediaAutoLoadPolicy =
 
 export type TDistractionFreeMode =
   (typeof DISTRACTION_FREE_MODE)[keyof typeof DISTRACTION_FREE_MODE]
+
+export type TAIServiceConfig = {
+  provider: 'openrouter'
+  apiKey?: string
+  model?: string
+}
+
+export type TAIToolsConfig = {
+  enableSummary: boolean
+}
+
+export type TArticleSummary = {
+  title: string
+  keyTakeaways: string[]
+  summary: string
+}

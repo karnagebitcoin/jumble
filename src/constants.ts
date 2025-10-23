@@ -73,6 +73,8 @@ export const StorageKey = {
   DECK_VIEW_MODE: 'deckViewMode',
   PINNED_COLUMNS: 'pinnedColumns',
   DISTRACTION_FREE_MODE: 'distractionFreeMode',
+  AI_SERVICE_CONFIG_MAP: 'aiServiceConfigMap',
+  AI_TOOLS_CONFIG_MAP: 'aiToolsConfigMap',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated

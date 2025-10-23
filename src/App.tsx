@@ -2,6 +2,7 @@ import 'yet-another-react-lightbox/styles.css'
 import './index.css'
 
 import { Toaster } from '@/components/ui/sonner'
+import { AIProvider } from '@/providers/AIProvider'
 import { BookmarksProvider } from '@/providers/BookmarksProvider'
 import { ButtonRadiusProvider } from '@/providers/ButtonRadiusProvider'
 import { CompactSidebarProvider } from '@/providers/CompactSidebarProvider'
@@ -53,39 +54,41 @@ export default function App(): JSX.Element {
                             <NostrProvider>
                               <ZapProvider>
                                 <TranslationServiceProvider>
-                                  <FavoriteRelaysProvider>
-                                    <FollowListProvider>
-                                      <MuteListProvider>
-                                        <UserTrustProvider>
-                                          <BookmarksProvider>
-                                            <PinListProvider>
-                                              <CustomFeedsProvider>
-                                                <FeedProvider>
-                                                  <ReplyProvider>
-                                                    <MediaUploadServiceProvider>
-                                                      <KindFilterProvider>
-                                                        <UserPreferencesProvider>
-                                                          <TrendingNotesDismissedProvider>
-                                                            <WidgetsProvider>
-                                                              <WidgetSidebarDismissedProvider>
-                                                                <PageManager />
-                                                                <Toaster />
-                                                              </WidgetSidebarDismissedProvider>
-                                                            </WidgetsProvider>
-                                                          </TrendingNotesDismissedProvider>
-                                                        </UserPreferencesProvider>
-                                                      </KindFilterProvider>
-                                                    </MediaUploadServiceProvider>
-                                                  </ReplyProvider>
-                                                </FeedProvider>
-                                              </CustomFeedsProvider>
-                                            </PinListProvider>
-                                          </BookmarksProvider>
-                                        </UserTrustProvider>
-                                      </MuteListProvider>
-                                    </FollowListProvider>
-                                  </FavoriteRelaysProvider>
-                                </TranslationServiceProvider>
+                                  <AIProvider>
+                                      <FavoriteRelaysProvider>
+                                        <FollowListProvider>
+                                          <MuteListProvider>
+                                            <UserTrustProvider>
+                                              <BookmarksProvider>
+                                                <PinListProvider>
+                                                  <CustomFeedsProvider>
+                                                    <FeedProvider>
+                                                      <ReplyProvider>
+                                                        <MediaUploadServiceProvider>
+                                                          <KindFilterProvider>
+                                                            <UserPreferencesProvider>
+                                                              <TrendingNotesDismissedProvider>
+                                                                <WidgetsProvider>
+                                                                  <WidgetSidebarDismissedProvider>
+                                                                    <PageManager />
+                                                                    <Toaster />
+                                                                  </WidgetSidebarDismissedProvider>
+                                                                </WidgetsProvider>
+                                                              </TrendingNotesDismissedProvider>
+                                                            </UserPreferencesProvider>
+                                                          </KindFilterProvider>
+                                                        </MediaUploadServiceProvider>
+                                                      </ReplyProvider>
+                                                    </FeedProvider>
+                                                  </CustomFeedsProvider>
+                                                </PinListProvider>
+                                              </BookmarksProvider>
+                                            </UserTrustProvider>
+                                          </MuteListProvider>
+                                        </FollowListProvider>
+                                      </FavoriteRelaysProvider>
+                                    </AIProvider>
+                                  </TranslationServiceProvider>
                               </ZapProvider>
                             </NostrProvider>
                           </DeletedEventProvider>

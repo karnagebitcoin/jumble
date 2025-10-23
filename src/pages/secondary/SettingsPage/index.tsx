@@ -1,6 +1,7 @@
 import AboutInfoDialog from '@/components/AboutInfoDialog'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import {
+  toAITools,
   toAppearanceSettings,
   toGeneralSettings,
   toPostSettings,
@@ -13,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useSecondaryPage } from '@/PageManager'
 import { useNostr } from '@/providers/NostrProvider'
 import {
+  Bot,
   Check,
   ChevronRight,
   Copy,
@@ -66,6 +68,15 @@ const SettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
         </div>
         <ChevronRight />
       </SettingItem>
+      {!!pubkey && (
+        <SettingItem className="clickable" onClick={() => push(toAITools())}>
+          <div className="flex items-center gap-4">
+            <Bot />
+            <div>{t('AI Tools')}</div>
+          </div>
+          <ChevronRight />
+        </SettingItem>
+      )}
       {!!pubkey && (
         <SettingItem className="clickable" onClick={() => push(toTranslation())}>
           <div className="flex items-center gap-4">
