@@ -1,4 +1,4 @@
-import { TAIServiceConfig, TArticleSummary } from '@/types'
+import { TAIServiceConfig, TArticleSummary, TAIMessage } from '@/types'
 
 class AIService {
   private config: TAIServiceConfig = {
@@ -11,6 +11,51 @@ class AIService {
 
   getConfig(): TAIServiceConfig {
     return this.config
+  }
+
+  async chat(messages: TAIMessage[]): Promise<string> {
+    if (!this.config.apiKey) {
+      throw new Error('API key not configured')
+    }
+
+    if (!this.config.model) {
+      throw new Error('Model not selected')
+    }
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Jumble'
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error?.message || 'Failed to get AI response')
+      }
+
+      const data = await response.json()
+      const content = data.choices?.[0]?.message?.content
+
+      if (!content) {
+        throw new Error('No response from AI')
+      }
+
+      return content
+    } catch (error) {
+      console.error('AI Service Error:', error)
+      throw error
+    }
   }
 
   async summarizeArticle(

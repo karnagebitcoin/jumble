@@ -80,6 +80,7 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private pinnedNoteWidgets: { id: string; eventId: string }[] = []
+  private aiPromptWidgets: { id: string; eventId: string; messages: any[] }[] = []
   private trendingNotesHeight: 'short' | 'medium' | 'tall' | 'remaining' = 'medium'
   private bitcoinTickerAlignment: 'left' | 'center' = 'left'
   private bitcoinTickerTextSize: 'large' | 'small' = 'large'
@@ -300,6 +301,11 @@ class LocalStorageService {
     const pinnedNoteWidgetsStr = window.localStorage.getItem(StorageKey.PINNED_NOTE_WIDGETS)
     if (pinnedNoteWidgetsStr) {
       this.pinnedNoteWidgets = JSON.parse(pinnedNoteWidgetsStr)
+    }
+
+    const aiPromptWidgetsStr = window.localStorage.getItem(StorageKey.AI_PROMPT_WIDGETS)
+    if (aiPromptWidgetsStr) {
+      this.aiPromptWidgets = JSON.parse(aiPromptWidgetsStr)
     }
 
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
@@ -805,6 +811,27 @@ class LocalStorageService {
   removePinnedNoteWidget(id: string) {
     this.pinnedNoteWidgets = this.pinnedNoteWidgets.filter((widget) => widget.id !== id)
     window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
+  }
+
+  getAIPromptWidgets() {
+    return this.aiPromptWidgets
+  }
+
+  setAIPromptWidgets(widgets: { id: string; eventId: string; messages: any[] }[]) {
+    this.aiPromptWidgets = widgets
+    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(widgets))
+  }
+
+  addAIPromptWidget(eventId: string) {
+    const id = `ai-prompt-${Date.now()}`
+    this.aiPromptWidgets.push({ id, eventId, messages: [] })
+    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(this.aiPromptWidgets))
+    return id
+  }
+
+  removeAIPromptWidget(id: string) {
+    this.aiPromptWidgets = this.aiPromptWidgets.filter((widget) => widget.id !== id)
+    window.localStorage.setItem(StorageKey.AI_PROMPT_WIDGETS, JSON.stringify(this.aiPromptWidgets))
   }
 
   getZapSound() {

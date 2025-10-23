@@ -3,6 +3,7 @@ import { usePageTheme } from '@/providers/PageThemeProvider'
 import TrendingNotesWidget from '@/components/TrendingNotes/TrendingNotesWidget'
 import BitcoinTickerWidget from '@/components/BitcoinTicker/BitcoinTickerWidget'
 import PinnedNoteWidget from '@/components/PinnedNoteWidget'
+import AIPromptWidget from '@/components/AIPromptWidget'
 import { cn } from '@/lib/utils'
 
 const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
@@ -11,7 +12,7 @@ const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
 }
 
 export default function Widgets() {
-  const { enabledWidgets, pinnedNoteWidgets } = useWidgets()
+  const { enabledWidgets, pinnedNoteWidgets, aiPromptWidgets } = useWidgets()
   const { pageTheme } = usePageTheme()
 
   if (enabledWidgets.length === 0) {
@@ -33,6 +34,16 @@ export default function Widgets() {
           return (
             <div key={widgetId} className={widgetClassName}>
               <PinnedNoteWidget widgetId={widgetId} eventId={pinnedNote.eventId} />
+            </div>
+          )
+        }
+
+        // Check if this is an AI prompt widget
+        const aiPrompt = aiPromptWidgets.find((w) => w.id === widgetId)
+        if (aiPrompt) {
+          return (
+            <div key={widgetId} className={widgetClassName}>
+              <AIPromptWidget widgetId={widgetId} eventId={aiPrompt.eventId} />
             </div>
           )
         }

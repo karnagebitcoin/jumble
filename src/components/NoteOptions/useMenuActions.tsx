@@ -8,6 +8,7 @@ import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { usePinList } from '@/providers/PinListProvider'
 import { useWidgets } from '@/providers/WidgetsProvider'
+import { useAI } from '@/providers/AIProvider'
 import client from '@/services/client.service'
 import {
   Bell,
@@ -21,7 +22,8 @@ import {
   StickyNote,
   Trash2,
   TriangleAlert,
-  PanelRightClose
+  PanelRightClose,
+  MessageSquare
 } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
@@ -73,9 +75,11 @@ export function useMenuActions({
   }, [currentBrowsingRelayUrls, favoriteRelays])
   const { mutePubkeyPublicly, mutePubkeyPrivately, unmutePubkey, mutePubkeySet } = useMuteList()
   const { pinnedEventHexIdSet, pin, unpin } = usePinList()
-  const { pinNoteWidget, unpinNoteByEventId, isPinned: isWidgetPinned } = useWidgets()
+  const { pinNoteWidget, unpinNoteByEventId, isPinned: isWidgetPinned, openAIPrompt, closeAIPromptByEventId, isAIPromptOpen } = useWidgets()
+  const { isConfigured: isAIConfigured } = useAI()
   const isMuted = useMemo(() => mutePubkeySet.has(event.pubkey), [mutePubkeySet, event])
   const isPinnedToSidebar = useMemo(() => isWidgetPinned(event.id), [isWidgetPinned, event.id])
+  const isAIPromptOpenForNote = useMemo(() => isAIPromptOpen(event.id), [isAIPromptOpen, event.id])
 
   const broadcastSubMenu: SubMenuAction[] = useMemo(() => {
     const items = []
@@ -243,6 +247,24 @@ export function useMenuActions({
           }
         },
         separator: event.pubkey === pubkey && event.kind === kinds.ShortTextNote ? false : true
+      })
+    }
+
+    // AI Prompt option (available when AI is configured)
+    if (pubkey && isAIConfigured) {
+      actions.push({
+        icon: MessageSquare,
+        label: isAIPromptOpenForNote ? t('Close AI Prompt') : t('AI Prompt'),
+        onClick: () => {
+          closeDrawer()
+          if (isAIPromptOpenForNote) {
+            closeAIPromptByEventId(event.id)
+            toast.success(t('AI Prompt closed'))
+          } else {
+            openAIPrompt(event.id)
+            toast.success(t('AI Prompt opened in sidebar'))
+          }
+        }
       })
     }
 

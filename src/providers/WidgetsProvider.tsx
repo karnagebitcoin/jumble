@@ -1,9 +1,10 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
-import { TrendingUp, Bitcoin, Pin } from 'lucide-react'
+import { TrendingUp, Bitcoin, Pin, MessageSquare } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import { TAIMessage } from '@/types'
 
-export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | string // Allow dynamic pinned-note-* IDs
+export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | string // Allow dynamic pinned-note-* and ai-prompt-* IDs
 
 export type TTrendingNotesHeight = 'short' | 'medium' | 'tall' | 'remaining'
 
@@ -21,6 +22,12 @@ export type TWidget = {
 export type TPinnedNoteWidget = {
   id: string
   eventId: string
+}
+
+export type TAIPromptWidget = {
+  id: string
+  eventId: string
+  messages: TAIMessage[]
 }
 
 export const AVAILABLE_WIDGETS: TWidget[] = [
@@ -57,6 +64,13 @@ type TWidgetsContext = {
   unpinNoteWidget: (widgetId: string) => void
   unpinNoteByEventId: (eventId: string) => void
   isPinned: (eventId: string) => boolean
+  aiPromptWidgets: TAIPromptWidget[]
+  openAIPrompt: (eventId: string) => string
+  closeAIPrompt: (widgetId: string) => void
+  closeAIPromptByEventId: (eventId: string) => void
+  isAIPromptOpen: (eventId: string) => boolean
+  updateAIPromptMessages: (widgetId: string, messages: TAIMessage[]) => void
+  getAIPromptWidget: (widgetId: string) => TAIPromptWidget | undefined
 }
 
 const WidgetsContext = createContext<TWidgetsContext | undefined>(undefined)
@@ -68,6 +82,10 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
 
   const [pinnedNoteWidgets, setPinnedNoteWidgets] = useState<TPinnedNoteWidget[]>(() => {
     return localStorageService.getPinnedNoteWidgets()
+  })
+
+  const [aiPromptWidgets, setAIPromptWidgets] = useState<TAIPromptWidget[]>(() => {
+    return localStorageService.getAIPromptWidgets()
   })
 
   const [trendingNotesHeight, setTrendingNotesHeightState] = useState<TTrendingNotesHeight>(() => {
@@ -89,6 +107,10 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorageService.setPinnedNoteWidgets(pinnedNoteWidgets)
   }, [pinnedNoteWidgets])
+
+  useEffect(() => {
+    localStorageService.setAIPromptWidgets(aiPromptWidgets)
+  }, [aiPromptWidgets])
 
   useEffect(() => {
     localStorageService.setTrendingNotesHeight(trendingNotesHeight)
@@ -164,6 +186,44 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
     return pinnedNoteWidgets.some((w) => w.eventId === eventId)
   }
 
+  const openAIPrompt = (eventId: string) => {
+    const id = localStorageService.addAIPromptWidget(eventId)
+    setAIPromptWidgets((prev) => [...prev, { id, eventId, messages: [] }])
+    // Auto-enable the widget
+    if (!enabledWidgets.includes(id)) {
+      setEnabledWidgets((prev) => [...prev, id])
+    }
+    return id
+  }
+
+  const closeAIPrompt = (widgetId: string) => {
+    localStorageService.removeAIPromptWidget(widgetId)
+    setAIPromptWidgets((prev) => prev.filter((w) => w.id !== widgetId))
+    // Remove from enabled widgets
+    setEnabledWidgets((prev) => prev.filter((id) => id !== widgetId))
+  }
+
+  const closeAIPromptByEventId = (eventId: string) => {
+    const widget = aiPromptWidgets.find((w) => w.eventId === eventId)
+    if (widget) {
+      closeAIPrompt(widget.id)
+    }
+  }
+
+  const isAIPromptOpen = (eventId: string) => {
+    return aiPromptWidgets.some((w) => w.eventId === eventId)
+  }
+
+  const updateAIPromptMessages = (widgetId: string, messages: TAIMessage[]) => {
+    setAIPromptWidgets((prev) =>
+      prev.map((w) => (w.id === widgetId ? { ...w, messages } : w))
+    )
+  }
+
+  const getAIPromptWidget = (widgetId: string) => {
+    return aiPromptWidgets.find((w) => w.id === widgetId)
+  }
+
   return (
     <WidgetsContext.Provider
       value={{
@@ -182,7 +242,14 @@ export function WidgetsProvider({ children }: { children: ReactNode }) {
         pinNoteWidget,
         unpinNoteWidget,
         unpinNoteByEventId,
-        isPinned
+        isPinned,
+        aiPromptWidgets,
+        openAIPrompt,
+        closeAIPrompt,
+        closeAIPromptByEventId,
+        isAIPromptOpen,
+        updateAIPromptMessages,
+        getAIPromptWidget
       }}
     >
       {children}
