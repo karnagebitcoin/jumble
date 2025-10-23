@@ -9,6 +9,7 @@ import { ContentPolicyProvider } from '@/providers/ContentPolicyProvider'
 import { DeckViewProvider } from '@/providers/DeckViewProvider'
 import { CustomFeedsProvider } from '@/providers/CustomFeedsProvider'
 import { DeletedEventProvider } from '@/providers/DeletedEventProvider'
+import { DistractionFreeModeProvider } from '@/providers/DistractionFreeModeProvider'
 import { FavoriteRelaysProvider } from '@/providers/FavoriteRelaysProvider'
 import { FeedProvider } from '@/providers/FeedProvider'
 import { FollowListProvider } from '@/providers/FollowListProvider'
@@ -45,6 +46,7 @@ export default function App(): JSX.Element {
                 <LayoutModeProvider>
                   <DeckViewProvider>
                     <CompactSidebarProvider>
+                      <DistractionFreeModeProvider>
                         <ContentPolicyProvider>
                         <ScreenSizeProvider>
                           <DeletedEventProvider>
@@ -89,9 +91,10 @@ export default function App(): JSX.Element {
                           </DeletedEventProvider>
                           </ScreenSizeProvider>
                         </ContentPolicyProvider>
-                      </CompactSidebarProvider>
-                    </DeckViewProvider>
-                  </LayoutModeProvider>
+                      </DistractionFreeModeProvider>
+                    </CompactSidebarProvider>
+                  </DeckViewProvider>
+                </LayoutModeProvider>
               </ButtonRadiusProvider>
             </FontFamilyProvider>
           </FontSizeProvider>

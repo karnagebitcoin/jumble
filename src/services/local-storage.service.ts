@@ -6,6 +6,7 @@ import {
   DEFAULT_NIP_96_SERVICE,
   DEFAULT_PAGE_THEME,
   DEFAULT_PRIMARY_COLOR,
+  DISTRACTION_FREE_MODE,
   ExtendedKind,
   FONT_FAMILIES,
   FONT_SIZES,
@@ -23,6 +24,7 @@ import {
   TAccount,
   TAccountPointer,
   TCustomFeed,
+  TDistractionFreeMode,
   TFeedInfo,
   TFontFamily,
   TMediaAutoLoadPolicy,
@@ -83,6 +85,7 @@ class LocalStorageService {
   private chargeZapLimit: number = 1000
   private zapOnReactions: boolean = false
   private onlyZapsMode: boolean = false
+  private distractionFreeMode: TDistractionFreeMode = DISTRACTION_FREE_MODE.DRAIN_MY_TIME
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -323,6 +326,14 @@ class LocalStorageService {
     this.zapOnReactions = window.localStorage.getItem(StorageKey.ZAP_ON_REACTIONS) === 'true'
 
     this.onlyZapsMode = window.localStorage.getItem(StorageKey.ONLY_ZAPS_MODE) === 'true'
+
+    const distractionFreeMode = window.localStorage.getItem(StorageKey.DISTRACTION_FREE_MODE)
+    if (
+      distractionFreeMode &&
+      Object.values(DISTRACTION_FREE_MODE).includes(distractionFreeMode as TDistractionFreeMode)
+    ) {
+      this.distractionFreeMode = distractionFreeMode as TDistractionFreeMode
+    }
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -627,6 +638,15 @@ class LocalStorageService {
   setMediaAutoLoadPolicy(policy: TMediaAutoLoadPolicy) {
     this.mediaAutoLoadPolicy = policy
     window.localStorage.setItem(StorageKey.MEDIA_AUTO_LOAD_POLICY, policy)
+  }
+
+  getDistractionFreeMode() {
+    return this.distractionFreeMode
+  }
+
+  setDistractionFreeMode(mode: TDistractionFreeMode) {
+    this.distractionFreeMode = mode
+    window.localStorage.setItem(StorageKey.DISTRACTION_FREE_MODE, mode)
   }
 
   hasShownCreateWalletGuideToast(pubkey: string) {

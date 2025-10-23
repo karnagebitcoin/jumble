@@ -2,16 +2,17 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
-import { MEDIA_AUTO_LOAD_POLICY } from '@/constants'
+import { DISTRACTION_FREE_MODE, MEDIA_AUTO_LOAD_POLICY } from '@/constants'
 import { LocalizedLanguageNames, TLanguage } from '@/i18n'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn, isSupportCheckConnectionType } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
+import { useDistractionFreeMode } from '@/providers/DistractionFreeModeProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import localStorageService from '@/services/local-storage.service'
-import { TMediaAutoLoadPolicy } from '@/types'
+import { TDistractionFreeMode, TMediaAutoLoadPolicy } from '@/types'
 import { SelectValue } from '@radix-ui/react-select'
-import { ExternalLink, RotateCcw } from 'lucide-react'
+import { Check, ExternalLink, RotateCcw, BellOff, BellRing } from 'lucide-react'
 import { forwardRef, HTMLProps, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -34,6 +35,7 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setMediaAutoLoadPolicy
   } = useContentPolicy()
   const { hideUntrustedNotes, updateHideUntrustedNotes } = useUserTrust()
+  const { distractionFreeMode, setDistractionFreeMode } = useDistractionFreeMode()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -59,6 +61,51 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
               ))}
             </SelectContent>
           </Select>
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3">
+          <Label className="text-base font-normal">
+            Distraction-Free Mode
+          </Label>
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <button
+              onClick={() => setDistractionFreeMode(DISTRACTION_FREE_MODE.DRAIN_MY_TIME)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                distractionFreeMode === DISTRACTION_FREE_MODE.DRAIN_MY_TIME
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <BellRing className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">Drain my time</span>
+              {distractionFreeMode === DISTRACTION_FREE_MODE.DRAIN_MY_TIME && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+            <button
+              onClick={() => setDistractionFreeMode(DISTRACTION_FREE_MODE.FOCUS_MODE)}
+              className={cn(
+                'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
+                distractionFreeMode === DISTRACTION_FREE_MODE.FOCUS_MODE
+                  ? 'border-primary'
+                  : 'border-border hover:border-muted-foreground/30'
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8">
+                <BellOff className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">Focus mode</span>
+              {distractionFreeMode === DISTRACTION_FREE_MODE.FOCUS_MODE && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </button>
+          </div>
         </SettingItem>
         <SettingItem>
           <Label htmlFor="media-auto-load-policy" className="text-base font-normal">

@@ -72,6 +72,7 @@ export const StorageKey = {
   ONLY_ZAPS_MODE: 'onlyZapsMode',
   DECK_VIEW_MODE: 'deckViewMode',
   PINNED_COLUMNS: 'pinnedColumns',
+  DISTRACTION_FREE_MODE: 'distractionFreeMode',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -177,6 +178,13 @@ export const MEDIA_AUTO_LOAD_POLICY = {
   WIFI_ONLY: 'wifi-only',
   NEVER: 'never'
 } as const
+
+export const DISTRACTION_FREE_MODE = {
+  DRAIN_MY_TIME: 'drain-my-time',
+  FOCUS_MODE: 'focus-mode'
+} as const
+
+export const DEFAULT_DISTRACTION_FREE_MODE = 'drain-my-time'
 
 export const FONT_SIZES = [10, 12, 14, 16, 18, 20] as const
 export const DEFAULT_FONT_SIZE = 14
