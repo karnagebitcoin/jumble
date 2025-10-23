@@ -205,6 +205,10 @@ export const FONT_FAMILIES = {
   ROBOTO: {
     name: 'Roboto',
     value: 'Roboto, system-ui, sans-serif'
+  },
+  GEIST_MONO: {
+    name: 'Geist Mono',
+    value: '"Geist Mono", monospace'
   }
 } as const
 
