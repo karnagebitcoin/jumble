@@ -50,7 +50,29 @@ export const StorageKey = {
   NOTIFICATION_LIST_STYLE: 'notificationListStyle',
   MEDIA_AUTO_LOAD_POLICY: 'mediaAutoLoadPolicy',
   SHOWN_CREATE_WALLET_GUIDE_TOAST_PUBKEYS: 'shownCreateWalletGuideToastPubkeys',
-  SIDEBAR_COLLAPSE: 'sidebarCollapse',
+  FONT_SIZE: 'fontSize',
+  PRIMARY_COLOR: 'primaryColor',
+  LAYOUT_MODE: 'layoutMode',
+  BUTTON_RADIUS: 'buttonRadius',
+  PAGE_THEME: 'pageTheme',
+  PRIVATE_NOTES: 'privateNotes',
+  TRENDING_NOTES_DISMISSED: 'trendingNotesDismissed',
+  TRENDING_NOTES_HEIGHT: 'trendingNotesHeight',
+  BITCOIN_TICKER_ALIGNMENT: 'bitcoinTickerAlignment',
+  BITCOIN_TICKER_TEXT_SIZE: 'bitcoinTickerTextSize',
+  COMPACT_SIDEBAR: 'compactSidebar',
+  ENABLED_WIDGETS: 'enabledWidgets',
+  PINNED_NOTE_WIDGETS: 'pinnedNoteWidgets',
+  ZAP_SOUND: 'zapSound',
+  FONT_FAMILY: 'fontFamily',
+  CUSTOM_FEEDS: 'customFeeds',
+  CHARGE_ZAP_ENABLED: 'chargeZapEnabled',
+  CHARGE_ZAP_LIMIT: 'chargeZapLimit',
+  ZAP_ON_REACTIONS: 'zapOnReactions',
+  ONLY_ZAPS_MODE: 'onlyZapsMode',
+  DECK_VIEW_MODE: 'deckViewMode',
+  PINNED_COLUMNS: 'pinnedColumns',
+  DISTRACTION_FREE_MODE: 'distractionFreeMode',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -157,9 +179,17 @@ export const MEDIA_AUTO_LOAD_POLICY = {
   NEVER: 'never'
 } as const
 
+export const DISTRACTION_FREE_MODE = {
+  DRAIN_MY_TIME: 'drain-my-time',
+  FOCUS_MODE: 'focus-mode'
+} as const
+
+export const DEFAULT_DISTRACTION_FREE_MODE = 'drain-my-time'
+
 export const FONT_SIZES = [10, 12, 14, 16, 18, 20] as const
 export const DEFAULT_FONT_SIZE = 14
 
+// Available font families for the application
 export const FONT_FAMILIES = {
   DEFAULT: {
     name: 'Default',
@@ -184,6 +214,10 @@ export const FONT_FAMILIES = {
   ROBOTO: {
     name: 'Roboto',
     value: 'Roboto, system-ui, sans-serif'
+  },
+  GEIST_MONO: {
+    name: 'Geist Mono',
+    value: '"Geist Mono", monospace'
   }
 } as const
 

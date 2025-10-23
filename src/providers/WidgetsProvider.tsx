@@ -5,7 +5,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 
 export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | string // Allow dynamic pinned-note-* IDs
 
-export type TTrendingNotesHeight = 'short' | 'medium' | 'tall'
+export type TTrendingNotesHeight = 'short' | 'medium' | 'tall' | 'remaining'
 
 export type TBitcoinTickerAlignment = 'left' | 'center'
 export type TBitcoinTickerTextSize = 'large' | 'small'

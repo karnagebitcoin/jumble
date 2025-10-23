@@ -1,13 +1,11 @@
 import { useFetchWebMetadata } from '@/hooks/useFetchWebMetadata'
 import { cn } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
-import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useMemo } from 'react'
 import Image from '../Image'
 
 export default function WebPreview({ url, className }: { url: string; className?: string }) {
   const { autoLoadMedia } = useContentPolicy()
-  const { isSmallScreen } = useScreenSize()
   const { title, description, image } = useFetchWebMetadata(url)
 
   const hostname = useMemo(() => {
@@ -26,27 +24,9 @@ export default function WebPreview({ url, className }: { url: string; className?
     return null
   }
 
-  if (isSmallScreen && image) {
-    return (
-      <div
-        className="rounded-lg border mt-2 overflow-hidden"
-        onClick={(e) => {
-          e.stopPropagation()
-          window.open(url, '_blank')
-        }}
-      >
-        <Image image={{ url: image }} className="w-full h-44 rounded-none" hideIfError />
-        <div className="bg-muted p-2 w-full">
-          <div className="text-xs text-muted-foreground">{hostname}</div>
-          <div className="font-semibold line-clamp-1">{title}</div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div
-      className={cn('p-0 clickable flex w-full border rounded-lg overflow-hidden', className)}
+      className={cn('p-2 clickable flex gap-2 w-full border rounded-lg overflow-hidden', className)}
       onClick={(e) => {
         e.stopPropagation()
         window.open(url, '_blank')
@@ -55,14 +35,16 @@ export default function WebPreview({ url, className }: { url: string; className?
       {image && (
         <Image
           image={{ url: image }}
-          className="aspect-[4/3] xl:aspect-video bg-foreground h-44 rounded-none"
+          className="w-10 h-10 rounded flex-shrink-0"
           hideIfError
         />
       )}
-      <div className="flex-1 w-0 p-2">
-        <div className="text-xs text-muted-foreground">{hostname}</div>
-        <div className="font-semibold line-clamp-2">{title}</div>
-        <div className="text-xs text-muted-foreground line-clamp-5">{description}</div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold line-clamp-1 text-sm">{title}</div>
+        {description && (
+          <div className="text-xs text-muted-foreground line-clamp-2">{description}</div>
+        )}
+        <div className="text-xs text-muted-foreground mt-0.5">{hostname}</div>
       </div>
     </div>
   )

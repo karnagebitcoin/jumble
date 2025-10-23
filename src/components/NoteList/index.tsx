@@ -9,6 +9,7 @@ import {
 import { isTouchDevice } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useDeletedEvent } from '@/providers/DeletedEventProvider'
+import { useDistractionFreeMode } from '@/providers/DistractionFreeModeProvider'
 import { useMuteList } from '@/providers/MuteListProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
@@ -65,6 +66,7 @@ const NoteList = forwardRef(
     const { mutePubkeySet } = useMuteList()
     const { hideContentMentioningMutedUsers } = useContentPolicy()
     const { isEventDeleted } = useDeletedEvent()
+    const { isDistractionFree } = useDistractionFreeMode()
     const [events, setEvents] = useState<Event[]>([])
     const [newEvents, setNewEvents] = useState<Event[]>([])
     const [hasMore, setHasMore] = useState<boolean>(true)
@@ -327,7 +329,7 @@ const NoteList = forwardRef(
 
     return (
       <div>
-        {filteredNewEvents.length > 0 && (
+        {filteredNewEvents.length > 0 && !isDistractionFree && (
           <NewNotesButton newEvents={filteredNewEvents} onClick={showNewEvents} />
         )}
         <div ref={topRef} className="scroll-mt-[calc(6rem+1px)]" />

@@ -135,7 +135,7 @@ function SortableWidgetCard({
           <RadioGroup
             value={trendingNotesHeight}
             onValueChange={onTrendingNotesHeightChange}
-            className="flex gap-4"
+            className="flex flex-wrap gap-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="short" id={`${id}-short`} />
@@ -155,54 +155,62 @@ function SortableWidgetCard({
                 Tall (480px)
               </Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="remaining" id={`${id}-remaining`} />
+              <Label htmlFor={`${id}-remaining`} className="cursor-pointer font-normal">
+                Remaining space
+              </Label>
+            </div>
           </RadioGroup>
         </div>
       )}
 
       {showBitcoinSettings && bitcoinTickerAlignment && onBitcoinTickerAlignmentChange && bitcoinTickerTextSize && onBitcoinTickerTextSizeChange && (
-        <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-4">
-          <div>
-            <Label className="text-sm font-medium mb-2 block">Text Alignment</Label>
-            <RadioGroup
-              value={bitcoinTickerAlignment}
-              onValueChange={onBitcoinTickerAlignmentChange}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="left" id={`${id}-align-left`} />
-                <Label htmlFor={`${id}-align-left`} className="cursor-pointer font-normal">
-                  Left
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="center" id={`${id}-align-center`} />
-                <Label htmlFor={`${id}-align-center`} className="cursor-pointer font-normal">
-                  Center
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
+        <div className="px-4 pb-4 pt-2 border-t border-border/50">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Text Alignment</Label>
+              <RadioGroup
+                value={bitcoinTickerAlignment}
+                onValueChange={onBitcoinTickerAlignmentChange}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="left" id={`${id}-align-left`} />
+                  <Label htmlFor={`${id}-align-left`} className="cursor-pointer font-normal">
+                    Left
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="center" id={`${id}-align-center`} />
+                  <Label htmlFor={`${id}-align-center`} className="cursor-pointer font-normal">
+                    Center
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-          <div>
-            <Label className="text-sm font-medium mb-2 block">Text Size</Label>
-            <RadioGroup
-              value={bitcoinTickerTextSize}
-              onValueChange={onBitcoinTickerTextSizeChange}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="large" id={`${id}-size-large`} />
-                <Label htmlFor={`${id}-size-large`} className="cursor-pointer font-normal">
-                  Large
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="small" id={`${id}-size-small`} />
-                <Label htmlFor={`${id}-size-small`} className="cursor-pointer font-normal">
-                  Small
-                </Label>
-              </div>
-            </RadioGroup>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Text Size</Label>
+              <RadioGroup
+                value={bitcoinTickerTextSize}
+                onValueChange={onBitcoinTickerTextSizeChange}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="large" id={`${id}-size-large`} />
+                  <Label htmlFor={`${id}-size-large`} className="cursor-pointer font-normal">
+                    Large
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="small" id={`${id}-size-small`} />
+                  <Label htmlFor={`${id}-size-small`} className="cursor-pointer font-normal">
+                    Small
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
         </div>
       )}

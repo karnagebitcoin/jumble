@@ -6,6 +6,7 @@ import {
   DEFAULT_NIP_96_SERVICE,
   DEFAULT_PAGE_THEME,
   DEFAULT_PRIMARY_COLOR,
+  DISTRACTION_FREE_MODE,
   ExtendedKind,
   FONT_FAMILIES,
   FONT_SIZES,
@@ -23,6 +24,7 @@ import {
   TAccount,
   TAccountPointer,
   TCustomFeed,
+  TDistractionFreeMode,
   TFeedInfo,
   TFontFamily,
   TMediaAutoLoadPolicy,
@@ -65,7 +67,25 @@ class LocalStorageService {
   private notificationListStyle: TNotificationStyle = NOTIFICATION_LIST_STYLE.DETAILED
   private mediaAutoLoadPolicy: TMediaAutoLoadPolicy = MEDIA_AUTO_LOAD_POLICY.ALWAYS
   private shownCreateWalletGuideToastPubkeys: Set<string> = new Set()
-  private sidebarCollapse: boolean = false
+  private fontSize: number = DEFAULT_FONT_SIZE
+  private fontFamily: TFontFamily = DEFAULT_FONT_FAMILY
+  private primaryColor: TPrimaryColor = DEFAULT_PRIMARY_COLOR
+  private buttonRadius: number = DEFAULT_BUTTON_RADIUS
+  private pageTheme: TPageTheme = DEFAULT_PAGE_THEME
+  private trendingNotesDismissed: boolean = false
+  private compactSidebar: boolean = false
+  private enabledWidgets: string[] = []
+  private pinnedNoteWidgets: { id: string; eventId: string }[] = []
+  private trendingNotesHeight: 'short' | 'medium' | 'tall' | 'remaining' = 'medium'
+  private bitcoinTickerAlignment: 'left' | 'center' = 'left'
+  private bitcoinTickerTextSize: 'large' | 'small' = 'large'
+  private zapSound: TZapSound = ZAP_SOUNDS.NONE
+  private customFeeds: TCustomFeed[] = []
+  private chargeZapEnabled: boolean = false
+  private chargeZapLimit: number = 1000
+  private zapOnReactions: boolean = false
+  private onlyZapsMode: boolean = false
+  private distractionFreeMode: TDistractionFreeMode = DISTRACTION_FREE_MODE.DRAIN_MY_TIME
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -217,7 +237,103 @@ class LocalStorageService {
       ? new Set(JSON.parse(shownCreateWalletGuideToastPubkeysStr))
       : new Set()
 
-    this.sidebarCollapse = window.localStorage.getItem(StorageKey.SIDEBAR_COLLAPSE) === 'true'
+    const fontSizeStr = window.localStorage.getItem(StorageKey.FONT_SIZE)
+    if (fontSizeStr) {
+      const fontSize = parseInt(fontSizeStr)
+      if (FONT_SIZES.includes(fontSize as any)) {
+        this.fontSize = fontSize
+      }
+    }
+
+    const fontFamily = window.localStorage.getItem(StorageKey.FONT_FAMILY)
+    if (fontFamily && Object.keys(FONT_FAMILIES).includes(fontFamily)) {
+      this.fontFamily = fontFamily as TFontFamily
+    }
+
+    const primaryColor = window.localStorage.getItem(StorageKey.PRIMARY_COLOR)
+    if (primaryColor && Object.keys(PRIMARY_COLORS).includes(primaryColor)) {
+      this.primaryColor = primaryColor as TPrimaryColor
+    }
+
+    const buttonRadiusStr = window.localStorage.getItem(StorageKey.BUTTON_RADIUS)
+    if (buttonRadiusStr) {
+      const buttonRadius = parseInt(buttonRadiusStr)
+      if (BUTTON_RADIUS_VALUES.includes(buttonRadius as any)) {
+        this.buttonRadius = buttonRadius
+      }
+    }
+
+    const pageTheme = window.localStorage.getItem(StorageKey.PAGE_THEME)
+    if (pageTheme && ['default', 'pure-black'].includes(pageTheme)) {
+      this.pageTheme = pageTheme as TPageTheme
+    }
+
+    this.trendingNotesDismissed =
+      window.localStorage.getItem(StorageKey.TRENDING_NOTES_DISMISSED) === 'true'
+
+    this.compactSidebar =
+      window.localStorage.getItem(StorageKey.COMPACT_SIDEBAR) === 'true'
+
+    const enabledWidgetsStr = window.localStorage.getItem(StorageKey.ENABLED_WIDGETS)
+    if (enabledWidgetsStr) {
+      this.enabledWidgets = JSON.parse(enabledWidgetsStr)
+    } else {
+      // Default to trending notes enabled
+      this.enabledWidgets = ['trending-notes']
+      window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
+    }
+
+    const pinnedNoteWidgetsStr = window.localStorage.getItem(StorageKey.PINNED_NOTE_WIDGETS)
+    if (pinnedNoteWidgetsStr) {
+      this.pinnedNoteWidgets = JSON.parse(pinnedNoteWidgetsStr)
+    }
+
+    const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
+    if (trendingNotesHeight && ['short', 'medium', 'tall', 'remaining'].includes(trendingNotesHeight)) {
+      this.trendingNotesHeight = trendingNotesHeight as 'short' | 'medium' | 'tall' | 'remaining'
+    }
+
+    const bitcoinTickerAlignment = window.localStorage.getItem(StorageKey.BITCOIN_TICKER_ALIGNMENT)
+    if (bitcoinTickerAlignment && ['left', 'center'].includes(bitcoinTickerAlignment)) {
+      this.bitcoinTickerAlignment = bitcoinTickerAlignment as 'left' | 'center'
+    }
+
+    const bitcoinTickerTextSize = window.localStorage.getItem(StorageKey.BITCOIN_TICKER_TEXT_SIZE)
+    if (bitcoinTickerTextSize && ['large', 'small'].includes(bitcoinTickerTextSize)) {
+      this.bitcoinTickerTextSize = bitcoinTickerTextSize as 'large' | 'small'
+    }
+
+    const zapSound = window.localStorage.getItem(StorageKey.ZAP_SOUND)
+    if (zapSound && Object.values(ZAP_SOUNDS).includes(zapSound as TZapSound)) {
+      this.zapSound = zapSound as TZapSound
+    }
+
+    const customFeedsStr = window.localStorage.getItem(StorageKey.CUSTOM_FEEDS)
+    if (customFeedsStr) {
+      this.customFeeds = JSON.parse(customFeedsStr)
+    }
+
+    this.chargeZapEnabled = window.localStorage.getItem(StorageKey.CHARGE_ZAP_ENABLED) === 'true'
+
+    const chargeZapLimitStr = window.localStorage.getItem(StorageKey.CHARGE_ZAP_LIMIT)
+    if (chargeZapLimitStr) {
+      const num = parseInt(chargeZapLimitStr)
+      if (!isNaN(num) && num > 0) {
+        this.chargeZapLimit = num
+      }
+    }
+
+    this.zapOnReactions = window.localStorage.getItem(StorageKey.ZAP_ON_REACTIONS) === 'true'
+
+    this.onlyZapsMode = window.localStorage.getItem(StorageKey.ONLY_ZAPS_MODE) === 'true'
+
+    const distractionFreeMode = window.localStorage.getItem(StorageKey.DISTRACTION_FREE_MODE)
+    if (
+      distractionFreeMode &&
+      Object.values(DISTRACTION_FREE_MODE).includes(distractionFreeMode as TDistractionFreeMode)
+    ) {
+      this.distractionFreeMode = distractionFreeMode as TDistractionFreeMode
+    }
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -524,6 +640,15 @@ class LocalStorageService {
     window.localStorage.setItem(StorageKey.MEDIA_AUTO_LOAD_POLICY, policy)
   }
 
+  getDistractionFreeMode() {
+    return this.distractionFreeMode
+  }
+
+  setDistractionFreeMode(mode: TDistractionFreeMode) {
+    this.distractionFreeMode = mode
+    window.localStorage.setItem(StorageKey.DISTRACTION_FREE_MODE, mode)
+  }
+
   hasShownCreateWalletGuideToast(pubkey: string) {
     return this.shownCreateWalletGuideToastPubkeys.has(pubkey)
   }
@@ -539,8 +664,177 @@ class LocalStorageService {
     )
   }
 
-  getSidebarCollapse() {
-    return this.sidebarCollapse
+    getFontSize() {
+    return this.fontSize
+  }
+
+  setFontSize(fontSize: number) {
+    if (!FONT_SIZES.includes(fontSize as any)) {
+      return
+    }
+    this.fontSize = fontSize
+    window.localStorage.setItem(StorageKey.FONT_SIZE, fontSize.toString())
+  }
+
+  getFontFamily() {
+    return this.fontFamily
+  }
+
+  setFontFamily(fontFamily: TFontFamily) {
+    if (!Object.keys(FONT_FAMILIES).includes(fontFamily)) {
+      return
+    }
+    this.fontFamily = fontFamily
+    window.localStorage.setItem(StorageKey.FONT_FAMILY, fontFamily)
+  }
+
+  getPrimaryColor() {
+    return this.primaryColor
+  }
+
+  setPrimaryColor(color: TPrimaryColor) {
+    this.primaryColor = color
+    window.localStorage.setItem(StorageKey.PRIMARY_COLOR, color)
+  }
+
+  getButtonRadius() {
+    return this.buttonRadius
+  }
+
+  setButtonRadius(radius: number) {
+    if (!BUTTON_RADIUS_VALUES.includes(radius as any)) {
+      return
+    }
+    this.buttonRadius = radius
+    window.localStorage.setItem(StorageKey.BUTTON_RADIUS, radius.toString())
+  }
+
+  getPageTheme() {
+    return this.pageTheme
+  }
+
+  setPageTheme(pageTheme: TPageTheme) {
+    this.pageTheme = pageTheme
+    window.localStorage.setItem(StorageKey.PAGE_THEME, pageTheme)
+  }
+
+  getTrendingNotesDismissed() {
+    return this.trendingNotesDismissed
+  }
+
+  setTrendingNotesDismissed(dismissed: boolean) {
+    this.trendingNotesDismissed = dismissed
+    window.localStorage.setItem(StorageKey.TRENDING_NOTES_DISMISSED, dismissed.toString())
+  }
+
+  getCompactSidebar() {
+    return this.compactSidebar
+  }
+
+  setCompactSidebar(compact: boolean) {
+    this.compactSidebar = compact
+    window.localStorage.setItem(StorageKey.COMPACT_SIDEBAR, compact.toString())
+  }
+
+  getEnabledWidgets() {
+    return this.enabledWidgets
+  }
+
+  setEnabledWidgets(widgets: string[]) {
+    this.enabledWidgets = widgets
+    window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(widgets))
+  }
+
+  getTrendingNotesHeight() {
+    return this.trendingNotesHeight
+  }
+
+  setTrendingNotesHeight(height: 'short' | 'medium' | 'tall' | 'remaining') {
+    this.trendingNotesHeight = height
+    window.localStorage.setItem(StorageKey.TRENDING_NOTES_HEIGHT, height)
+  }
+
+  getBitcoinTickerAlignment() {
+    return this.bitcoinTickerAlignment
+  }
+
+  setBitcoinTickerAlignment(alignment: 'left' | 'center') {
+    this.bitcoinTickerAlignment = alignment
+    window.localStorage.setItem(StorageKey.BITCOIN_TICKER_ALIGNMENT, alignment)
+  }
+
+  getBitcoinTickerTextSize() {
+    return this.bitcoinTickerTextSize
+  }
+
+  setBitcoinTickerTextSize(size: 'large' | 'small') {
+    this.bitcoinTickerTextSize = size
+    window.localStorage.setItem(StorageKey.BITCOIN_TICKER_TEXT_SIZE, size)
+  }
+
+  getPinnedNoteWidgets() {
+    return this.pinnedNoteWidgets
+  }
+
+  setPinnedNoteWidgets(widgets: { id: string; eventId: string }[]) {
+    this.pinnedNoteWidgets = widgets
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(widgets))
+  }
+
+  addPinnedNoteWidget(eventId: string) {
+    const id = `pinned-note-${Date.now()}`
+    this.pinnedNoteWidgets.push({ id, eventId })
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
+    return id
+  }
+
+  removePinnedNoteWidget(id: string) {
+    this.pinnedNoteWidgets = this.pinnedNoteWidgets.filter((widget) => widget.id !== id)
+    window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
+  }
+
+  getZapSound() {
+    return this.zapSound
+  }
+
+  setZapSound(sound: TZapSound) {
+    this.zapSound = sound
+    window.localStorage.setItem(StorageKey.ZAP_SOUND, sound)
+  }
+
+  getCustomFeeds() {
+    return this.customFeeds
+  }
+
+  addCustomFeed(feed: TCustomFeed) {
+    this.customFeeds.push(feed)
+    window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+  }
+
+  removeCustomFeed(id: string) {
+    this.customFeeds = this.customFeeds.filter((feed) => feed.id !== id)
+    window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+  }
+
+  updateCustomFeed(id: string, updates: Partial<TCustomFeed>) {
+    const index = this.customFeeds.findIndex((feed) => feed.id === id)
+    if (index !== -1) {
+      this.customFeeds[index] = { ...this.customFeeds[index], ...updates }
+      window.localStorage.setItem(StorageKey.CUSTOM_FEEDS, JSON.stringify(this.customFeeds))
+    }
+  }
+
+  getZapOnReactions() {
+    return this.zapOnReactions
+  }
+
+  setZapOnReactions(enabled: boolean) {
+    this.zapOnReactions = enabled
+    window.localStorage.setItem(StorageKey.ZAP_ON_REACTIONS, enabled.toString())
+  }
+
+  getOnlyZapsMode() {
+    return this.onlyZapsMode
   }
 
   setSidebarCollapse(collapse: boolean) {

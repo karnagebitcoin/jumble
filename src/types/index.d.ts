@@ -1,5 +1,5 @@
 import { Event, Filter, VerifiedEvent } from 'nostr-tools'
-import { MEDIA_AUTO_LOAD_POLICY, NOTIFICATION_LIST_STYLE, POLL_TYPE } from '../constants'
+import { DISTRACTION_FREE_MODE, MEDIA_AUTO_LOAD_POLICY, NOTIFICATION_LIST_STYLE, POLL_TYPE } from '../constants'
 
 export type TSubRequestFilter = Omit<Filter, 'since' | 'until'> & { limit: number }
 
@@ -85,7 +85,7 @@ export type TPageTheme = 'default' | 'pure-black'
 
 export type TPrimaryColor = 'RED' | 'ORANGE' | 'AMBER' | 'YELLOW' | 'LIME' | 'GREEN' | 'EMERALD' | 'TEAL' | 'CYAN' | 'SKY' | 'BLUE' | 'INDIGO' | 'VIOLET' | 'PURPLE' | 'FUCHSIA' | 'PINK' | 'ROSE'
 
-export type TFontFamily = 'DEFAULT' | 'SYSTEM' | 'IBM_PLEX_SANS' | 'LATO' | 'OUTFIT' | 'ROBOTO'
+export type TFontFamily = 'DEFAULT' | 'SYSTEM' | 'IBM_PLEX_SANS' | 'LATO' | 'OUTFIT' | 'ROBOTO' | 'GEIST_MONO'
 
 export type TLayoutMode = 'boxed' | 'full-width'
 
@@ -220,3 +220,6 @@ export type TAwesomeRelayCollection = {
 
 export type TMediaAutoLoadPolicy =
   (typeof MEDIA_AUTO_LOAD_POLICY)[keyof typeof MEDIA_AUTO_LOAD_POLICY]
+
+export type TDistractionFreeMode =
+  (typeof DISTRACTION_FREE_MODE)[keyof typeof DISTRACTION_FREE_MODE]
