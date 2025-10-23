@@ -1,12 +1,11 @@
 import PostEditor from '@/components/PostEditor'
 import { cn } from '@/lib/utils'
-import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { PencilLine } from 'lucide-react'
 import { useState } from 'react'
 import SidebarItem from './SidebarItem'
 
-export default function PostButton() {
+export default function PostButton({ collapse }: { collapse: boolean }) {
   const { checkLogin } = useNostr()
   const [open, setOpen] = useState(false)
   const { compactSidebar } = useCompactSidebar()
@@ -23,12 +22,10 @@ export default function PostButton() {
           })
         }}
         variant="default"
-        className={cn(
-          "bg-primary gap-2",
-          compactSidebar ? "" : "xl:justify-center"
-        )}
+        className={cn('bg-primary gap-2', !collapse && 'justify-center')}
+        collapse={collapse}
       >
-        <PencilLine strokeWidth={1.3} />
+        <PencilLine />
       </SidebarItem>
       <PostEditor open={open} setOpen={setOpen} />
     </div>
