@@ -181,6 +181,7 @@ export const MEDIA_AUTO_LOAD_POLICY = {
 export const FONT_SIZES = [10, 12, 14, 16, 18, 20] as const
 export const DEFAULT_FONT_SIZE = 14
 
+// Available font families for the application
 export const FONT_FAMILIES = {
   DEFAULT: {
     name: 'Default',
