@@ -6,7 +6,6 @@ import { ExternalLink } from 'lucide-react'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
 import Markdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import NostrNode from './NostrNode'
 import { remarkNostr } from './remarkNostr'
@@ -113,7 +112,6 @@ export default function LongFormArticle({
       )}
       <Markdown
         remarkPlugins={[remarkGfm, remarkNostr]}
-        rehypePlugins={[rehypeRaw]}
         urlTransform={(url) => {
           if (url.startsWith('nostr:')) {
             return url.slice(6) // Remove 'nostr:' prefix for rendering

@@ -63,6 +63,7 @@ export const StorageKey = {
   COMPACT_SIDEBAR: 'compactSidebar',
   ENABLED_WIDGETS: 'enabledWidgets',
   PINNED_NOTE_WIDGETS: 'pinnedNoteWidgets',
+  AI_PROMPT_WIDGETS: 'aiPromptWidgets',
   ZAP_SOUND: 'zapSound',
   FONT_FAMILY: 'fontFamily',
   CUSTOM_FEEDS: 'customFeeds',

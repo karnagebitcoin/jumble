@@ -80,6 +80,7 @@ class LocalStorageService {
   private compactSidebar: boolean = false
   private enabledWidgets: string[] = []
   private pinnedNoteWidgets: { id: string; eventId: string }[] = []
+  private aiPromptWidgets: { id: string; eventId: string; messages: any[] }[] = []
   private trendingNotesHeight: 'short' | 'medium' | 'tall' | 'remaining' = 'medium'
   private bitcoinTickerAlignment: 'left' | 'center' = 'left'
   private bitcoinTickerTextSize: 'large' | 'small' = 'large'
@@ -301,6 +302,11 @@ class LocalStorageService {
     if (pinnedNoteWidgetsStr) {
       this.pinnedNoteWidgets = JSON.parse(pinnedNoteWidgetsStr)
     }
+
+    // AI Prompt widgets are session-only and should not persist across page reloads
+    // Clear any stored AI prompt widgets
+    this.aiPromptWidgets = []
+    window.localStorage.removeItem(StorageKey.AI_PROMPT_WIDGETS)
 
     const trendingNotesHeight = window.localStorage.getItem(StorageKey.TRENDING_NOTES_HEIGHT)
     if (trendingNotesHeight && ['short', 'medium', 'tall', 'remaining'].includes(trendingNotesHeight)) {
@@ -805,6 +811,27 @@ class LocalStorageService {
   removePinnedNoteWidget(id: string) {
     this.pinnedNoteWidgets = this.pinnedNoteWidgets.filter((widget) => widget.id !== id)
     window.localStorage.setItem(StorageKey.PINNED_NOTE_WIDGETS, JSON.stringify(this.pinnedNoteWidgets))
+  }
+
+  getAIPromptWidgets() {
+    return this.aiPromptWidgets
+  }
+
+  setAIPromptWidgets(widgets: { id: string; eventId: string; messages: any[] }[]) {
+    // AI Prompt widgets are session-only, no localStorage persistence
+    this.aiPromptWidgets = widgets
+  }
+
+  addAIPromptWidget(eventId: string, id?: string) {
+    const widgetId = id ?? `ai-prompt-${Date.now()}`
+    this.aiPromptWidgets.push({ id: widgetId, eventId, messages: [] })
+    // AI Prompt widgets are session-only, no localStorage persistence
+    return widgetId
+  }
+
+  removeAIPromptWidget(id: string) {
+    this.aiPromptWidgets = this.aiPromptWidgets.filter((widget) => widget.id !== id)
+    // AI Prompt widgets are session-only, no localStorage persistence
   }
 
   getZapSound() {

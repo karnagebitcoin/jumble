@@ -33,9 +33,9 @@ export default function TrendingNotesWidget() {
   const useFullHeight = trendingNotesHeight === 'remaining' || isOnlyWidget
 
   return (
-    <WidgetContainer className={useFullHeight ? 'h-full flex flex-col' : ''}>
+    <WidgetContainer className={useFullHeight ? 'h-full flex flex-col' : 'flex flex-col'}>
       <CardHeader
-        className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b group"
+        className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 border-b group flex-shrink-0"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -50,7 +50,7 @@ export default function TrendingNotesWidget() {
           </button>
         )}
       </CardHeader>
-      <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4 ${useFullHeight ? 'flex-1' : ''}`}>
+      <div className={`${heightClass} overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-4 ${useFullHeight ? 'flex-1 min-h-0' : ''}`}>
         <CompactTrendingNotes />
       </div>
     </WidgetContainer>

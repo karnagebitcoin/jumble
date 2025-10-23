@@ -1,6 +1,6 @@
 import aiService from '@/services/ai.service'
 import storage from '@/services/local-storage.service'
-import { TAIServiceConfig, TAIToolsConfig, TArticleSummary } from '@/types'
+import { TAIServiceConfig, TAIToolsConfig, TArticleSummary, TAIMessage } from '@/types'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNostr } from './NostrProvider'
 
@@ -10,6 +10,7 @@ type TAIContext = {
   updateServiceConfig: (config: TAIServiceConfig) => void
   updateToolsConfig: (config: TAIToolsConfig) => void
   summarizeArticle: (title: string, description: string, url: string) => Promise<TArticleSummary>
+  chat: (messages: TAIMessage[]) => Promise<string>
   isConfigured: boolean
 }
 
@@ -61,6 +62,10 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     return await aiService.summarizeArticle(title, description, url)
   }
 
+  const chat = async (messages: TAIMessage[]): Promise<string> => {
+    return await aiService.chat(messages)
+  }
+
   const isConfigured = !!(serviceConfig.apiKey && serviceConfig.model)
 
   return (
@@ -71,6 +76,7 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
         updateServiceConfig,
         updateToolsConfig,
         summarizeArticle,
+        chat,
         isConfigured
       }}
     >

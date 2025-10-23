@@ -239,3 +239,14 @@ export type TArticleSummary = {
   keyTakeaways: string[]
   summary: string
 }
+
+export type TAIMessage = {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+}
+
+export type TAIPromptWidget = {
+  id: string
+  eventId: string
+  messages: TAIMessage[]
+}
