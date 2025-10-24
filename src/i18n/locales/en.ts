@@ -507,6 +507,10 @@ export default {
     Round: 'Round',
     'Hide widget': 'Hide widget',
     'Skip Tour': 'Skip Tour',
-    'Get Started': 'Get Started'
+    'Get Started': 'Get Started',
+    'Welcome to Nostr': 'Welcome to Nostr',
+    'New to Nostr?': 'New to Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.',
+    'Start Tour': 'Start Tour'
   }
 }

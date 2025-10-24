@@ -4,17 +4,15 @@ import TrendingNotesWidget from '@/components/TrendingNotes/TrendingNotesWidget'
 import BitcoinTickerWidget from '@/components/BitcoinTicker/BitcoinTickerWidget'
 import PinnedNoteWidget from '@/components/PinnedNoteWidget'
 import AIPromptWidget from '@/components/AIPromptWidget'
-import TourWidget from '@/components/TourWidget'
+import { TourWelcomeWidget } from '@/components/TourWidget'
 import { cn } from '@/lib/utils'
 import { createPortal } from 'react-dom'
 
 const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   'bitcoin-ticker': BitcoinTickerWidget,
-  'trending-notes': TrendingNotesWidget
+  'trending-notes': TrendingNotesWidget,
+  'tour': TourWelcomeWidget
 }
-
-// Widgets that should be rendered as portals (fullscreen/modal)
-const PORTAL_WIDGETS = ['tour']
 
 export default function Widgets() {
   const { enabledWidgets, pinnedNoteWidgets, aiPromptWidgets } = useWidgets()
@@ -26,9 +24,9 @@ export default function Widgets() {
     pageTheme === 'pure-black' ? "border border-neutral-900" : "shadow-lg"
   )
 
-  // Filter out AI prompt widgets and portal widgets from the regular widget list
+  // Filter out AI prompt widgets from the regular widget list
   const regularWidgets = enabledWidgets.filter((widgetId) => {
-    return !aiPromptWidgets.find((w) => w.id === widgetId) && !PORTAL_WIDGETS.includes(widgetId)
+    return !aiPromptWidgets.find((w) => w.id === widgetId)
   })
 
   return (
@@ -69,12 +67,6 @@ export default function Widgets() {
           document.body
         )
       })}
-
-      {/* Tour widget as modal (rendered via portal) */}
-      {enabledWidgets.includes('tour') && createPortal(
-        <TourWidget key="tour" />,
-        document.body
-      )}
     </>
   )
 }

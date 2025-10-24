@@ -457,6 +457,12 @@ export default {
     'Unpinned!': 'تم إلغاء التثبيت!',
     'Failed to unpin: {{error}}': 'فشل في إلغاء التثبيت: {{error}}',
     'Unpin from profile': 'إلغاء التثبيت من الملف الشخصي',
-    'Pin to profile': 'تثبيت في الملف الشخصي'
+    'Pin to profile': 'تثبيت في الملف الشخصي',
+    'Skip Tour': 'تخطي الجولة',
+    'Get Started': 'ابدأ',
+    'Welcome to Nostr': 'مرحبًا بك في Nostr',
+    'New to Nostr?': 'جديد في Nostr؟',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'قم بجولة سريعة للتعرف على الشبكات الاجتماعية اللامركزية والمرحلات وكيفية عمل Nostr.',
+    'Start Tour': 'ابدأ الجولة'
   }
 }

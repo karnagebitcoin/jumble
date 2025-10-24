@@ -461,6 +461,12 @@ export default {
     'Unpinned!': '固定が解除されました！',
     'Failed to unpin: {{error}}': '固定解除に失敗しました: {{error}}',
     'Unpin from profile': 'プロフィールから固定解除',
-    'Pin to profile': 'プロフィールに固定'
+    'Pin to profile': 'プロフィールに固定',
+    'Skip Tour': 'ツアーをスキップ',
+    'Get Started': '始める',
+    'Welcome to Nostr': 'Nostrへようこそ',
+    'New to Nostr?': 'Nostrは初めてですか？',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': '分散型ソーシャルネットワーク、リレー、Nostrの仕組みについて学ぶクイックツアーをご覧ください。',
+    'Start Tour': 'ツアーを開始'
   }
 }

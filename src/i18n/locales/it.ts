@@ -465,6 +465,12 @@ export default {
     'Unpinned!': 'Rimosso fissaggio!',
     'Failed to unpin: {{error}}': 'Impossibile rimuovere il fissaggio: {{error}}',
     'Unpin from profile': 'Rimuovi fissaggio dal profilo',
-    'Pin to profile': 'Fissa al profilo'
+    'Pin to profile': 'Fissa al profilo',
+    'Skip Tour': 'Salta il tour',
+    'Get Started': 'Inizia',
+    'Welcome to Nostr': 'Benvenuto su Nostr',
+    'New to Nostr?': 'Nuovo su Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Fai un rapido tour per conoscere i social network decentralizzati, i relay e come funziona Nostr.',
+    'Start Tour': 'Inizia il tour'
   }
 }

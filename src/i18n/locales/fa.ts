@@ -460,6 +460,12 @@ export default {
     'Unpinned!': 'لغو پین شد!',
     'Failed to unpin: {{error}}': 'لغو پین ناموفق بود: {{error}}',
     'Unpin from profile': 'لغو پین از پروفایل',
-    'Pin to profile': 'پین به پروفایل'
+    'Pin to profile': 'پین به پروفایل',
+    'Skip Tour': 'Skip Tour',
+    'Get Started': 'Get Started',
+    'Welcome to Nostr': 'Welcome to Nostr',
+    'New to Nostr?': 'New to Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.',
+    'Start Tour': 'Start Tour'
   }
 }

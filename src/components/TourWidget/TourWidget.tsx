@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useWidgets } from '@/providers/WidgetsProvider'
+import { createPortal } from 'react-dom'
 
 type TourScene = {
   title: string
@@ -84,11 +84,14 @@ const TOUR_SCENES: TourScene[] = [
   }
 ]
 
-export default function TourWidget() {
+interface TourWidgetProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function TourWidget({ isOpen, onClose }: TourWidgetProps) {
   const { t } = useTranslation()
-  const { toggleWidget } = useWidgets()
   const [currentScene, setCurrentScene] = useState(0)
-  const [isOpen, setIsOpen] = useState(true)
 
   const handleNext = () => {
     if (currentScene < TOUR_SCENES.length - 1) {
@@ -103,9 +106,8 @@ export default function TourWidget() {
   }
 
   const handleClose = () => {
-    setIsOpen(false)
-    // Disable the widget when user closes the tour
-    toggleWidget('tour')
+    setCurrentScene(0) // Reset to first scene for next time
+    onClose()
   }
 
   const handleSkip = () => {
@@ -120,7 +122,7 @@ export default function TourWidget() {
   const isFirstScene = currentScene === 0
   const isLastScene = currentScene === TOUR_SCENES.length - 1
 
-  return (
+  return createPortal(
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col" withoutClose>
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -196,6 +198,7 @@ export default function TourWidget() {
           {currentScene + 1} / {TOUR_SCENES.length}
         </div>
       </DialogContent>
-    </Dialog>
+    </Dialog>,
+    document.body
   )
 }

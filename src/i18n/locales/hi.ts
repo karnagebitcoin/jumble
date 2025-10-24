@@ -461,6 +461,12 @@ export default {
     'Unpinned!': 'पिन हटा दिया गया!',
     'Failed to unpin: {{error}}': 'पिन हटाने में असफल: {{error}}',
     'Unpin from profile': 'प्रोफ़ाइल से पिन हटाएं',
-    'Pin to profile': 'प्रोफ़ाइल पर पिन करें'
+    'Pin to profile': 'प्रोफ़ाइल पर पिन करें',
+    'Skip Tour': 'Skip Tour',
+    'Get Started': 'Get Started',
+    'Welcome to Nostr': 'Welcome to Nostr',
+    'New to Nostr?': 'New to Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.',
+    'Start Tour': 'Start Tour'
   }
 }
