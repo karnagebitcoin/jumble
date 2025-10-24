@@ -30,16 +30,29 @@ export default function SignupProfile({
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [generatedKeys, setGeneratedKeys] = useState<{ sk: Uint8Array; nsec: string; npub: string } | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  // Generate keys on mount
+  // Generate keys and login on mount
   useEffect(() => {
-    const sk = generateSecretKey()
-    const nsec = nsecEncode(sk)
-    const pubkey = getPublicKey(sk)
-    const npub = npubEncode(pubkey)
-    setGeneratedKeys({ sk, nsec, npub })
-    // Set default avatar
-    setAvatar(generateImageByPubkey(pubkey))
+    const initAccount = async () => {
+      const sk = generateSecretKey()
+      const nsec = nsecEncode(sk)
+      const pubkey = getPublicKey(sk)
+      const npub = npubEncode(pubkey)
+      setGeneratedKeys({ sk, nsec, npub })
+      // Set default avatar
+      setAvatar(generateImageByPubkey(pubkey))
+
+      // Login immediately so avatar upload will work
+      try {
+        await nsecLogin(nsec, '', true)
+        setIsLoggedIn(true)
+      } catch (error) {
+        console.error('Failed to login during signup:', error)
+      }
+    }
+
+    initAccount()
   }, [])
 
   if (!generatedKeys) return null
@@ -47,9 +60,6 @@ export default function SignupProfile({
   const handleContinue = async () => {
     setSaving(true)
     try {
-      // Login with the generated nsec
-      await nsecLogin(generatedKeys.nsec, '', true)
-
       // Create and publish profile if user entered any data
       if (displayName || username || about || avatar) {
         const profileContent = {
@@ -99,7 +109,7 @@ export default function SignupProfile({
           onUploadSuccess={onAvatarUploadSuccess}
           onUploadStart={() => setUploadingAvatar(true)}
           onUploadEnd={() => setUploadingAvatar(false)}
-          className="w-24 h-24 relative cursor-pointer rounded-full border-4 border-muted hover:border-primary transition-colors"
+          className="w-24 h-24 relative cursor-pointer rounded-full border-4 border-muted hover:border-primary transition-colors group"
         >
           <Avatar className="w-full h-full">
             <AvatarImage src={avatar} className="object-cover object-center" />
@@ -107,9 +117,15 @@ export default function SignupProfile({
               <User className="w-8 h-8 text-muted-foreground" />
             </AvatarFallback>
           </Avatar>
-          <div className="absolute top-0 bg-muted/80 w-full h-full rounded-full flex flex-col justify-center items-center">
-            {uploadingAvatar ? <Loader className="animate-spin" /> : <Upload />}
-          </div>
+          {uploadingAvatar ? (
+            <div className="absolute inset-0 bg-black/60 w-full h-full rounded-full flex flex-col justify-center items-center">
+              <Loader className="animate-spin text-white" size={20} />
+            </div>
+          ) : (
+            <div className="absolute inset-0 bg-black/40 w-full h-full rounded-full flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity hidden group-hover:flex">
+              <Upload className="text-white" size={20} />
+            </div>
+          )}
         </Uploader>
         <p className="text-xs text-muted-foreground mt-2">Click to upload avatar</p>
       </div>
