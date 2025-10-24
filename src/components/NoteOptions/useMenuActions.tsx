@@ -174,24 +174,43 @@ export function useMenuActions({
       {
         icon: Copy,
         label: t('Copy event ID'),
-        onClick: () => {
-          navigator.clipboard.writeText(getNoteBech32Id(event))
+        onClick: async () => {
+          try {
+            await navigator.clipboard.writeText(getNoteBech32Id(event))
+            toast.success(t('Event ID copied to clipboard'))
+          } catch (error) {
+            console.error('Failed to copy event ID:', error)
+            toast.error(t('Failed to copy to clipboard'))
+          }
           closeDrawer()
         }
       },
       {
         icon: Copy,
         label: t('Copy user ID'),
-        onClick: () => {
-          navigator.clipboard.writeText(pubkeyToNpub(event.pubkey) ?? '')
+        onClick: async () => {
+          try {
+            const npub = pubkeyToNpub(event.pubkey) ?? ''
+            await navigator.clipboard.writeText(npub)
+            toast.success(t('User ID copied to clipboard'))
+          } catch (error) {
+            console.error('Failed to copy user ID:', error)
+            toast.error(t('Failed to copy to clipboard'))
+          }
           closeDrawer()
         }
       },
       {
         icon: Link,
         label: t('Copy share link'),
-        onClick: () => {
-          navigator.clipboard.writeText(toNjump(getNoteBech32Id(event)))
+        onClick: async () => {
+          try {
+            await navigator.clipboard.writeText(toNjump(getNoteBech32Id(event)))
+            toast.success(t('Share link copied to clipboard'))
+          } catch (error) {
+            console.error('Failed to copy share link:', error)
+            toast.error(t('Failed to copy to clipboard'))
+          }
           closeDrawer()
         }
       },

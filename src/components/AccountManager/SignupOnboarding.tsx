@@ -147,10 +147,16 @@ function KeysDisplay({
   const [nsecRevealed, setNsecRevealed] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
 
-  const handleCopy = () => {
-    const text = `Public Key (npub):\n${keys.npub}\n\nPrivate Key (nsec):\n${keys.nsec}`
-    navigator.clipboard.writeText(text)
-    setHasInteracted(true)
+  const handleCopy = async () => {
+    try {
+      const text = `Public Key (npub):\n${keys.npub}\n\nPrivate Key (nsec):\n${keys.nsec}`
+      await navigator.clipboard.writeText(text)
+      setHasInteracted(true)
+    } catch (error) {
+      console.error('Failed to copy keys:', error)
+      // Still mark as interacted even if copy fails
+      setHasInteracted(true)
+    }
   }
 
   const handleDownload = () => {
