@@ -19,7 +19,10 @@ export default function SignupProfile({
   onProfileComplete
 }: {
   back: () => void
-  onProfileComplete: (keys: { nsec: string; npub: string }) => void
+  onProfileComplete: (
+    keys: { nsec: string; npub: string },
+    profile: { displayName: string; username: string }
+  ) => void
 }) {
   const { t } = useTranslation()
   const { nsecLogin, publish, updateProfileEvent } = useNostr()
@@ -76,7 +79,10 @@ export default function SignupProfile({
       }
 
       // Move to keys display
-      onProfileComplete({ nsec: generatedKeys.nsec, npub: generatedKeys.npub })
+      onProfileComplete(
+        { nsec: generatedKeys.nsec, npub: generatedKeys.npub },
+        { displayName, username }
+      )
     } catch (error) {
       console.error('Failed to create profile:', error)
       setSaving(false)

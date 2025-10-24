@@ -1,10 +1,13 @@
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Eye, EyeOff, Download, Copy } from 'lucide-react'
 import SignupProfile from './SignupProfile'
 
 type OnboardingStep = 'intro1' | 'intro2' | 'profile' | 'complete'
+type ProfileData = { displayName: string; username: string }
 
 export default function SignupOnboarding({
   back,
@@ -16,6 +19,7 @@ export default function SignupOnboarding({
   const { t } = useTranslation()
   const [step, setStep] = useState<OnboardingStep>('intro1')
   const [generatedKeys, setGeneratedKeys] = useState<{ nsec: string; npub: string } | null>(null)
+  const [profileData, setProfileData] = useState<ProfileData>({ displayName: '', username: '' })
 
   if (step === 'intro1') {
     return (
@@ -27,7 +31,7 @@ export default function SignupOnboarding({
         >
           ← {t('Back')}
         </Button>
-        
+
         <div className="flex flex-col gap-6 items-center text-center py-8">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <svg
@@ -44,7 +48,7 @@ export default function SignupOnboarding({
               />
             </svg>
           </div>
-          
+
           <div>
             <h2 className="text-2xl font-semibold mb-2">Protocols over apps</h2>
             <p className="text-muted-foreground max-w-sm mx-auto">
@@ -75,7 +79,7 @@ export default function SignupOnboarding({
         >
           ← {t('Back')}
         </Button>
-        
+
         <div className="flex flex-col gap-6 items-center text-center py-8">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <svg
@@ -92,7 +96,7 @@ export default function SignupOnboarding({
               />
             </svg>
           </div>
-          
+
           <div>
             <h2 className="text-2xl font-semibold mb-2">An identity you truly own</h2>
             <p className="text-muted-foreground max-w-sm mx-auto">
@@ -117,8 +121,9 @@ export default function SignupOnboarding({
     return (
       <SignupProfile
         back={() => setStep('intro2')}
-        onProfileComplete={(keys) => {
+        onProfileComplete={(keys, profile) => {
           setGeneratedKeys(keys)
+          setProfileData(profile)
           setStep('complete')
         }}
       />
@@ -126,10 +131,58 @@ export default function SignupOnboarding({
   }
 
   // Complete step - show keys
+  return <KeysDisplay keys={generatedKeys!} profile={profileData} onComplete={onComplete} />
+}
+
+function KeysDisplay({
+  keys,
+  profile,
+  onComplete
+}: {
+  keys: { nsec: string; npub: string }
+  profile: ProfileData
+  onComplete: () => void
+}) {
+  const { t } = useTranslation()
+  const [nsecRevealed, setNsecRevealed] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
+
+  const handleCopy = () => {
+    const text = `Public Key (npub):\n${keys.npub}\n\nPrivate Key (nsec):\n${keys.nsec}`
+    navigator.clipboard.writeText(text)
+    setHasInteracted(true)
+  }
+
+  const handleDownload = () => {
+    const content = `Nostr Account Information
+========================
+
+Display Name: ${profile.displayName || 'Not set'}
+Username: ${profile.username || 'Not set'}
+
+Public Key (npub):
+${keys.npub}
+
+Private Key (nsec):
+${keys.nsec}
+
+⚠️ IMPORTANT: Keep your private key (nsec) safe and NEVER share it with anyone!
+Your private key is the only way to access your account. If you lose it, you lose access forever.
+`
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'nostr-keys.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+    setHasInteracted(true)
+  }
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-6 items-center text-center py-4">
-        <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
+      <div className="flex flex-col gap-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
           <svg
             className="w-8 h-8 text-green-500"
             fill="none"
@@ -144,109 +197,77 @@ export default function SignupOnboarding({
             />
           </svg>
         </div>
-        
+
         <div>
           <h2 className="text-2xl font-semibold mb-2">Your Keys</h2>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            These are your Nostr keys. Save them somewhere safe - you'll need them to access your account.
+            These are your Nostr keys. Save them somewhere safe - you'll need them to access your
+            account.
           </p>
         </div>
 
-        {generatedKeys && (
-          <div className="w-full space-y-4 mt-4">
-            <KeyDisplay
-              label="Public Identity (npub)"
-              value={generatedKeys.npub}
-              description="Share this publicly - it's your Nostr address"
-              isSecret={false}
-            />
-            
-            <KeyDisplay
-              label="Private Key (nsec)"
-              value={generatedKeys.nsec}
-              description="NEVER share this - it's your secret key"
-              isSecret={true}
-            />
+        <div className="w-full space-y-4 mt-2 text-left">
+          <div className="grid gap-2">
+            <Label htmlFor="npub-input">Public Identity (npub)</Label>
+            <Input id="npub-input" value={keys.npub} readOnly className="font-mono text-xs" />
+            <p className="text-xs text-muted-foreground">
+              Share this publicly - it's your Nostr address
+            </p>
           </div>
-        )}
 
-        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 text-left max-w-md">
+          <div className="grid gap-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="nsec-input">Private Key (nsec)</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setNsecRevealed(!nsecRevealed)}
+                className="h-7 px-2"
+              >
+                {nsecRevealed ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <Input
+              id="nsec-input"
+              type={nsecRevealed ? 'text' : 'password'}
+              value={keys.nsec}
+              readOnly
+              className="font-mono text-xs"
+            />
+            <p className="text-xs text-muted-foreground">
+              NEVER share this - it's your secret key
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 text-left">
           <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-            ⚠️ Important: Download and save your private key (nsec) now. If you lose it, you'll lose access to your account forever.
+            ⚠️ Important: Download and save your private key (nsec) now. If you lose it, you'll
+            lose access to your account forever.
           </p>
         </div>
 
-        <Button
-          onClick={onComplete}
-          className="w-full max-w-xs mt-4"
-          size="lg"
-        >
-          {t('Done')}
-        </Button>
-      </div>
-    </div>
-  )
-}
+        <div className="flex gap-2 w-full">
+          <Button variant="secondary" onClick={handleCopy} className="flex-1" size="lg">
+            <Copy className="h-4 w-4 mr-2" />
+            {t('Copy')}
+          </Button>
+          <Button variant="secondary" onClick={handleDownload} className="flex-1" size="lg">
+            <Download className="h-4 w-4 mr-2" />
+            {t('Download')}
+          </Button>
+        </div>
 
-function KeyDisplay({
-  label,
-  value,
-  description,
-  isSecret
-}: {
-  label: string
-  value: string
-  description: string
-  isSecret: boolean
-}) {
-  const [revealed, setRevealed] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const displayValue = isSecret && !revealed ? '•'.repeat(63) : value
-
-  return (
-    <div className="bg-muted/30 border rounded-lg p-4 text-left">
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium">{label}</label>
-        {isSecret && (
-          <button
-            onClick={() => setRevealed(!revealed)}
-            className="text-xs text-primary hover:underline"
-          >
-            {revealed ? 'Hide' : 'Reveal'}
-          </button>
+        {hasInteracted && (
+          <Button onClick={onComplete} className="w-full" size="lg">
+            {t('Done')}
+          </Button>
         )}
       </div>
-      
-      <div className="flex gap-2 items-center mb-2">
-        <code className="flex-1 bg-background border rounded px-3 py-2 text-xs break-all">
-          {displayValue}
-        </code>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={handleCopy}
-          className="shrink-0"
-        >
-          {copied ? (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          )}
-        </Button>
-      </div>
-      
-      <p className="text-xs text-muted-foreground">{description}</p>
     </div>
   )
 }
