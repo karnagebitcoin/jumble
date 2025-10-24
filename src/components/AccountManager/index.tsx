@@ -11,8 +11,9 @@ import GenerateNewAccount from './GenerateNewAccount'
 import NostrConnectLogin from './NostrConnectionLogin'
 import NpubLogin from './NpubLogin'
 import PrivateKeyLogin from './PrivateKeyLogin'
+import SignupOnboarding from './SignupOnboarding'
 
-type TAccountManagerPage = 'nsec' | 'bunker' | 'generate' | 'npub' | null
+type TAccountManagerPage = 'nsec' | 'bunker' | 'generate' | 'npub' | 'signup' | null
 
 export default function AccountManager({ close }: { close?: () => void }) {
   const [page, setPage] = useState<TAccountManagerPage>(null)
@@ -27,6 +28,8 @@ export default function AccountManager({ close }: { close?: () => void }) {
         <GenerateNewAccount back={() => setPage(null)} onLoginSuccess={() => close?.()} />
       ) : page === 'npub' ? (
         <NpubLogin back={() => setPage(null)} onLoginSuccess={() => close?.()} />
+      ) : page === 'signup' ? (
+        <SignupOnboarding back={() => setPage(null)} onComplete={() => close?.()} />
       ) : (
         <AccountManagerNav setPage={setPage} close={close} />
       )}
@@ -76,27 +79,7 @@ function AccountManagerNav({
           {t("Don't have an account yet?")}
         </div>
         <Button
-          onClick={() => {
-            const wizard = new NstartModal({
-              baseUrl: 'https://nstart.me',
-              an: 'Jumble',
-              am: themeSetting,
-              al: i18n.language.slice(0, 2),
-              onComplete: ({ nostrLogin }) => {
-                if (!nostrLogin) return
-
-                if (nostrLogin.startsWith('bunker://')) {
-                  bunkerLogin(nostrLogin)
-                } else if (nostrLogin.startsWith('ncryptsec')) {
-                  ncryptsecLogin(nostrLogin)
-                } else if (nostrLogin.startsWith('nsec')) {
-                  nsecLogin(nostrLogin)
-                }
-              }
-            })
-            close?.()
-            wizard.open()
-          }}
+          onClick={() => setPage('signup')}
           className="w-full mt-4"
         >
           {t('Sign up')}
