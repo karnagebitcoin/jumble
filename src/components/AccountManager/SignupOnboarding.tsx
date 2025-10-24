@@ -158,7 +158,7 @@ function KeysDisplay({
 ========================
 
 Display Name: ${profile.displayName || 'Not set'}
-Username: ${profile.username || 'Not set'}
+Username: ${profile.username ? '@' + profile.username : 'Not set'}
 
 Public Key (npub):
 ${keys.npub}
@@ -169,13 +169,21 @@ ${keys.nsec}
 ⚠️ IMPORTANT: Keep your private key (nsec) safe and NEVER share it with anyone!
 Your private key is the only way to access your account. If you lose it, you lose access forever.
 `
-    const blob = new Blob([content], { type: 'text/plain' })
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = 'nostr-keys.txt'
+    a.style.display = 'none'
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }, 100)
+
     setHasInteracted(true)
   }
 
