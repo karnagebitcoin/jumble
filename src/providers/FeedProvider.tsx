@@ -58,10 +58,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
           const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
 
           if (followings.length === 0) {
-            // New users with no followings should default to a relay feed
+            // New users with no followings should default to nostr.wine relay feed
             feedInfo = {
               feedType: 'relay',
-              id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
+              id: DEFAULT_FAVORITE_RELAYS[0] // wss://nostr.wine/
             }
             return await switchFeed('relay', { relay: feedInfo.id })
           } else {
@@ -71,10 +71,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } else {
-        // For logged out users, default to a relay feed
+        // For logged out users, default to nostr.wine relay feed
         feedInfo = {
           feedType: 'relay',
-          id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
+          id: DEFAULT_FAVORITE_RELAYS[0] // wss://nostr.wine/
         }
       }
 
