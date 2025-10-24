@@ -1,6 +1,7 @@
 import { DEFAULT_FAVORITE_RELAYS } from '@/constants'
 import { getRelaySetFromEvent } from '@/lib/event-metadata'
 import { isWebsocketUrl, normalizeUrl } from '@/lib/url'
+import { getPubkeysFromPTags } from '@/lib/tag'
 import indexedDb from '@/services/indexed-db.service'
 import storage from '@/services/local-storage.service'
 import { TFeedInfo, TFeedType } from '@/types'
@@ -30,7 +31,7 @@ export const useFeed = () => {
 }
 
 export function FeedProvider({ children }: { children: React.ReactNode }) {
-  const { pubkey, isInitialized } = useNostr()
+  const { pubkey, isInitialized, followListEvent } = useNostr()
   const { relaySets, favoriteRelays } = useFavoriteRelays()
   const [relayUrls, setRelayUrls] = useState<string[]>([])
   const [isReady, setIsReady] = useState(false)
@@ -48,15 +49,26 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
 
       let feedInfo: TFeedInfo
       if (pubkey) {
-        // For logged in users, check stored feed or default to following
+        // For logged in users, check stored feed or default based on follow list
         const storedFeedInfo = storage.getFeedInfo(pubkey)
         if (storedFeedInfo) {
           feedInfo = storedFeedInfo
         } else {
-          // Default to following feed for logged in users
-          feedInfo = { feedType: 'following' }
-          // Initialize with following feed
-          return await switchFeed('following', { pubkey })
+          // Check if user has any followings
+          const followings = followListEvent ? getPubkeysFromPTags(followListEvent.tags) : []
+
+          if (followings.length === 0) {
+            // New users with no followings should default to a relay feed
+            feedInfo = {
+              feedType: 'relay',
+              id: favoriteRelays[0] ?? DEFAULT_FAVORITE_RELAYS[0]
+            }
+            return await switchFeed('relay', { relay: feedInfo.id })
+          } else {
+            // Users with followings default to following feed
+            feedInfo = { feedType: 'following' }
+            return await switchFeed('following', { pubkey })
+          }
         }
       } else {
         // For logged out users, default to a relay feed
@@ -89,7 +101,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
     }
 
     init()
-  }, [pubkey, isInitialized])
+  }, [pubkey, isInitialized, followListEvent])
 
   const switchFeed = async (
     feedType: TFeedType,
