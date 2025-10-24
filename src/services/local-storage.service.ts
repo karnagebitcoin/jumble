@@ -293,8 +293,8 @@ class LocalStorageService {
     if (enabledWidgetsStr) {
       this.enabledWidgets = JSON.parse(enabledWidgetsStr)
     } else {
-      // Default to tour and trending notes enabled for new users
-      this.enabledWidgets = ['tour', 'trending-notes']
+      // Default to trending notes enabled
+      this.enabledWidgets = ['trending-notes']
       window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
     }
 
