@@ -1,6 +1,6 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
-import { TrendingUp, Bitcoin, Pin, MessageSquare } from 'lucide-react'
+import { TrendingUp, Bitcoin, Pin, MessageSquare, Compass } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { TAIMessage } from '@/types'
 
@@ -31,6 +31,13 @@ export type TAIPromptWidget = {
 }
 
 export const AVAILABLE_WIDGETS: TWidget[] = [
+  {
+    id: 'tour',
+    name: 'Nostr Tour',
+    description: 'Interactive onboarding experience explaining Nostr',
+    defaultEnabled: true,
+    icon: <Compass className="h-5 w-5" />
+  },
   {
     id: 'bitcoin-ticker',
     name: 'Bitcoin Ticker',

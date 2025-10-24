@@ -504,6 +504,9 @@ export default {
     'Fully rounded': 'Fully rounded',
     'Square corners': 'Square corners',
     Square: 'Square',
-    Round: 'Round'
+    Round: 'Round',
+    'Hide widget': 'Hide widget',
+    'Skip Tour': 'Skip Tour',
+    'Get Started': 'Get Started'
   }
 }
