@@ -23,6 +23,7 @@ export default function SignupProfile({
 }) {
   const { t } = useTranslation()
   const { nsecLogin, publish, updateProfileEvent } = useNostr()
+  const [displayName, setDisplayName] = useState('')
   const [username, setUsername] = useState('')
   const [about, setAbout] = useState('')
   const [avatar, setAvatar] = useState('')
@@ -50,11 +51,11 @@ export default function SignupProfile({
       await nsecLogin(generatedKeys.nsec, '', true)
 
       // Create and publish profile if user entered any data
-      if (username || about || avatar) {
+      if (displayName || username || about || avatar) {
         const profileContent = {
-          display_name: username,
-          displayName: username,
-          name: username,
+          display_name: displayName,
+          displayName: displayName,
+          name: username || displayName,
           about,
           picture: avatar
         }
@@ -115,22 +116,42 @@ export default function SignupProfile({
 
       <div className="space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="signup-username-input">{t('Display Name')}</Label>
+          <Label htmlFor="signup-displayname-input">{t('Display Name')}</Label>
           <Input
-            id="signup-username-input"
+            id="signup-displayname-input"
             placeholder="Enter your name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             autoFocus
           />
+          <p className="text-xs text-muted-foreground">
+            Nostr is nym-friendly, you don't need to use your real name.
+          </p>
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="signup-about-textarea">{t('Bio')}</Label>
+          <Label htmlFor="signup-username-input">{t('Username')}</Label>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">@</span>
+            <Input
+              id="signup-username-input"
+              placeholder="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Usernames are not unique in nostr. Two people can have the same username.
+          </p>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="signup-about-textarea">{t('Short Bio')}</Label>
           <Textarea
             id="signup-about-textarea"
             placeholder="Tell us about yourself..."
-            className="h-24 resize-none"
+            className="h-20 resize-none"
             value={about}
             onChange={(e) => setAbout(e.target.value)}
           />
@@ -149,13 +170,9 @@ export default function SignupProfile({
             {t('Creating your account...')}
           </>
         ) : (
-          t('Continue')
+          t('Save')
         )}
       </Button>
-
-      <p className="text-xs text-center text-muted-foreground">
-        By continuing, your Nostr keys will be generated and stored in your browser
-      </p>
     </div>
   )
 }
