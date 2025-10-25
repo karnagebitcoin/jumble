@@ -267,6 +267,9 @@ const NotificationList = forwardRef((_, ref) => {
     </div>
   )
 
+  // In deck view, we need different sticky positioning
+  const isInDeckView = current !== 'notifications'
+
   return (
     <div>
       <Tabs
@@ -282,6 +285,7 @@ const NotificationList = forwardRef((_, ref) => {
           setNotificationType(type as TNotificationType)
         }}
         options={!supportTouch ? <RefreshButton onClick={() => refresh()} /> : null}
+        stickyTop={isInDeckView ? 'top-0' : 'top-12'}
       />
       <div ref={topRef} className="scroll-mt-[calc(6rem+1px)]" />
       {supportTouch ? (

@@ -13,12 +13,14 @@ export default function NormalFeed({
   subRequests,
   areAlgoRelays = false,
   isMainFeed = false,
-  showRelayCloseReason = false
+  showRelayCloseReason = false,
+  isInDeckView = false
 }: {
   subRequests: TFeedSubRequest[]
   areAlgoRelays?: boolean
   isMainFeed?: boolean
   showRelayCloseReason?: boolean
+  isInDeckView?: boolean
 }) {
   const { hideUntrustedNotes } = useUserTrust()
   const { showKinds } = useKindFilter()
@@ -57,6 +59,7 @@ export default function NormalFeed({
             <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
           </>
         }
+        stickyTop={isInDeckView ? 'top-0' : 'top-12'}
       />
       <NoteList
         ref={noteListRef}

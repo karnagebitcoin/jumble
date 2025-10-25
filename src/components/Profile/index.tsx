@@ -34,7 +34,7 @@ import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
 import Relays from './Relays'
 
-export default function Profile({ id }: { id?: string }) {
+export default function Profile({ id, isInDeckView = false }: { id?: string; isInDeckView?: boolean }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
   const { profile, isFetching } = useFetchProfile(id)
@@ -248,7 +248,7 @@ export default function Profile({ id }: { id?: string }) {
           </div>
         </div>
       </div>
-      <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} />
+      <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} isInDeckView={isInDeckView} />
       {avatarLightboxIndex >= 0 &&
         avatar &&
         createPortal(

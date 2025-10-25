@@ -14,13 +14,15 @@ export default function Tabs({
   value,
   onTabChange,
   threshold = 800,
-  options = null
+  options = null,
+  stickyTop = 'top-12'
 }: {
   tabs: TabDefinition[]
   value: string
   onTabChange?: (tab: string) => void
   threshold?: number
   options?: ReactNode
+  stickyTop?: string
 }) {
   const { t } = useTranslation()
   const { deepBrowsing, lastScrollTop } = useDeepBrowsing()
@@ -87,7 +89,8 @@ export default function Tabs({
     <div
       ref={containerRef}
       className={cn(
-        'sticky flex justify-between top-12 bg-background z-30 px-1 w-full transition-transform border-b',
+        'sticky flex justify-between bg-background z-30 px-1 w-full transition-transform border-b',
+        stickyTop,
         deepBrowsing && lastScrollTop > threshold ? '-translate-y-[calc(100%+12rem)]' : ''
       )}
     >

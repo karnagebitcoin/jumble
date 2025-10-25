@@ -44,13 +44,13 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
     case 'profile':
       if (column.props?.pubkey) {
         titlebar = <ProfileTitlebar pubkey={column.props.pubkey} onClose={() => unpinColumn(column.id)} />
-        content = <Profile id={column.props.pubkey} />
+        content = <Profile id={column.props.pubkey} isInDeckView={true} />
       }
       break
     case 'search':
       if (column.props?.searchParams) {
         titlebar = <SearchTitlebar searchParams={column.props.searchParams} onClose={() => unpinColumn(column.id)} />
-        content = <SearchResult searchParams={column.props.searchParams} />
+        content = <SearchResult searchParams={column.props.searchParams} isInDeckView={true} />
       }
       break
     case 'relay':
@@ -69,6 +69,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
             <NormalFeed
               subRequests={[{ urls: relaySet.relayUrls, filter: {} }]}
               showRelayCloseReason
+              isInDeckView={true}
             />
           )
         }
@@ -87,6 +88,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
                   { urls: SEARCHABLE_RELAY_URLS, filter: { search: searchParams.search } }
                 ]}
                 showRelayCloseReason
+                isInDeckView={true}
               />
             )
           } else if (searchParams.type === 'hashtag') {
@@ -94,6 +96,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
               <NormalFeed
                 subRequests={[{ urls: BIG_RELAY_URLS, filter: { '#t': [searchParams.search] } }]}
                 showRelayCloseReason
+                isInDeckView={true}
               />
             )
           }

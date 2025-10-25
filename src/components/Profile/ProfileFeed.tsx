@@ -15,10 +15,12 @@ import { RefreshButton } from '../RefreshButton'
 
 export default function ProfileFeed({
   pubkey,
-  topSpace = 0
+  topSpace = 0,
+  isInDeckView = false
 }: {
   pubkey: string
   topSpace?: number
+  isInDeckView?: boolean
 }) {
   const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
   const { showKinds } = useKindFilter()
@@ -143,6 +145,7 @@ export default function ProfileFeed({
             <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
           </>
         }
+        stickyTop={isInDeckView ? 'top-0' : 'top-12'}
       />
       <NoteList
         ref={noteListRef}
