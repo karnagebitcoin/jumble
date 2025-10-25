@@ -18,7 +18,6 @@ import RelaySettingsPage from './pages/secondary/RelaySettingsPage'
 import RizfulPage from './pages/secondary/RizfulPage'
 import SearchPage from './pages/secondary/SearchPage'
 import SettingsPage from './pages/secondary/SettingsPage'
-import SyncSettingsPage from './pages/secondary/SyncSettingsPage'
 import TranslationPage from './pages/secondary/TranslationPage'
 import WalletPage from './pages/secondary/WalletPage'
 import WidgetsSettingsPage from './pages/secondary/WidgetsSettingsPage'
@@ -40,7 +39,6 @@ const ROUTES = [
   { path: '/settings/general', element: <GeneralSettingsPage /> },
   { path: '/settings/appearance', element: <AppearanceSettingsPage /> },
   { path: '/settings/widgets', element: <WidgetsSettingsPage /> },
-  { path: '/settings/sync', element: <SyncSettingsPage /> },
   { path: '/settings/translation', element: <TranslationPage /> },
   { path: '/settings/ai-tools', element: <AIToolsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },

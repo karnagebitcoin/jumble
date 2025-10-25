@@ -6,7 +6,6 @@ import {
   toGeneralSettings,
   toPostSettings,
   toRelaySettings,
-  toSyncSettings,
   toTranslation,
   toWallet,
   toWidgetsSettings
@@ -25,7 +24,6 @@ import {
   LayoutGrid,
   Palette,
   PencilLine,
-  RefreshCcw,
   Server,
   Settings2,
   Wallet
@@ -70,15 +68,6 @@ const SettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
         </div>
         <ChevronRight />
       </SettingItem>
-      {!!pubkey && (
-        <SettingItem className="clickable" onClick={() => push(toSyncSettings())}>
-          <div className="flex items-center gap-4">
-            <RefreshCcw />
-            <div>{t('Sync')}</div>
-          </div>
-          <ChevronRight />
-        </SettingItem>
-      )}
       {!!pubkey && (
         <SettingItem className="clickable" onClick={() => push(toAITools())}>
           <div className="flex items-center gap-4">
