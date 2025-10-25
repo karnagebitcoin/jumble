@@ -57,7 +57,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
       if (column.props?.url) {
         const normalizedUrl = normalizeUrl(column.props.url)
         titlebar = <RelayTitlebar url={normalizedUrl} onClose={() => unpinColumn(column.id)} />
-        content = <Relay url={normalizedUrl} />
+        content = <Relay url={normalizedUrl} isInDeckView={true} />
       }
       break
     case 'relays':

@@ -40,5 +40,5 @@ export default function SearchResult({
       />
     )
   }
-  return <Relay url={searchParams.search} />
+  return <Relay url={searchParams.search} isInDeckView={isInDeckView} />
 }
