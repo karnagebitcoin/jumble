@@ -59,7 +59,7 @@ export default function NormalFeed({
             <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
           </>
         }
-        stickyTop={isInDeckView ? 'top-0' : 'top-12'}
+        isInDeckView={isInDeckView}
       />
       <NoteList
         ref={noteListRef}

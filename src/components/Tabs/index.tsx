@@ -15,14 +15,14 @@ export default function Tabs({
   onTabChange,
   threshold = 800,
   options = null,
-  stickyTop = 'top-12'
+  isInDeckView = false
 }: {
   tabs: TabDefinition[]
   value: string
   onTabChange?: (tab: string) => void
   threshold?: number
   options?: ReactNode
-  stickyTop?: string
+  isInDeckView?: boolean
 }) {
   const { t } = useTranslation()
   const { deepBrowsing, lastScrollTop } = useDeepBrowsing()
@@ -90,8 +90,10 @@ export default function Tabs({
       ref={containerRef}
       className={cn(
         'sticky flex justify-between bg-background z-30 px-1 w-full transition-transform border-b',
-        stickyTop,
-        deepBrowsing && lastScrollTop > threshold ? '-translate-y-[calc(100%+12rem)]' : ''
+        isInDeckView ? 'top-0' : 'top-12',
+        deepBrowsing && lastScrollTop > threshold
+          ? (isInDeckView ? '-translate-y-full' : '-translate-y-[calc(100%+12rem)]')
+          : ''
       )}
     >
       <ScrollArea className="flex-1 w-0">

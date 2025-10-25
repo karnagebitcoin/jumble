@@ -285,7 +285,7 @@ const NotificationList = forwardRef((_, ref) => {
           setNotificationType(type as TNotificationType)
         }}
         options={!supportTouch ? <RefreshButton onClick={() => refresh()} /> : null}
-        stickyTop={isInDeckView ? 'top-0' : 'top-12'}
+        isInDeckView={isInDeckView}
       />
       <div ref={topRef} className="scroll-mt-[calc(6rem+1px)]" />
       {supportTouch ? (
