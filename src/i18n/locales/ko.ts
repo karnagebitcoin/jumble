@@ -11,6 +11,7 @@ export default {
     Refresh: '새로고침',
     Profile: '프로필',
     Logout: '로그아웃',
+    Deck: '덱',
     Following: '팔로잉',
     followings: '팔로잉',
     reposted: '리포스트',

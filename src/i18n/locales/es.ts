@@ -12,6 +12,7 @@ export default {
     Refresh: 'Actualizar',
     Profile: 'Perfil',
     Logout: 'Cerrar sesión',
+    Deck: 'Tablero',
     Following: 'Siguiendo',
     followings: 'siguiendo',
     reposted: 'retransmitido',

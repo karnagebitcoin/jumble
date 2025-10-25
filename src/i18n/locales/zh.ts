@@ -11,6 +11,7 @@ export default {
     Refresh: '刷新列表',
     Profile: '个人资料',
     Logout: '退出登录',
+    Deck: '多列视图',
     Following: '关注',
     followings: '关注',
     reposted: '转发',

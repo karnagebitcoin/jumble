@@ -11,6 +11,7 @@ export default {
     Refresh: 'Refresh',
     Profile: 'Profile',
     Logout: 'Logout',
+    Deck: 'Deck',
     Following: 'Following',
     followings: 'followings',
     reposted: 'reposted',

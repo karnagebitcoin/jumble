@@ -11,6 +11,7 @@ import PostButton from './PostButton'
 import ProfileButton from './ProfileButton'
 import SearchButton from './SearchButton'
 import SettingsButton from './SettingsButton'
+import MultiColumnToggle from './MultiColumnToggle'
 
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
@@ -39,7 +40,10 @@ export default function PrimaryPageSidebar() {
         <SettingsButton />
         <PostButton />
       </div>
-      <AccountButton />
+      <div className="space-y-2">
+        <MultiColumnToggle />
+        <AccountButton />
+      </div>
     </div>
   )
 }

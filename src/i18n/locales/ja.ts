@@ -12,6 +12,7 @@ export default {
     Refresh: '更新',
     Profile: 'プロフィール',
     Logout: 'ログアウト',
+    Deck: 'デッキ',
     Following: 'フォロー中',
     followings: 'フォロー',
     reposted: 'リポスト済み',

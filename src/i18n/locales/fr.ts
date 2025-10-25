@@ -12,6 +12,7 @@ export default {
     Refresh: 'Rafraîchir',
     Profile: 'Profil',
     Logout: 'Déconnexion',
+    Deck: 'Vue en colonnes',
     Following: 'Abonnements',
     followings: 'abonnements',
     reposted: 'republié',

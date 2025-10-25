@@ -12,6 +12,7 @@ export default {
     Refresh: 'Aktualisieren',
     Profile: 'Profil',
     Logout: 'Abmelden',
+    Deck: 'Deck-Ansicht',
     Following: 'Folgende',
     followings: 'Folgekonten',
     reposted: 'erneut gepostet',
