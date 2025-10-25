@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
 type TourScene = {
-  title: string
   content: string
   imagePlaceholder: string
 }
@@ -14,71 +13,58 @@ type TourScene = {
 const TOUR_SCENES: TourScene[] = [
   // Act 1: The Old World — "Centralized Feeds"
   {
-    title: 'The Feed Factory',
     content: 'Welcome to the Feed Factory.\nAlgorithms decide what you feel today.\nYou follow 100 people but only see 12. Congratulations, you\'re the product.',
     imagePlaceholder: 'Conveyor belt image placeholder'
   },
   {
-    title: 'The Attention Harvesters',
     content: 'Your curiosity is their currency.\nEvery click funds the next outrage headline.\nWelcome to the dopamine mines.',
     imagePlaceholder: 'Robotic arms image placeholder'
   },
   {
-    title: 'The Walled Garden',
     content: 'Every wall keeps you in.\nEvery scroll feeds the system.\nThe longer you stay, the more they win.',
     imagePlaceholder: 'Walled garden image placeholder'
   },
   // Act 2: The Great Escape — "Discovering Nostr"
   {
-    title: 'The Breakout',
     content: 'You\'ve escaped the feed loop.\nWelcome to Nostr — not a platform, but a protocol.\nNo masters. No walls. Just open communication.',
     imagePlaceholder: 'Breaking wall image placeholder'
   },
   {
-    title: 'The Relays',
     content: 'Relays are independent servers run by people.\nYou can read from any of them — or all of them.\nYour feed, your network, your choice.',
     imagePlaceholder: 'Satellite relays image placeholder'
   },
   {
-    title: 'The Network Effect',
     content: 'Post once, and your followers rebroadcast your note through their relays.\nNo algorithms — just real people spreading real content.',
     imagePlaceholder: 'Network connections image placeholder'
   },
   // Act 3: The Algorithm Detox — "Freedom Restored"
   {
-    title: 'The Algorithm\'s Funeral',
     content: 'No algorithm decides what you see.\nNo outrage loops. No manipulation.\nJust signal — no noise.',
     imagePlaceholder: 'Gravestone image placeholder'
   },
   {
-    title: 'Attention Reclaimed',
     content: 'Your attention is yours again.\nNo ads. No infinite scroll.\nJust people you actually follow.',
     imagePlaceholder: 'Peaceful scrolling image placeholder'
   },
   // Act 4: Building the New Garden — "Proof of Work"
   {
-    title: 'Proof of Work',
     content: 'You decide who to follow and what to read.\nCuration is proof of work.\nQuality grows when attention is earned.',
     imagePlaceholder: 'Digital garden image placeholder'
   },
   {
-    title: 'The Honest Economy',
     content: 'No ads. No dark patterns.\nCreators earn trust, not clicks.\nThe best work rises — naturally.',
     imagePlaceholder: 'Open marketplace image placeholder'
   },
   // Act 5: The Launch — "You're a Nostronaut Now"
   {
-    title: 'Launch Sequence',
     content: 'You control your identity.\nYour notes travel across relays — not platforms.\nYou\'re free to explore the open web of people.',
     imagePlaceholder: 'Rocket launch image placeholder'
   },
   {
-    title: 'The First Steps',
     content: 'Welcome, Nostronaut.\nBrowse a few relays — each opens a unique window into the network.\nFollow some people who catch your eye and watch your feed come alive.\nPost your first note and see it ripple across the open web.',
     imagePlaceholder: 'Dashboard image placeholder'
   },
   {
-    title: 'The Open Conversation',
     content: 'You\'ve joined a living network.\nNo algorithms. No walls. No ads.\nJust connection — on your terms.',
     imagePlaceholder: 'Constellation image placeholder'
   }
@@ -125,16 +111,14 @@ export default function TourWidget({ isOpen, onClose }: TourWidgetProps) {
   return createPortal(
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col" withoutClose>
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-xl font-bold">{scene.title}</DialogTitle>
-          <button
-            onClick={handleClose}
-            className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
-        </DialogHeader>
+        {/* Close button in top-right corner */}
+        <button
+          onClick={handleClose}
+          className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
 
         {/* Image Placeholder Area */}
         <div className="flex items-center justify-center bg-muted rounded-lg h-64 mb-4">
