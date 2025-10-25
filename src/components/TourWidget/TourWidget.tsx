@@ -43,7 +43,7 @@ const TOUR_SCENES: TourScene[] = [
     image: '/tour-images/7-min.png'
   },
   {
-    content: 'Your attention is yours again.\nNo ads. No infinite scroll.\nJust people you actually follow.',
+    content: 'Your attention is yours again.\nNo ads.\nJust people you actually follow.',
     image: '/tour-images/8-min.png'
   },
   // Act 4: Building the New Garden — "Proof of Work"
