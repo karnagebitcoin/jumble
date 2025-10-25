@@ -21,6 +21,7 @@ import { LayoutModeProvider } from '@/providers/LayoutModeProvider'
 import { MediaUploadServiceProvider } from '@/providers/MediaUploadServiceProvider'
 import { MuteListProvider } from '@/providers/MuteListProvider'
 import { NostrProvider } from '@/providers/NostrProvider'
+import { Nip78PreferencesProvider } from '@/providers/Nip78PreferencesProvider'
 import { PageThemeProvider } from '@/providers/PageThemeProvider'
 import { PinListProvider } from '@/providers/PinListProvider'
 import { PrimaryColorProvider } from '@/providers/PrimaryColorProvider'
@@ -52,10 +53,11 @@ export default function App(): JSX.Element {
                         <ScreenSizeProvider>
                           <DeletedEventProvider>
                             <NostrProvider>
-                              <ZapProvider>
-                                <TranslationServiceProvider>
-                                  <AIProvider>
-                                      <FavoriteRelaysProvider>
+                              <Nip78PreferencesProvider>
+                                <ZapProvider>
+                                  <TranslationServiceProvider>
+                                    <AIProvider>
+                                        <FavoriteRelaysProvider>
                                         <FollowListProvider>
                                           <MuteListProvider>
                                             <UserTrustProvider>
@@ -87,9 +89,10 @@ export default function App(): JSX.Element {
                                           </MuteListProvider>
                                         </FollowListProvider>
                                       </FavoriteRelaysProvider>
-                                    </AIProvider>
-                                  </TranslationServiceProvider>
-                              </ZapProvider>
+                                      </AIProvider>
+                                    </TranslationServiceProvider>
+                                </ZapProvider>
+                              </Nip78PreferencesProvider>
                             </NostrProvider>
                           </DeletedEventProvider>
                           </ScreenSizeProvider>
