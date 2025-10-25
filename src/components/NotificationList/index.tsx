@@ -29,7 +29,7 @@ import { RefreshButton } from '../RefreshButton'
 const LIMIT = 100
 const SHOW_COUNT = 30
 
-const NotificationList = forwardRef((_, ref) => {
+const NotificationList = forwardRef(({ isInDeckView = false }: { isInDeckView?: boolean }, ref) => {
   const { t } = useTranslation()
   const { current, display } = usePrimaryPage()
   const active = useMemo(() => current === 'notifications' && display, [current, display])
@@ -266,9 +266,6 @@ const NotificationList = forwardRef((_, ref) => {
       </div>
     </div>
   )
-
-  // In deck view, we need different sticky positioning
-  const isInDeckView = current !== 'notifications'
 
   return (
     <div>

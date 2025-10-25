@@ -39,7 +39,7 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
       break
     case 'notifications':
       titlebar = <NotificationsTitlebar onClose={() => unpinColumn(column.id)} />
-      content = <NotificationList />
+      content = <NotificationList isInDeckView={true} />
       break
     case 'profile':
       if (column.props?.pubkey) {
