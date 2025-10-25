@@ -1,6 +1,6 @@
 import { useTheme } from '@/providers/ThemeProvider'
-import logoLight from '../../resources/logo-light.png'
-import logoDark from '../../resources/logo-dark.png'
+import logoLight from '../../resources/logo-light.svg'
+import logoDark from '../../resources/logo-dark.svg'
 
 export default function Logo({ className }: { className?: string }) {
   const { theme } = useTheme()
