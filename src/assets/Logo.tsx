@@ -7,7 +7,7 @@ export default function Logo({ className }: { className?: string }) {
 
   return (
     <img
-      src={theme === 'dark' ? logoDark : logoLight}
+      src={theme === 'dark' ? logoLight : logoDark}
       alt="Jumble Logo"
       className={className}
     />
