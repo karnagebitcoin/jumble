@@ -121,11 +121,11 @@ export default function TourWidget({ isOpen, onClose }: TourWidgetProps) {
         </button>
 
         {/* Image Area */}
-        <div className="flex items-center justify-center bg-muted rounded-lg h-64 mb-4 overflow-hidden">
+        <div className="mb-4 -mx-6">
           <img
             src={scene.image}
             alt={`Tour step ${currentScene + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-auto"
           />
         </div>
 
