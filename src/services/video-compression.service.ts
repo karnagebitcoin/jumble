@@ -1,4 +1,4 @@
-import * as MediaBunny from 'mediabunny'
+import { Conversion, Input, Output, QUALITY_HIGH } from 'mediabunny'
 
 class VideoCompressionService {
   static instance: VideoCompressionService
@@ -16,59 +16,55 @@ class VideoCompressionService {
    * @param onProgress - Optional callback for progress updates (0-100)
    * @returns Compressed video file
    */
-  async compressVideo(
-    file: File,
-    onProgress?: (progress: number) => void
-  ): Promise<File> {
+  async compressVideo(file: File, onProgress?: (progress: number) => void): Promise<File> {
     // Check if the file is actually a video
     if (!file.type.startsWith('video/')) {
       return file
     }
 
     try {
-      // Create an encoder instance
-      const encoder = new MediaBunny.Encoder()
+      // Create input from the video file
+      const input = await Input.fromBlob(file)
 
-      // Prepare the encoder with web-friendly settings
-      // Using H264 codec for maximum compatibility
-      // Quality 80% (CRF 23 is a good balance - lower CRF = higher quality)
-      await encoder.prepare({
-        input: file,
-        output: {
-          // Use MP4 container format (most web-friendly)
-          container: 'mp4',
-          video: {
-            codec: 'h264',
-            // CRF 23 gives approximately 80% quality with good compression
-            // CRF scale: 0 (lossless) to 51 (worst quality)
-            // 18-28 is the recommended range, 23 is the default
-            crf: 23,
-            // Use baseline profile for maximum compatibility
-            profile: 'baseline',
-            // Optimize for web streaming (faststart flag will be added by container)
-            preset: 'medium'
-          },
-          audio: {
-            codec: 'aac',
-            // 128kbps is good quality for most content
-            bitrate: 128000
-          }
+      // Create output to MP4 format
+      const output = Output.create('mp4', {
+        video: {
+          codec: 'h264',
+          // Use QUALITY_HIGH which gives approximately 80% quality
+          bitrate: QUALITY_HIGH
+        },
+        audio: {
+          codec: 'aac',
+          // 128kbps is good quality for most content
+          bitrate: 128000
         }
+      })
+
+      // Initialize the conversion
+      const conversion = await Conversion.init({
+        input,
+        output
       })
 
       // Set up progress tracking
       if (onProgress) {
-        encoder.on('progress', (progress) => {
+        conversion.onProgress = (progress) => {
           // mediabunny returns progress as 0-1, convert to 0-100
           onProgress(Math.round(progress * 100))
-        })
+        }
       }
 
-      // Start encoding
-      const blob = await encoder.encode()
+      // Check if the conversion is valid
+      if (!conversion.isValid) {
+        console.error('Conversion is not valid:', conversion.discardedTracks)
+        throw new Error('Video conversion is not valid')
+      }
 
-      // Clean up the encoder
-      encoder.dispose()
+      // Execute the conversion
+      await conversion.execute()
+
+      // Get the blob from the output
+      const blob = await output.complete()
 
       // Convert blob to File with appropriate name and type
       const fileName = file.name.replace(/\.[^/.]+$/, '.mp4')
