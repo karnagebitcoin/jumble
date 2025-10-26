@@ -1,5 +1,6 @@
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
+import ArticleList, { TArticleListRef } from '@/components/ArticleList'
 import Tabs from '@/components/Tabs'
 import { BIG_RELAY_URLS, MAX_PINNED_NOTES } from '@/constants'
 import { generateBech32IdFromETag } from '@/lib/tag'
@@ -31,7 +32,8 @@ export default function ProfileFeed({
   const tabs = useMemo(() => {
     const _tabs = [
       { value: 'posts', label: 'Notes' },
-      { value: 'postsAndReplies', label: 'Replies' }
+      { value: 'postsAndReplies', label: 'Replies' },
+      { value: 'reads', label: 'Reads' }
     ]
 
     if (myPubkey && myPubkey !== pubkey) {
@@ -42,6 +44,7 @@ export default function ProfileFeed({
   }, [myPubkey, pubkey])
   const supportTouch = useMemo(() => isTouchDevice(), [])
   const noteListRef = useRef<TNoteListRef>(null)
+  const articleListRef = useRef<TArticleListRef>(null)
 
   useEffect(() => {
     const initPinnedEventIds = async () => {
@@ -123,6 +126,7 @@ export default function ProfileFeed({
   const handleListModeChange = (mode: TNoteListMode) => {
     setListMode(mode)
     noteListRef.current?.scrollToTop('smooth')
+    articleListRef.current?.scrollToTop('smooth')
   }
 
   const handleShowKindsChange = (newShowKinds: number[]) => {
@@ -141,20 +145,28 @@ export default function ProfileFeed({
         threshold={Math.max(800, topSpace)}
         options={
           <>
-            {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
-            <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
+            {!supportTouch && listMode !== 'reads' && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
+            {!supportTouch && listMode === 'reads' && <RefreshButton onClick={() => articleListRef.current?.refresh()} />}
+            {listMode !== 'reads' && <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />}
           </>
         }
         isInDeckView={isInDeckView}
       />
-      <NoteList
-        ref={noteListRef}
-        subRequests={subRequests}
-        showKinds={temporaryShowKinds}
-        hideReplies={listMode === 'posts'}
-        filterMutedNotes={false}
-        pinnedEventIds={listMode === 'you' ? [] : pinnedEventIds}
-      />
+      {listMode === 'reads' ? (
+        <ArticleList
+          ref={articleListRef}
+          subRequests={subRequests}
+        />
+      ) : (
+        <NoteList
+          ref={noteListRef}
+          subRequests={subRequests}
+          showKinds={temporaryShowKinds}
+          hideReplies={listMode === 'posts'}
+          filterMutedNotes={false}
+          pinnedEventIds={listMode === 'you' ? [] : pinnedEventIds}
+        />
+      )}
     </>
   )
 }

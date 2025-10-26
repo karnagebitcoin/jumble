@@ -83,3 +83,4 @@ export const toChachiChat = (relay: string, d: string) => {
   return `https://chachi.chat/${relay.replace(/^wss?:\/\//, '').replace(/\/$/, '')}/${d}`
 }
 export const toNjump = (id: string) => `https://njump.me/${id}`
+export const toArticle = (naddr: string) => `/articles/${naddr}`
