@@ -62,7 +62,7 @@ const ArticleList = forwardRef(
           }))
 
           const events = await client.fetchEvents(requests)
-          
+
           // Sort by published_at if available, otherwise by created_at
           const sortedEvents = events.sort((a, b) => {
             const aPublishedAt = parseInt(a.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || a.created_at
@@ -75,7 +75,7 @@ const ArticleList = forwardRef(
           sortedEvents.forEach((event) => {
             const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
             const key = `${event.pubkey}:${dTag || event.id}`
-            
+
             // Keep the most recent version
             const existing = uniqueArticles.get(key)
             if (!existing || event.created_at > existing.created_at) {
