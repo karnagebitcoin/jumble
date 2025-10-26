@@ -1,4 +1,4 @@
-import { Conversion, Input, Output, QUALITY_HIGH } from 'mediabunny'
+import { Conversion, Input, Output, QUALITY_HIGH, BlobSource, ALL_FORMATS } from 'mediabunny'
 
 class VideoCompressionService {
   static instance: VideoCompressionService
@@ -23,8 +23,14 @@ class VideoCompressionService {
     }
 
     try {
-      // Create input from the video file
-      const input = await Input.fromBlob(file)
+      // Create a BlobSource from the video file
+      const source = new BlobSource(file)
+
+      // Create input from the source
+      const input = new Input({
+        source,
+        formats: ALL_FORMATS
+      })
 
       // Create output to MP4 format
       const output = Output.create('mp4', {
