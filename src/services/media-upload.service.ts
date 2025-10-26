@@ -4,7 +4,7 @@ import { BlossomClient } from 'blossom-client-sdk'
 import { z } from 'zod'
 import client from './client.service'
 import storage from './local-storage.service'
-import { encode as encodeAvif } from '@jsquash/avif'
+import imageCompression from 'browser-image-compression'
 
 type UploadOptions = {
   onProgress?: (progressPercent: number) => void
@@ -31,41 +31,36 @@ class MediaUploadService {
     this.serviceConfig = config
   }
 
-  private async convertPngToAvif(file: File): Promise<File> {
-    // Only convert PNG images
-    if (file.type !== 'image/png') {
+  private async convertToWebP(file: File): Promise<File> {
+    // Only convert PNG and JPEG images
+    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
       return file
     }
 
     try {
-      // Load the image
-      const imageBitmap = await createImageBitmap(file)
-
-      // Convert to ImageData
-      const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height)
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        throw new Error('Could not get canvas context')
+      // Use browser-image-compression to convert to WebP
+      const options = {
+        maxSizeMB: 10, // Don't compress file size, just convert format
+        fileType: 'image/webp',
+        initialQuality: 0.9,
+        alwaysKeepResolution: true,
+        useWebWorker: true
       }
 
-      ctx.drawImage(imageBitmap, 0, 0)
-      const imageData = ctx.getImageData(0, 0, imageBitmap.width, imageBitmap.height)
+      const compressedFile = await imageCompression(file, options)
 
-      // Encode to AVIF
-      const avifData = await encodeAvif(imageData, { quality: 80 })
-
-      // Create new File with .avif extension
-      const fileName = file.name.replace(/\.png$/i, '.avif')
-      return new File([avifData], fileName, { type: 'image/avif' })
+      // Update filename to have .webp extension
+      const fileName = file.name.replace(/\.(png|jpe?g)$/i, '.webp')
+      return new File([compressedFile], fileName, { type: 'image/webp' })
     } catch (error) {
-      console.error('Failed to convert PNG to AVIF, using original file:', error)
+      console.error('Failed to convert to WebP, using original file:', error)
       return file
     }
   }
 
   async upload(file: File, options?: UploadOptions) {
-    // Convert PNG to AVIF before uploading
-    const fileToUpload = await this.convertPngToAvif(file)
+    // Convert PNG/JPEG to WebP before uploading
+    const fileToUpload = await this.convertToWebP(file)
 
     let result: { url: string; tags: string[][] }
     if (this.serviceConfig.type === 'nip96') {
