@@ -4,6 +4,7 @@ import { BlossomClient } from 'blossom-client-sdk'
 import { z } from 'zod'
 import client from './client.service'
 import storage from './local-storage.service'
+import { encode as encodeAvif } from '@jsquash/avif'
 
 type UploadOptions = {
   onProgress?: (progressPercent: number) => void
@@ -30,12 +31,47 @@ class MediaUploadService {
     this.serviceConfig = config
   }
 
+  private async convertPngToAvif(file: File): Promise<File> {
+    // Only convert PNG images
+    if (file.type !== 'image/png') {
+      return file
+    }
+
+    try {
+      // Load the image
+      const imageBitmap = await createImageBitmap(file)
+
+      // Convert to ImageData
+      const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height)
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        throw new Error('Could not get canvas context')
+      }
+
+      ctx.drawImage(imageBitmap, 0, 0)
+      const imageData = ctx.getImageData(0, 0, imageBitmap.width, imageBitmap.height)
+
+      // Encode to AVIF
+      const avifData = await encodeAvif(imageData, { quality: 80 })
+
+      // Create new File with .avif extension
+      const fileName = file.name.replace(/\.png$/i, '.avif')
+      return new File([avifData], fileName, { type: 'image/avif' })
+    } catch (error) {
+      console.error('Failed to convert PNG to AVIF, using original file:', error)
+      return file
+    }
+  }
+
   async upload(file: File, options?: UploadOptions) {
+    // Convert PNG to AVIF before uploading
+    const fileToUpload = await this.convertPngToAvif(file)
+
     let result: { url: string; tags: string[][] }
     if (this.serviceConfig.type === 'nip96') {
-      result = await this.uploadByNip96(this.serviceConfig.service, file, options)
+      result = await this.uploadByNip96(this.serviceConfig.service, fileToUpload, options)
     } else {
-      result = await this.uploadByBlossom(file, options)
+      result = await this.uploadByBlossom(fileToUpload, options)
     }
 
     if (result.tags.length > 0) {
