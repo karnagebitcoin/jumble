@@ -1,4 +1,12 @@
-import { Conversion, Input, Output, QUALITY_HIGH, BlobSource, ALL_FORMATS } from 'mediabunny'
+import {
+  Conversion,
+  Input,
+  Output,
+  BlobSource,
+  BufferTarget,
+  ALL_FORMATS,
+  Mp4OutputFormat
+} from 'mediabunny'
 
 class VideoCompressionService {
   static instance: VideoCompressionService
@@ -32,24 +40,34 @@ class VideoCompressionService {
         formats: ALL_FORMATS
       })
 
-      // Create output to MP4 format
-      const output = Output.create('mp4', {
+      // Create a buffer target to hold the output in memory
+      const target = new BufferTarget()
+
+      // Create MP4 output format
+      const format = new Mp4OutputFormat()
+
+      // Create output
+      const output = new Output({
+        format,
+        target
+      })
+
+      // Initialize the conversion with video and audio encoding options
+      const conversion = await Conversion.init({
+        input,
+        output,
         video: {
           codec: 'h264',
-          // Use QUALITY_HIGH which gives approximately 80% quality
-          bitrate: QUALITY_HIGH
+          // Set a reasonable bitrate for ~80% quality
+          // For 1080p video, 5 Mbps is good; for 720p, 2.5 Mbps
+          // We'll use a quality-based approach with CRF-like bitrate
+          bitrate: 5_000_000 // 5 Mbps
         },
         audio: {
           codec: 'aac',
           // 128kbps is good quality for most content
-          bitrate: 128000
+          bitrate: 128_000
         }
-      })
-
-      // Initialize the conversion
-      const conversion = await Conversion.init({
-        input,
-        output
       })
 
       // Set up progress tracking
@@ -69,12 +87,17 @@ class VideoCompressionService {
       // Execute the conversion
       await conversion.execute()
 
-      // Get the blob from the output
-      const blob = await output.complete()
+      // Finalize the output to complete the file
+      await output.finalize()
 
-      // Convert blob to File with appropriate name and type
+      // Get the buffer from the target
+      if (!target.buffer) {
+        throw new Error('Output buffer is null')
+      }
+
+      // Convert buffer to File with appropriate name and type
       const fileName = file.name.replace(/\.[^/.]+$/, '.mp4')
-      const compressedFile = new File([blob], fileName, {
+      const compressedFile = new File([target.buffer], fileName, {
         type: 'video/mp4',
         lastModified: Date.now()
       })
