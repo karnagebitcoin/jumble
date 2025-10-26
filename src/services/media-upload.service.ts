@@ -5,6 +5,7 @@ import { z } from 'zod'
 import client from './client.service'
 import storage from './local-storage.service'
 import imageCompression from 'browser-image-compression'
+import videoCompression from './video-compression.service'
 
 type UploadOptions = {
   onProgress?: (progressPercent: number) => void
@@ -59,8 +60,40 @@ class MediaUploadService {
   }
 
   async upload(file: File, options?: UploadOptions) {
-    // Convert PNG/JPEG to WebP before uploading
-    const fileToUpload = await this.convertToWebP(file)
+    let fileToUpload = file
+
+    // Compress video files before uploading
+    if (videoCompression.shouldCompress(file)) {
+      // For video, we'll track compression progress as 0-50% and upload as 50-100%
+      const compressionProgress = (p: number) => {
+        options?.onProgress?.(Math.round(p * 0.5))
+      }
+      fileToUpload = await videoCompression.compressVideo(file, compressionProgress)
+
+      // Create new options with adjusted progress for upload phase
+      const uploadOptions: UploadOptions = {
+        ...options,
+        onProgress: (p: number) => {
+          // Map upload progress from 0-100 to 50-100
+          options?.onProgress?.(50 + Math.round(p * 0.5))
+        }
+      }
+
+      let result: { url: string; tags: string[][] }
+      if (this.serviceConfig.type === 'nip96') {
+        result = await this.uploadByNip96(this.serviceConfig.service, fileToUpload, uploadOptions)
+      } else {
+        result = await this.uploadByBlossom(fileToUpload, uploadOptions)
+      }
+
+      if (result.tags.length > 0) {
+        this.imetaTagMap.set(result.url, ['imeta', ...result.tags.map(([n, v]) => `${n} ${v}`)])
+      }
+      return result
+    }
+
+    // Convert PNG/JPEG to WebP before uploading (for images only)
+    fileToUpload = await this.convertToWebP(fileToUpload)
 
     let result: { url: string; tags: string[][] }
     if (this.serviceConfig.type === 'nip96') {
