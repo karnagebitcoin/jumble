@@ -9,6 +9,7 @@ import HomeButton from './HomeButton'
 import NotificationsButton from './NotificationButton'
 import PostButton from './PostButton'
 import ProfileButton from './ProfileButton'
+import ReadsButton from './ReadsButton'
 import SearchButton from './SearchButton'
 import SettingsButton from './SettingsButton'
 import MultiColumnToggle from './MultiColumnToggle'
@@ -33,6 +34,7 @@ export default function PrimaryPageSidebar() {
           <Logo className={cn(compactSidebar ? "hidden" : "max-xl:hidden")} />
         </div>
         <HomeButton />
+        <ReadsButton />
         <RelaysButton />
         <NotificationsButton />
         <SearchButton />

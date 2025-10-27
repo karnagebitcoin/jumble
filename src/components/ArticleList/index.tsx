@@ -8,6 +8,9 @@ import client from '@/services/client.service'
 import ArticleCard from '../ArticleCard'
 import { isTouchDevice } from '@/lib/utils'
 import PullToRefresh from 'react-simple-pull-to-refresh'
+import { getReplaceableCoordinateFromEvent, isReplaceableEvent } from '@/lib/event'
+import dayjs from 'dayjs'
+import { useNostr } from '@/providers/NostrProvider'
 
 const LIMIT = 50
 const SHOW_COUNT = 10
@@ -27,107 +30,155 @@ const ArticleList = forwardRef(
     ref
   ) => {
     const { t } = useTranslation()
+    const { startLogin } = useNostr()
     const [articles, setArticles] = useState<Event[]>([])
     const [loading, setLoading] = useState(true)
     const [hasMore, setHasMore] = useState<boolean>(true)
     const [showCount, setShowCount] = useState(SHOW_COUNT)
+    const [timelineKey, setTimelineKey] = useState<string | undefined>(undefined)
+    const [refreshCount, setRefreshCount] = useState(0)
     const supportTouch = useMemo(() => isTouchDevice(), [])
     const bottomRef = useRef<HTMLDivElement | null>(null)
     const topRef = useRef<HTMLDivElement | null>(null)
-    const subRequestsRef = useRef<TFeedSubRequest[]>([])
+
+    const scrollToTop = (behavior: ScrollBehavior = 'instant') => {
+      setTimeout(() => {
+        topRef.current?.scrollIntoView({ behavior, block: 'start' })
+      }, 20)
+    }
+
+    const refresh = () => {
+      scrollToTop()
+      setTimeout(() => {
+        setRefreshCount((count) => count + 1)
+      }, 500)
+    }
 
     useImperativeHandle(ref, () => ({
-      refresh: () => {
-        loadArticles(true)
-      },
-      scrollToTop: (behavior: ScrollBehavior = 'smooth') => {
-        topRef.current?.scrollIntoView({ behavior })
-      }
+      refresh,
+      scrollToTop
     }))
 
-    const loadArticles = useCallback(
-      async (reset = false) => {
-        if (!reset && !hasMore) return
+    useEffect(() => {
+      if (!subRequests.length) return
 
+      async function init() {
         setLoading(true)
+        setArticles([])
+        setHasMore(true)
 
-        try {
-          const requests = subRequestsRef.current.map((req) => ({
-            ...req,
+        const { closer, timelineKey } = await client.subscribeTimeline(
+          subRequests.map(({ urls, filter }) => ({
+            urls,
             filter: {
-              ...req.filter,
               kinds: [30023], // Long-form content
+              ...filter,
               limit: LIMIT
             }
-          }))
-
-          const events = await client.fetchEvents(requests)
-
-          // Sort by published_at if available, otherwise by created_at
-          const sortedEvents = events.sort((a, b) => {
-            const aPublishedAt = parseInt(a.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || a.created_at
-            const bPublishedAt = parseInt(b.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || b.created_at
-            return bPublishedAt - aPublishedAt
-          })
-
-          // Remove duplicates by d-tag identifier
-          const uniqueArticles = new Map<string, Event>()
-          sortedEvents.forEach((event) => {
-            const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
-            const key = `${event.pubkey}:${dTag || event.id}`
-
-            // Keep the most recent version
-            const existing = uniqueArticles.get(key)
-            if (!existing || event.created_at > existing.created_at) {
-              uniqueArticles.set(key, event)
+          })),
+          {
+            onEvents: (events, eosed) => {
+              if (events.length > 0) {
+                setArticles(events)
+              }
+              if (eosed) {
+                setLoading(false)
+                setHasMore(events.length > 0)
+              }
+            },
+            onNew: (event) => {
+              // Insert new articles at the top
+              setArticles((oldArticles) =>
+                oldArticles.some((e) => e.id === event.id) ? oldArticles : [event, ...oldArticles]
+              )
             }
-          })
-
-          const uniqueArticlesList = Array.from(uniqueArticles.values())
-          setArticles(uniqueArticlesList)
-          setHasMore(uniqueArticlesList.length >= LIMIT)
-        } catch (error) {
-          console.error('Failed to load articles:', error)
-        } finally {
-          setLoading(false)
-        }
-      },
-      [hasMore]
-    )
-
-    useEffect(() => {
-      subRequestsRef.current = subRequests
-      if (subRequests.length > 0) {
-        loadArticles(true)
-      } else {
-        setArticles([])
-        setLoading(false)
-      }
-    }, [subRequests, loadArticles])
-
-    useEffect(() => {
-      if (!bottomRef.current) return
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && !loading && hasMore) {
-            setShowCount((prev) => prev + SHOW_COUNT)
+          },
+          {
+            startLogin
           }
-        },
-        {
-          rootMargin: '400px'
-        }
-      )
+        )
+        setTimelineKey(timelineKey)
+        return closer
+      }
 
-      observer.observe(bottomRef.current)
+      const promise = init()
+      return () => {
+        promise.then((closer) => closer())
+      }
+    }, [JSON.stringify(subRequests), refreshCount])
+
+    useEffect(() => {
+      const options = {
+        root: null,
+        rootMargin: '10px',
+        threshold: 0.1
+      }
+
+      const loadMore = async () => {
+        if (showCount < articles.length) {
+          setShowCount((prev) => prev + SHOW_COUNT)
+          // preload more
+          if (articles.length - showCount > LIMIT / 2) {
+            return
+          }
+        }
+
+        if (!timelineKey || loading || !hasMore) return
+        setLoading(true)
+        const newArticles = await client.loadMoreTimeline(
+          timelineKey,
+          articles.length ? articles[articles.length - 1].created_at - 1 : dayjs().unix(),
+          LIMIT
+        )
+        setLoading(false)
+        if (newArticles.length === 0) {
+          setHasMore(false)
+          return
+        }
+        setArticles((oldArticles) => [...oldArticles, ...newArticles])
+      }
+
+      const observerInstance = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMore()
+        }
+      }, options)
+
+      const currentBottomRef = bottomRef.current
+
+      if (currentBottomRef) {
+        observerInstance.observe(currentBottomRef)
+      }
 
       return () => {
-        observer.disconnect()
+        if (observerInstance && currentBottomRef) {
+          observerInstance.unobserve(currentBottomRef)
+        }
       }
-    }, [loading, hasMore])
+    }, [loading, hasMore, articles, showCount, timelineKey])
 
     const displayedArticles = useMemo(() => {
-      return articles.slice(0, showCount)
+      // Remove duplicates by d-tag identifier (keep most recent version)
+      const uniqueArticles = new Map<string, Event>()
+      articles.forEach((event) => {
+        const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
+        const key = `${event.pubkey}:${dTag || event.id}`
+
+        // Keep the most recent version
+        const existing = uniqueArticles.get(key)
+        if (!existing || event.created_at > existing.created_at) {
+          uniqueArticles.set(key, event)
+        }
+      })
+
+      return Array.from(uniqueArticles.values())
+        .sort((a, b) => {
+          // Sort by published_at if available, otherwise by created_at
+          const aPublishedAt = parseInt(a.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || a.created_at
+          const bPublishedAt = parseInt(b.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || b.created_at
+          return bPublishedAt - aPublishedAt
+        })
+        .slice(0, showCount)
     }, [articles, showCount])
 
     const handleRefresh = async () => {

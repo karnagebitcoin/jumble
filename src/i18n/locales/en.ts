@@ -512,6 +512,11 @@ export default {
     'Welcome to Nostr': 'Welcome to Nostr',
     'New to Nostr?': 'New to Nostr?',
     'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.',
-    'Start Tour': 'Start Tour'
+    'Start Tour': 'Start Tour',
+    'Reads': 'Reads',
+    'Please login to view reads from people you follow': 'Please login to view reads from people you follow',
+    'Follow some people to see their long-form articles here': 'Follow some people to see their long-form articles here',
+    'No articles found': 'No articles found',
+    'Load More': 'Load More'
   }
 }

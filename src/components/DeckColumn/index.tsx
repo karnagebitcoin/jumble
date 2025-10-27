@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import { TPinnedColumn } from '@/types'
-import { X, Compass, Bell, UserRound, Search, Server, Bookmark } from 'lucide-react'
-import { useRef } from 'react'
+import { TPinnedColumn, TFeedSubRequest } from '@/types'
+import { X, Compass, Bell, UserRound, Search, Server, Bookmark, BookOpen } from 'lucide-react'
+import { useRef, useEffect, useState } from 'react'
 import Explore from '@/components/Explore'
 import NotificationList from '@/components/NotificationList'
 import Profile from '@/components/Profile'
@@ -9,6 +9,7 @@ import SearchResult from '@/components/SearchResult'
 import Relay from '@/components/Relay'
 import NormalFeed from '@/components/NormalFeed'
 import BookmarkList from '@/components/BookmarkList'
+import ArticleList from '@/components/ArticleList'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '../ui/button'
 import { usePageTheme } from '@/providers/PageThemeProvider'
@@ -19,8 +20,10 @@ import { DeepBrowsingProvider } from '@/providers/DeepBrowsingProvider'
 import { BIG_RELAY_URLS, SEARCHABLE_RELAY_URLS } from '@/constants'
 import { normalizeUrl, simplifyUrl } from '@/lib/url'
 import { useTranslation } from 'react-i18next'
-import { useFetchProfile } from '@/hooks'
+import { useFetchProfile, useFetchFollowings } from '@/hooks'
 import Username from '../Username'
+import { useNostr } from '@/providers/NostrProvider'
+import client from '@/services/client.service'
 
 export default function DeckColumn({ column }: { column: TPinnedColumn }) {
   const { pageTheme } = usePageTheme()
@@ -110,6 +113,10 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
           <BookmarkList />
         </div>
       )
+      break
+    case 'reads':
+      titlebar = <ReadsTitlebar onClose={() => unpinColumn(column.id)} />
+      content = <ReadsContent />
       break
   }
 
@@ -278,4 +285,54 @@ function BookmarksTitlebar({ onClose }: { onClose: () => void }) {
       </Button>
     </div>
   )
+}
+
+function ReadsTitlebar({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <BookOpen className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {t('Reads')}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function ReadsContent() {
+  const { pubkey } = useNostr()
+  const { followings } = useFetchFollowings(pubkey)
+  const [subRequests, setSubRequests] = useState<TFeedSubRequest[]>([])
+
+  useEffect(() => {
+    if (!pubkey || !followings.length) {
+      setSubRequests([])
+      return
+    }
+
+    const init = async () => {
+      const relayList = await client.fetchRelayList(pubkey)
+      setSubRequests([
+        {
+          urls: relayList.read.concat(BIG_RELAY_URLS).slice(0, 8),
+          filter: {
+            authors: followings
+          }
+        }
+      ])
+    }
+
+    init()
+  }, [pubkey, followings])
+
+  if (!pubkey || !followings.length) {
+    return null
+  }
+
+  return <ArticleList subRequests={subRequests} />
 }
