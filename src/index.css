@@ -102,8 +102,8 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 93% 82%;
     --destructive-foreground: 240 10% 3.9%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --border: 240 5.9% 94%;
+    --input: 240 5.9% 94%;
     --ring: 259 43% 56%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -160,7 +160,7 @@
     --background: 0 0% 100%;
     --card: 0 0% 100%;
     --popover: 0 0% 100%;
-    --border: 240 5.9% 90%;
+    --border: 240 5.9% 94%;
   }
 }
 
