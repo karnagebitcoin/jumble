@@ -823,21 +823,30 @@ const ListsPage = forwardRef((_, ref) => {
         )}
 
         {/* My Lists */}
-        {!searchQuery && lists && lists.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">{t('My Lists')}</h2>
+        {!searchQuery && lists && lists.length > 0 && (() => {
+          const nonFavoriteLists = lists.filter((list) => {
+            const listKey = `${list.event.pubkey}:${list.id}`
+            return !favoriteLists.includes(listKey)
+          })
 
-            {isLoadingMyLists && (
-              <div className="text-center text-muted-foreground py-8">
-                {t('Loading lists...')}
+          if (nonFavoriteLists.length === 0) return null
+
+          return (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold">{t('My Lists')}</h2>
+
+              {isLoadingMyLists && (
+                <div className="text-center text-muted-foreground py-8">
+                  {t('Loading lists...')}
+                </div>
+              )}
+
+              <div className="grid gap-4">
+                {nonFavoriteLists.map((list) => renderListCard(list, true))}
               </div>
-            )}
-
-            <div className="grid gap-4">
-              {lists.map((list) => renderListCard(list, true))}
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Discover Public Lists */}
         {!searchQuery && (
@@ -851,19 +860,32 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
             )}
 
-            {!isLoadingPublicLists && (!allPublicLists || allPublicLists.length === 0) && (
-              <div className="text-center text-muted-foreground py-8">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>{t('No starter packs found')}</p>
-                <p className="text-sm">{t('Try searching or create your own')}</p>
-              </div>
-            )}
+            {!isLoadingPublicLists && (() => {
+              const nonFavoritePublicLists = (allPublicLists || []).filter((list) => {
+                const listKey = `${list.event.pubkey}:${list.id}`
+                return !favoriteLists.includes(listKey)
+              })
 
-            {!isLoadingPublicLists && allPublicLists && allPublicLists.length > 0 && (
-              <div className="grid gap-4">
-                {allPublicLists.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
-              </div>
-            )}
+              if (nonFavoritePublicLists.length === 0 && (!allPublicLists || allPublicLists.length === 0)) {
+                return (
+                  <div className="text-center text-muted-foreground py-8">
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>{t('No starter packs found')}</p>
+                    <p className="text-sm">{t('Try searching or create your own')}</p>
+                  </div>
+                )
+              }
+
+              if (nonFavoritePublicLists.length === 0) {
+                return null
+              }
+
+              return (
+                <div className="grid gap-4">
+                  {nonFavoritePublicLists.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
+                </div>
+              )
+            })()}
           </div>
         )}
       </div>
