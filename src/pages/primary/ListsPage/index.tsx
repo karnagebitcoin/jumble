@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search, ArrowLeft } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2 } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -26,9 +26,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import client from '@/services/client.service'
 import { ExtendedKind, BIG_RELAY_URLS } from '@/constants'
-import { Event } from 'nostr-tools'
+import { Event, nip19 } from 'nostr-tools'
 import { TStarterPack } from '@/providers/ListsProvider'
 import NoteList from '@/components/NoteList'
+import { useFollowList } from '@/providers/FollowListProvider'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
@@ -36,6 +37,7 @@ const ListsPage = forwardRef((_, ref) => {
   const { pubkey, checkLogin } = useNostr()
   const { push } = useSecondaryPage()
   const { lists, isLoading: isLoadingMyLists, deleteList, fetchLists } = useLists()
+  const { followList, followingPubkeys } = useFollowList()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<TStarterPack[]>([])
@@ -211,6 +213,73 @@ const ListsPage = forwardRef((_, ref) => {
     setListToDelete(null)
   }
 
+  const handleFollowAll = async () => {
+    if (!pubkey) {
+      checkLogin()
+      return
+    }
+
+    if (!selectedList || !selectedList.pubkeys || selectedList.pubkeys.length === 0) {
+      toast.error(t('No members to follow'))
+      return
+    }
+
+    // Filter out already followed pubkeys
+    const pubkeysToFollow = selectedList.pubkeys.filter(
+      (pk) => !followingPubkeys.includes(pk) && pk !== pubkey
+    )
+
+    if (pubkeysToFollow.length === 0) {
+      toast.info(t('You are already following everyone in this list'))
+      return
+    }
+
+    const { unwrap } = toast.promise(
+      followList([...followingPubkeys, ...pubkeysToFollow]),
+      {
+        loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
+        success: t('Successfully followed {{count}} users!', { count: pubkeysToFollow.length }),
+        error: (err) => t('Failed to follow users: {{error}}', { error: err.message })
+      }
+    )
+    await unwrap()
+  }
+
+  const handleShare = async () => {
+    if (!selectedList) return
+
+    try {
+      // Create naddr (NIP-19 addressable event identifier)
+      const naddr = nip19.naddrEncode({
+        kind: ExtendedKind.STARTER_PACK,
+        pubkey: selectedList.event.pubkey,
+        identifier: selectedList.id,
+        relays: BIG_RELAY_URLS.slice(0, 3)
+      })
+
+      const shareUrl = `https://njump.me/${naddr}`
+
+      // Try to use Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: selectedList.title,
+          text: selectedList.description || `Check out this starter pack: ${selectedList.title}`,
+          url: shareUrl
+        })
+        toast.success(t('Shared successfully!'))
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(shareUrl)
+        toast.success(t('Link copied to clipboard!'))
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Failed to share:', error)
+        toast.error(t('Failed to share'))
+      }
+    }
+  }
+
   const renderListCard = (list: TStarterPack, isOwned: boolean = false) => {
     const memberCount = list.pubkeys?.length || 0
 
@@ -312,20 +381,44 @@ const ListsPage = forwardRef((_, ref) => {
   if (selectedList) {
     const isOwnList = selectedList.event.pubkey === pubkey
     const memberCount = selectedList.pubkeys?.length || 0
+    const validPubkeys = selectedList.pubkeys?.filter(pk => pk && pk.length > 0) || []
 
     content = (
       <div className="flex flex-col h-full">
         {/* List Header */}
         <div className="border-b px-4 py-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedList(null)}
-            className="mb-3"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('Back to Lists')}
-          </Button>
+          <div className="flex items-center justify-between mb-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedList(null)}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('Back to Lists')}
+            </Button>
+
+            {memberCount > 0 && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFollowAll}
+                  disabled={!pubkey}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  {t('Follow All')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleShare}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  {t('Share')}
+                </Button>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-start gap-4">
             {selectedList.image && (
@@ -368,7 +461,7 @@ const ListsPage = forwardRef((_, ref) => {
 
         {/* List Content */}
         <div className="flex-1 overflow-auto">
-          {memberCount === 0 ? (
+          {validPubkeys.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
               <Users className="w-16 h-16 text-muted-foreground opacity-50" />
               <div className="text-muted-foreground">{t('No members in this list')}</div>
@@ -381,7 +474,7 @@ const ListsPage = forwardRef((_, ref) => {
           ) : (
             <NoteList
               filter={{
-                authors: selectedList.pubkeys,
+                authors: validPubkeys,
                 kinds: [1, 6]
               }}
             />
