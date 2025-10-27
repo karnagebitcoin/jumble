@@ -34,6 +34,7 @@
     user-select: none;
     font-family: var(--font-family);
     font-size: var(--font-size, 14px);
+    position: relative;
   }
 
 
