@@ -1,5 +1,4 @@
 import { StorageKey } from '@/constants'
-import localStorageService from '@/services/local-storage.service'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 interface IListsVisibilityContext {
@@ -11,11 +10,11 @@ const ListsVisibilityContext = createContext<IListsVisibilityContext | undefined
 
 export function ListsVisibilityProvider({ children }: { children: ReactNode }) {
   const [hideListsInNavigation, _setHideListsInNavigation] = useState<boolean>(() => {
-    return localStorageService.get<boolean>(StorageKey.HIDE_LISTS_IN_NAVIGATION) ?? false
+    return window.localStorage.getItem(StorageKey.HIDE_LISTS_IN_NAVIGATION) === 'true'
   })
 
   useEffect(() => {
-    localStorageService.set(StorageKey.HIDE_LISTS_IN_NAVIGATION, hideListsInNavigation)
+    window.localStorage.setItem(StorageKey.HIDE_LISTS_IN_NAVIGATION, hideListsInNavigation.toString())
   }, [hideListsInNavigation])
 
   const setHideListsInNavigation = (hide: boolean) => {
