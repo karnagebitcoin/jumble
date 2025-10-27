@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card'
 import Username from '@/components/Username'
 import UserAvatar from '@/components/UserAvatar'
 import { FormattedTimestamp } from '@/components/FormattedTimestamp'
@@ -7,8 +6,11 @@ import { toArticle } from '@/lib/link'
 import { NostrEvent } from 'nostr-tools'
 import { useMemo } from 'react'
 import { nip19 } from 'nostr-tools'
+import { useFetchProfile } from '@/hooks'
 
 export default function ArticleCard({ event }: { event: NostrEvent }) {
+  const { profile } = useFetchProfile(event.pubkey)
+
   const { title, summary, image, publishedAt, identifier } = useMemo(() => {
     const titleTag = event.tags.find((tag) => tag[0] === 'title')
     const summaryTag = event.tags.find((tag) => tag[0] === 'summary')
@@ -52,9 +54,11 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
       : plainText
   }, [summary, event.content])
 
+  const displayName = profile?.username || event.pubkey.slice(0, 8) + '...'
+
   return (
     <SecondaryPageLink to={toArticle(naddr)}>
-      <Card className="p-4 hover:bg-accent/50 transition-colors cursor-pointer">
+      <div className="py-4 px-4 hover:bg-accent/50 transition-colors cursor-pointer border-b border-border">
         <div className="flex gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-lg mb-1 line-clamp-2">{title}</h3>
@@ -65,7 +69,7 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
             )}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <UserAvatar userId={event.pubkey} size="small" />
-              <Username pubkey={event.pubkey} />
+              <span className="truncate">{displayName}</span>
               <span>•</span>
               <FormattedTimestamp timestamp={publishedAt} />
             </div>
@@ -81,7 +85,7 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
             </div>
           )}
         </div>
-      </Card>
+      </div>
     </SecondaryPageLink>
   )
 }
