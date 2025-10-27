@@ -503,10 +503,16 @@ const ListsPage = forwardRef((_, ref) => {
             </div>
           ) : (
             <NoteList
-              filter={{
-                authors: validPubkeys,
-                kinds: [1, 6]
-              }}
+              subRequests={[
+                {
+                  urls: BIG_RELAY_URLS,
+                  filter: {
+                    authors: validPubkeys,
+                    kinds: [1, 6]
+                  }
+                }
+              ]}
+              showKinds={[1, 6]}
             />
           )}
         </div>
