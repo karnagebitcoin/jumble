@@ -27,6 +27,7 @@ import DeckColumn from './components/DeckColumn'
 import TooManyRelaysAlertDialog from './components/TooManyRelaysAlertDialog'
 import { normalizeUrl } from './lib/url'
 import ExplorePage from './pages/primary/ExplorePage'
+import ListsPage from './pages/primary/ListsPage'
 import MePage from './pages/primary/MePage'
 import NotificationListPage from './pages/primary/NotificationListPage'
 import ProfilePage from './pages/primary/ProfilePage'
@@ -65,6 +66,7 @@ type TStackItem = {
 const PRIMARY_PAGE_REF_MAP = {
   home: createRef<TPageRef>(),
   reads: createRef<TPageRef>(),
+  lists: createRef<TPageRef>(),
   explore: createRef<TPageRef>(),
   notifications: createRef<TPageRef>(),
   me: createRef<TPageRef>(),
@@ -76,6 +78,7 @@ const PRIMARY_PAGE_REF_MAP = {
 const PRIMARY_PAGE_MAP = {
   home: <NoteListPage ref={PRIMARY_PAGE_REF_MAP.home} />,
   reads: <ReadsPage ref={PRIMARY_PAGE_REF_MAP.reads} />,
+  lists: <ListsPage ref={PRIMARY_PAGE_REF_MAP.lists} />,
   explore: <ExplorePage ref={PRIMARY_PAGE_REF_MAP.explore} />,
   notifications: <NotificationListPage ref={PRIMARY_PAGE_REF_MAP.notifications} />,
   me: <MePage ref={PRIMARY_PAGE_REF_MAP.me} />,

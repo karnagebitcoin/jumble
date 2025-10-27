@@ -6,13 +6,16 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists } from '@/providers/ListsProvider'
 import { useSearchProfiles } from '@/hooks/useSearchProfiles'
 import { useSecondaryPage } from '@/PageManager'
-import { Search, X, UserPlus } from 'lucide-react'
+import { Search, X, UserPlus, Upload, Image as ImageIcon } from 'lucide-react'
 import { forwardRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
+import Nip05 from '@/components/Nip05'
 import { Card, CardContent } from '@/components/ui/card'
+import Uploader from '@/components/PostEditor/Uploader'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type ListEditorPageProps = {
   index?: number
@@ -131,13 +134,52 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">{t('Image URL')} ({t('optional')})</Label>
-              <Input
-                id="image"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder={t('https://...')}
-              />
+              <Label htmlFor="image">{t('Cover Image')} ({t('optional')})</Label>
+              <Tabs defaultValue="url" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="url">URL</TabsTrigger>
+                  <TabsTrigger value="upload">{t('Upload')}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="url" className="space-y-2">
+                  <Input
+                    id="image"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    placeholder={t('https://...')}
+                  />
+                  {image && (
+                    <div className="relative w-full h-32 rounded overflow-hidden border">
+                      <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="upload" className="space-y-2">
+                  <Uploader
+                    accept="image/*"
+                    onUploadSuccess={({ url }) => setImage(url)}
+                  >
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors">
+                      <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('Click to upload an image')}
+                      </p>
+                    </div>
+                  </Uploader>
+                  {image && (
+                    <div className="relative w-full h-32 rounded overflow-hidden border">
+                      <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => setImage('')}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 
@@ -157,7 +199,7 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
             {/* Search Results */}
             {searchQuery && (
               <Card>
-                <CardContent className="p-2">
+                <CardContent className="p-2 max-h-96 overflow-y-auto">
                   {isFetching && (
                     <div className="text-center text-sm text-muted-foreground py-4">
                       {t('Searching...')}
@@ -172,19 +214,27 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
                     profiles.map((profile) => (
                       <div
                         key={profile.pubkey}
-                        className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
+                        className="flex items-center justify-between p-3 hover:bg-accent rounded cursor-pointer transition-colors"
                         onClick={() => handleAddPubkey(profile.pubkey)}
                       >
-                        <div className="flex items-center gap-3">
-                          <UserAvatar pubkey={profile.pubkey} className="w-10 h-10" />
-                          <div>
-                            <Username pubkey={profile.pubkey} className="font-medium" />
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <UserAvatar pubkey={profile.pubkey} className="w-12 h-12 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Username pubkey={profile.pubkey} className="font-medium truncate" />
+                            </div>
+                            {profile.nip05 && (
+                              <div className="text-sm text-muted-foreground truncate">
+                                <Nip05 nip05={profile.nip05} pubkey={profile.pubkey} />
+                              </div>
+                            )}
                           </div>
                         </div>
                         <Button
-                          variant="ghost"
+                          variant={selectedPubkeys.includes(profile.pubkey) ? "secondary" : "ghost"}
                           size="icon"
                           disabled={selectedPubkeys.includes(profile.pubkey)}
+                          className="flex-shrink-0"
                         >
                           <UserPlus className="w-4 h-4" />
                         </Button>
@@ -202,22 +252,23 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
                 {t('Members')} ({selectedPubkeys.length})
               </Label>
               <Card>
-                <CardContent className="p-2">
+                <CardContent className="p-2 max-h-96 overflow-y-auto">
                   {selectedPubkeys.map((pubkey) => (
                     <div
                       key={pubkey}
-                      className="flex items-center justify-between p-2 hover:bg-accent rounded"
+                      className="flex items-center justify-between p-3 hover:bg-accent rounded transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <UserAvatar pubkey={pubkey} className="w-10 h-10" />
-                        <div>
-                          <Username pubkey={pubkey} className="font-medium" />
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <UserAvatar pubkey={pubkey} className="w-12 h-12 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <Username pubkey={pubkey} className="font-medium truncate" />
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemovePubkey(pubkey)}
+                        className="flex-shrink-0"
                       >
                         <X className="w-4 h-4" />
                       </Button>

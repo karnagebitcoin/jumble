@@ -1,18 +1,13 @@
-import { useSecondaryPage } from '@/PageManager'
-import { toListsIndex } from '@/lib/link'
+import { usePrimaryPage } from '@/PageManager'
 import { List } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import SidebarItem from './SidebarItem'
 
 export default function ListsButton() {
-  const { t } = useTranslation()
-  const { push } = useSecondaryPage()
-
-  const handleClick = () => {
-    push(toListsIndex())
-  }
+  const { navigate, current } = usePrimaryPage()
 
   return (
-    <SidebarItem onClick={handleClick} icon={List} label={t('Lists')} />
+    <SidebarItem title="Lists" onClick={() => navigate('lists')} active={current === 'lists'}>
+      <List strokeWidth={1.3} />
+    </SidebarItem>
   )
 }
