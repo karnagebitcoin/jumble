@@ -766,7 +766,7 @@ const ListsPage = forwardRef((_, ref) => {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('Search starter packs...')}
+                placeholder={t('Search lists...')}
                 className="pl-9"
               />
             </div>
