@@ -158,6 +158,9 @@ const ArticleList = forwardRef(
     }, [loading, hasMore, articles, showCount, timelineKey])
 
     const displayedArticles = useMemo(() => {
+      // Titles to filter out (exact matches only)
+      const filteredTitles = ['Untitled', 'Untitled Draft', 'Draft', 'Test', 'Testing']
+
       // Remove duplicates by d-tag identifier (keep most recent version)
       const uniqueArticles = new Map<string, Event>()
       articles.forEach((event) => {
@@ -172,6 +175,12 @@ const ArticleList = forwardRef(
       })
 
       return Array.from(uniqueArticles.values())
+        .filter((event) => {
+          // Filter out articles with exact titles we want to exclude
+          const titleTag = event.tags.find((tag) => tag[0] === 'title')
+          const title = titleTag?.[1] || 'Untitled'
+          return !filteredTitles.includes(title)
+        })
         .sort((a, b) => {
           // Sort by published_at if available, otherwise by created_at
           const aPublishedAt = parseInt(a.tags.find((tag) => tag[0] === 'published_at')?.[1] || '0') || a.created_at
