@@ -344,7 +344,7 @@ const ListsPage = forwardRef((_, ref) => {
     const listKey = `${list.event.pubkey}:${list.id}`
     const isFavorite = localStorageService.isFavoriteList(listKey)
     const isExpanded = expandedDescriptions.has(listKey)
-    const descriptionNeedsTruncation = (list.description?.length || 0) > 240
+    const descriptionNeedsTruncation = (list.description?.length || 0) > 140
     const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
     const isPinned = pinnedColumns.some((col) => col.type === 'list' && col.props?.listId === listKey)
 
@@ -451,7 +451,7 @@ const ListsPage = forwardRef((_, ref) => {
                     <>
                       <span className="text-muted-foreground">•</span>
                       <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
-                        <span>{t('by')}</span>
+                        <UserAvatar userId={list.event.pubkey} size="xSmall" className="inline-block" />
                         <Username pubkey={list.event.pubkey} className="font-medium inline" />
                       </div>
                     </>
@@ -459,6 +459,17 @@ const ListsPage = forwardRef((_, ref) => {
                 </div>
               </div>
               <div className="flex gap-1 flex-shrink-0">
+                {!isOwned && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleFollowAllClick}
+                    title={t('Follow all members')}
+                    className="text-xs px-2 h-8 w-auto"
+                  >
+                    +all
+                  </Button>
+                )}
                 {isMultiColumn && (
                   <Button
                     variant="ghost"
@@ -506,7 +517,7 @@ const ListsPage = forwardRef((_, ref) => {
               <div className="text-sm text-muted-foreground">
                 {descriptionNeedsTruncation && !isExpanded ? (
                   <>
-                    {list.description.substring(0, 240)}...{' '}
+                    {list.description.substring(0, 140)}...{' '}
                     <button
                       className="text-primary hover:underline"
                       onClick={(e) => {
@@ -520,21 +531,6 @@ const ListsPage = forwardRef((_, ref) => {
                 ) : (
                   list.description
                 )}
-              </div>
-            )}
-
-            {/* Actions */}
-            {!isOwned && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={handleFollowAllClick}
-                >
-                  <UserPlus className="w-4 h-4 mr-1" />
-                  {t('Follow All')}
-                </Button>
               </div>
             )}
           </div>
@@ -799,7 +795,7 @@ const ListsPage = forwardRef((_, ref) => {
               <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                 <div className="text-center text-muted-foreground">
-                  {t('Loading starter packs...')}
+                  {t('Loading lists...')}
                 </div>
               </div>
             )}
