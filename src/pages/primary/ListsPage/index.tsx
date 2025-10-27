@@ -155,7 +155,7 @@ const ListsPage = forwardRef((_, ref) => {
     }
 
     // Check if it's in our lists
-    const ownList = lists.find((l) => l.id === dTag)
+    const ownList = Array.isArray(lists) ? lists.find((l) => l.id === dTag) : null
 
     if (ownList) {
       setSelectedList(ownList)
@@ -219,7 +219,10 @@ const ListsPage = forwardRef((_, ref) => {
       return
     }
 
-    if (!selectedList || !selectedList.pubkeys || selectedList.pubkeys.length === 0) {
+    // Ensure selectedList.pubkeys is an array
+    const listPubkeys = Array.isArray(selectedList?.pubkeys) ? selectedList.pubkeys : []
+
+    if (!selectedList || listPubkeys.length === 0) {
       toast.error(t('No members to follow'))
       return
     }
@@ -228,7 +231,7 @@ const ListsPage = forwardRef((_, ref) => {
     const currentFollowing = Array.isArray(followingPubkeys) ? followingPubkeys : []
 
     // Filter out already followed pubkeys
-    const pubkeysToFollow = selectedList.pubkeys.filter(
+    const pubkeysToFollow = listPubkeys.filter(
       (pk) => pk && !currentFollowing.includes(pk) && pk !== pubkey
     )
 
@@ -533,19 +536,21 @@ const ListsPage = forwardRef((_, ref) => {
             {isSearching && (
               <div className="text-center text-muted-foreground py-8">{t('Searching...')}</div>
             )}
-            {!isSearching && searchResults.length === 0 && (
+            {!isSearching && (!searchResults || searchResults.length === 0) && (
               <div className="text-center text-muted-foreground py-8">
                 {t('No starter packs found')}
               </div>
             )}
-            <div className="grid gap-4">
-              {searchResults.map((list) => renderListCard(list, list.event.pubkey === pubkey))}
-            </div>
+            {searchResults && searchResults.length > 0 && (
+              <div className="grid gap-4">
+                {searchResults.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
+              </div>
+            )}
           </div>
         )}
 
         {/* My Lists */}
-        {!searchQuery && lists.length > 0 && (
+        {!searchQuery && lists && lists.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-bold">{t('My Lists')}</h2>
 
@@ -572,7 +577,7 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
             )}
 
-            {!isLoadingPublicLists && allPublicLists.length === 0 && (
+            {!isLoadingPublicLists && (!allPublicLists || allPublicLists.length === 0) && (
               <div className="text-center text-muted-foreground py-8">
                 <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>{t('No starter packs found')}</p>
@@ -580,9 +585,11 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
             )}
 
-            <div className="grid gap-4">
-              {allPublicLists.map((list) => renderListCard(list, list.event.pubkey === pubkey))}
-            </div>
+            {allPublicLists && allPublicLists.length > 0 && (
+              <div className="grid gap-4">
+                {allPublicLists.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
+              </div>
+            )}
           </div>
         )}
       </div>
