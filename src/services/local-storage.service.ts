@@ -91,6 +91,8 @@ class LocalStorageService {
   private zapOnReactions: boolean = false
   private onlyZapsMode: boolean = false
   private distractionFreeMode: TDistractionFreeMode = DISTRACTION_FREE_MODE.DRAIN_MY_TIME
+  private hideReadsInNavigation: boolean = false
+  private hideReadsInProfiles: boolean = false
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -354,6 +356,12 @@ class LocalStorageService {
     ) {
       this.distractionFreeMode = distractionFreeMode as TDistractionFreeMode
     }
+
+    this.hideReadsInNavigation =
+      window.localStorage.getItem(StorageKey.HIDE_READS_IN_NAVIGATION) === 'true'
+
+    this.hideReadsInProfiles =
+      window.localStorage.getItem(StorageKey.HIDE_READS_IN_PROFILES) === 'true'
 
     // Clean up deprecated data
     window.localStorage.removeItem(StorageKey.ACCOUNT_PROFILE_EVENT_MAP)
@@ -899,6 +907,24 @@ class LocalStorageService {
   setAIToolsConfig(config: TAIToolsConfig, pubkey?: string | null) {
     this.aiToolsConfigMap[pubkey ?? '_'] = config
     window.localStorage.setItem(StorageKey.AI_TOOLS_CONFIG_MAP, JSON.stringify(this.aiToolsConfigMap))
+  }
+
+  getHideReadsInNavigation() {
+    return this.hideReadsInNavigation
+  }
+
+  setHideReadsInNavigation(hide: boolean) {
+    this.hideReadsInNavigation = hide
+    window.localStorage.setItem(StorageKey.HIDE_READS_IN_NAVIGATION, hide.toString())
+  }
+
+  getHideReadsInProfiles() {
+    return this.hideReadsInProfiles
+  }
+
+  setHideReadsInProfiles(hide: boolean) {
+    this.hideReadsInProfiles = hide
+    window.localStorage.setItem(StorageKey.HIDE_READS_IN_PROFILES, hide.toString())
   }
 }
 

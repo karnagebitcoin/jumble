@@ -7,6 +7,7 @@ import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
@@ -25,6 +26,7 @@ export default function ProfileFeed({
 }) {
   const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
   const { showKinds } = useKindFilter()
+  const { hideReadsInProfiles } = useReadsVisibility()
   const [temporaryShowKinds, setTemporaryShowKinds] = useState(showKinds)
   const [listMode, setListMode] = useState<TNoteListMode>(() => storage.getNoteListMode())
   const [subRequests, setSubRequests] = useState<TFeedSubRequest[]>([])
@@ -32,19 +34,29 @@ export default function ProfileFeed({
   const tabs = useMemo(() => {
     const _tabs = [
       { value: 'posts', label: 'Notes' },
-      { value: 'postsAndReplies', label: 'Replies' },
-      { value: 'reads', label: 'Reads' }
+      { value: 'postsAndReplies', label: 'Replies' }
     ]
+
+    if (!hideReadsInProfiles) {
+      _tabs.push({ value: 'reads', label: 'Reads' })
+    }
 
     if (myPubkey && myPubkey !== pubkey) {
       _tabs.push({ value: 'you', label: 'YouTabName' })
     }
 
     return _tabs
-  }, [myPubkey, pubkey])
+  }, [myPubkey, pubkey, hideReadsInProfiles])
   const supportTouch = useMemo(() => isTouchDevice(), [])
   const noteListRef = useRef<TNoteListRef>(null)
   const articleListRef = useRef<TArticleListRef>(null)
+
+  useEffect(() => {
+    // If user is on reads tab and it gets hidden, switch to posts
+    if (listMode === 'reads' && hideReadsInProfiles) {
+      setListMode('posts')
+    }
+  }, [hideReadsInProfiles, listMode])
 
   useEffect(() => {
     const initPinnedEventIds = async () => {

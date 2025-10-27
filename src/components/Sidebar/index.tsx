@@ -1,6 +1,7 @@
 import Icon from '@/assets/Icon'
 import Logo from '@/assets/Logo'
 import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
+import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { cn } from '@/lib/utils'
 import AccountButton from './AccountButton'
@@ -17,6 +18,7 @@ import MultiColumnToggle from './MultiColumnToggle'
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
   const { compactSidebar } = useCompactSidebar()
+  const { hideReadsInNavigation } = useReadsVisibility()
 
   if (isSmallScreen) return null
 
@@ -34,7 +36,7 @@ export default function PrimaryPageSidebar() {
           <Logo className={cn(compactSidebar ? "hidden" : "max-xl:hidden")} />
         </div>
         <HomeButton />
-        <ReadsButton />
+        {!hideReadsInNavigation && <ReadsButton />}
         <RelaysButton />
         <NotificationsButton />
         <SearchButton />

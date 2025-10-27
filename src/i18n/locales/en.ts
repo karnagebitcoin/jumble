@@ -372,6 +372,9 @@ export default {
     MuteListNotFoundConfirmation:
       'Mute list not found. Do you want to create a new one? If you have muted users before, please DO NOT confirm as this operation will cause you to lose your previous mute list.',
     'Show NSFW content by default': 'Show NSFW content by default',
+    Reads: 'Reads',
+    'Hide reads in navigation': 'Hide reads in navigation',
+    'Hide reads in profiles': 'Hide reads in profiles',
     'Custom emoji management': 'Custom emoji management',
     'After changing emojis, you may need to refresh the page':
       'After changing emojis, you may need to refresh the page',

@@ -76,6 +76,8 @@ export const StorageKey = {
   DISTRACTION_FREE_MODE: 'distractionFreeMode',
   AI_SERVICE_CONFIG_MAP: 'aiServiceConfigMap',
   AI_TOOLS_CONFIG_MAP: 'aiToolsConfigMap',
+  HIDE_READS_IN_NAVIGATION: 'hideReadsInNavigation',
+  HIDE_READS_IN_PROFILES: 'hideReadsInProfiles',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated

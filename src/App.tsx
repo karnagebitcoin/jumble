@@ -24,6 +24,7 @@ import { NostrProvider } from '@/providers/NostrProvider'
 import { PageThemeProvider } from '@/providers/PageThemeProvider'
 import { PinListProvider } from '@/providers/PinListProvider'
 import { PrimaryColorProvider } from '@/providers/PrimaryColorProvider'
+import { ReadsVisibilityProvider } from '@/providers/ReadsVisibilityProvider'
 import { ReplyProvider } from '@/providers/ReplyProvider'
 import { ScreenSizeProvider } from '@/providers/ScreenSizeProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
@@ -49,8 +50,9 @@ export default function App(): JSX.Element {
                     <CompactSidebarProvider>
                       <DistractionFreeModeProvider>
                         <ContentPolicyProvider>
-                        <ScreenSizeProvider>
-                          <DeletedEventProvider>
+                          <ReadsVisibilityProvider>
+                            <ScreenSizeProvider>
+                              <DeletedEventProvider>
                             <NostrProvider>
                               <ZapProvider>
                                 <TranslationServiceProvider>
@@ -91,8 +93,9 @@ export default function App(): JSX.Element {
                                   </TranslationServiceProvider>
                               </ZapProvider>
                             </NostrProvider>
-                          </DeletedEventProvider>
-                          </ScreenSizeProvider>
+                              </DeletedEventProvider>
+                            </ScreenSizeProvider>
+                          </ReadsVisibilityProvider>
                         </ContentPolicyProvider>
                       </DistractionFreeModeProvider>
                     </CompactSidebarProvider>

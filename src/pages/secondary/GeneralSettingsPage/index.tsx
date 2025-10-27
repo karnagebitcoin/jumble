@@ -8,6 +8,7 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { cn, isSupportCheckConnectionType } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useDistractionFreeMode } from '@/providers/DistractionFreeModeProvider'
+import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import localStorageService from '@/services/local-storage.service'
 import { TDistractionFreeMode, TMediaAutoLoadPolicy } from '@/types'
@@ -36,6 +37,12 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
   } = useContentPolicy()
   const { hideUntrustedNotes, updateHideUntrustedNotes } = useUserTrust()
   const { distractionFreeMode, setDistractionFreeMode } = useDistractionFreeMode()
+  const {
+    hideReadsInNavigation,
+    setHideReadsInNavigation,
+    hideReadsInProfiles,
+    setHideReadsInProfiles
+  } = useReadsVisibility()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -183,6 +190,29 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             {t('Show NSFW content by default')}
           </Label>
           <Switch id="show-nsfw" checked={defaultShowNsfw} onCheckedChange={setDefaultShowNsfw} />
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3 pt-4">
+          <Label className="text-base font-semibold">{t('Reads')}</Label>
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-reads-in-navigation" className="text-base font-normal">
+            {t('Hide reads in navigation')}
+          </Label>
+          <Switch
+            id="hide-reads-in-navigation"
+            checked={hideReadsInNavigation}
+            onCheckedChange={setHideReadsInNavigation}
+          />
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-reads-in-profiles" className="text-base font-normal">
+            {t('Hide reads in profiles')}
+          </Label>
+          <Switch
+            id="hide-reads-in-profiles"
+            checked={hideReadsInProfiles}
+            onCheckedChange={setHideReadsInProfiles}
+          />
         </SettingItem>
         <SettingItem>
           <div>
