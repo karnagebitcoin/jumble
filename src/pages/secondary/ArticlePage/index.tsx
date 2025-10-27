@@ -71,9 +71,9 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
         <h1 className="text-4xl font-bold mb-6 select-text">{articleData.title}</h1>
 
         <div className="flex items-center gap-3 mb-6">
-          <UserAvatar pubkey={event.pubkey} className="w-10 h-10" />
+          <UserAvatar userId={event.pubkey} className="w-10 h-10" />
           <div className="flex-1">
-            <Username pubkey={event.pubkey} className="font-semibold" />
+            <Username userId={event.pubkey} className="font-semibold" />
             <div className="text-sm text-muted-foreground">
               <FormattedTimestamp timestamp={articleData.publishedAt} />
             </div>
