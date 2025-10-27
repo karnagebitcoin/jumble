@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2 } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2 } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -312,6 +312,63 @@ const ListsPage = forwardRef((_, ref) => {
     const pubkeys = Array.isArray(list?.pubkeys) ? list.pubkeys : []
     const memberCount = pubkeys.length
 
+    const handleFollowAllClick = async (e: React.MouseEvent) => {
+      e.stopPropagation()
+
+      if (!pubkey) {
+        checkLogin()
+        return
+      }
+
+      if (memberCount === 0) {
+        toast.error(t('No members to follow'))
+        return
+      }
+
+      // Ensure followings is an array
+      const currentFollowing = Array.isArray(followings) ? followings : []
+
+      // Filter out already followed pubkeys and self
+      const pubkeysToFollow = pubkeys.filter(
+        (pk) => pk && !currentFollowing.includes(pk) && pk !== pubkey
+      )
+
+      if (pubkeysToFollow.length === 0) {
+        toast.info(t('You are already following everyone in this list'))
+        return
+      }
+
+      const { unwrap } = toast.promise(
+        (async () => {
+          // Create a new follow list event with all the new follows at once
+          const followListEvent = await client.fetchFollowListEvent(pubkey)
+          const existingTags = followListEvent?.tags ?? []
+          const newTags = [...existingTags]
+
+          // Add new p tags for users to follow
+          pubkeysToFollow.forEach(pk => {
+            if (!newTags.some(tag => tag[0] === 'p' && tag[1] === pk)) {
+              newTags.push(['p', pk])
+            }
+          })
+
+          const newFollowListDraftEvent = createFollowListDraftEvent(
+            newTags,
+            followListEvent?.content
+          )
+
+          const newFollowListEvent = await publish(newFollowListDraftEvent)
+          await updateFollowListEvent(newFollowListEvent)
+        })(),
+        {
+          loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
+          success: t('Successfully followed {{count}} users!', { count: pubkeysToFollow.length }),
+          error: (err) => t('Failed to follow users: {{error}}', { error: err.message })
+        }
+      )
+      await unwrap()
+    }
+
     return (
       <Card
         key={`${list.event.pubkey}-${list.id}`}
@@ -376,28 +433,31 @@ const ListsPage = forwardRef((_, ref) => {
               </p>
             )}
 
-            {/* Profile avatars */}
-            {memberCount > 0 && (
-              <div className="flex items-center -space-x-2 overflow-hidden">
-                {pubkeys.slice(0, 5).map((pubkey, index) => (
-                  <div
-                    key={pubkey || `avatar-${index}`}
-                    className="ring-2 ring-background rounded-full"
-                    style={{ zIndex: 5 - index }}
-                  >
-                    <UserAvatar pubkey={pubkey} className="w-8 h-8" />
-                  </div>
-                ))}
-                {memberCount > 5 && (
-                  <div
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-muted ring-2 ring-background text-xs font-medium"
-                    style={{ zIndex: 0 }}
-                  >
-                    +{memberCount - 5}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                className="flex-1"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleListClick(`${list.event.pubkey}:${list.id}`)
+                }}
+              >
+                {t('View')}
+              </Button>
+              {!isOwned && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleFollowAllClick}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  {t('Follow All')}
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -596,11 +656,12 @@ const ListsPage = forwardRef((_, ref) => {
         {/* Discover Public Lists */}
         {!searchQuery && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">{t('Discover Starter Packs')}</h2>
-
             {isLoadingPublicLists && (
-              <div className="text-center text-muted-foreground py-8">
-                {t('Loading starter packs...')}
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <div className="text-center text-muted-foreground">
+                  {t('Loading starter packs...')}
+                </div>
               </div>
             )}
 
@@ -612,7 +673,7 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
             )}
 
-            {allPublicLists && allPublicLists.length > 0 && (
+            {!isLoadingPublicLists && allPublicLists && allPublicLists.length > 0 && (
               <div className="grid gap-4">
                 {allPublicLists.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
               </div>
