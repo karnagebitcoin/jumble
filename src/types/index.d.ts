@@ -181,6 +181,11 @@ export type TTranslationServiceConfig =
       server?: string
       api_key?: string
     }
+  | {
+      service: 'openrouter'
+      api_key?: string
+      model?: string
+    }
 
 export type TMediaUploadServiceConfig =
   | {

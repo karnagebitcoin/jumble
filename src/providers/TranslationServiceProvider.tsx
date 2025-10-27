@@ -1,6 +1,7 @@
 import { ExtendedKind } from '@/constants'
 import { getPollMetadataFromEvent } from '@/lib/event-metadata'
 import libreTranslate from '@/services/libre-translate.service'
+import openrouterTranslate from '@/services/openrouter-translate.service'
 import storage from '@/services/local-storage.service'
 import translation from '@/services/translation.service'
 import { TTranslationAccount, TTranslationServiceConfig } from '@/types'
@@ -8,6 +9,7 @@ import { Event, kinds } from 'nostr-tools'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNostr } from './NostrProvider'
+import { useAI } from './AIProvider'
 
 const translatedEventCache: Map<string, Event> = new Map()
 const translatedTextCache: Map<string, string> = new Map()
@@ -38,6 +40,7 @@ export function TranslationServiceProvider({ children }: { children: React.React
   const { i18n } = useTranslation()
   const [config, setConfig] = useState<TTranslationServiceConfig>({ service: 'jumble' })
   const { pubkey, startLogin } = useNostr()
+  const { serviceConfig: aiServiceConfig } = useAI()
   const [translatedEventIdSet, setTranslatedEventIdSet] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -73,9 +76,15 @@ export function TranslationServiceProvider({ children }: { children: React.React
   const translate = async (text: string, target: string): Promise<string> => {
     if (config.service === 'jumble') {
       return await translation.translate(text, target)
-    } else {
+    } else if (config.service === 'libre_translate') {
       return await libreTranslate.translate(text, target, config.server, config.api_key)
+    } else if (config.service === 'openrouter') {
+      // Use API key from config first, fall back to AI tools config
+      const apiKey = config.api_key || aiServiceConfig.apiKey
+      const model = config.model || aiServiceConfig.model
+      return await openrouterTranslate.translate(text, target, apiKey, model)
     }
+    throw new Error('Invalid translation service')
   }
 
   const translateText = async (text: string): Promise<string> => {
