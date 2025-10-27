@@ -6,14 +6,17 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists } from '@/providers/ListsProvider'
 import { useSearchProfiles } from '@/hooks/useSearchProfiles'
 import { useSecondaryPage } from '@/PageManager'
-import { Search, X, Upload } from 'lucide-react'
+import { Search, X, Upload, Plus, Check } from 'lucide-react'
 import { forwardRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import UserItem from '@/components/UserItem'
+import UserAvatar from '@/components/UserAvatar'
+import Username from '@/components/Username'
+import Nip05 from '@/components/Nip05'
 import { Card, CardContent } from '@/components/ui/card'
 import Uploader from '@/components/PostEditor/Uploader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type ListEditorPageProps = {
   index?: number
@@ -52,7 +55,6 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
     const handleAddPubkey = (pubkey: string) => {
       if (!selectedPubkeys.includes(pubkey)) {
         setSelectedPubkeys([...selectedPubkeys, pubkey])
-        setSearchQuery('')
       }
     }
 
@@ -197,36 +199,58 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
             {/* Search Results */}
             {searchQuery && (
               <Card>
-                <CardContent className="p-4 max-h-96 overflow-y-auto space-y-2">
-                  {isFetching && (
-                    <div className="text-center text-sm text-muted-foreground py-4">
-                      {t('Searching...')}
-                    </div>
-                  )}
-                  {!isFetching && profiles.length === 0 && (
-                    <div className="text-center text-sm text-muted-foreground py-4">
-                      {t('No users found')}
-                    </div>
-                  )}
-                  {!isFetching &&
-                    profiles.map((profile) => (
-                      <div
-                        key={profile.pubkey}
-                        className="hover:bg-accent rounded px-2 cursor-pointer transition-colors"
-                        onClick={() => handleAddPubkey(profile.pubkey)}
-                      >
-                        <UserItem
-                          pubkey={profile.pubkey}
-                          hideFollowButton={selectedPubkeys.includes(profile.pubkey)}
-                        />
-                        {selectedPubkeys.includes(profile.pubkey) && (
-                          <div className="text-xs text-muted-foreground ml-14 -mt-2 mb-2">
-                            {t('Already added')}
-                          </div>
-                        )}
+                <ScrollArea className="h-96">
+                  <CardContent className="p-4 space-y-2">
+                    {isFetching && (
+                      <div className="text-center text-sm text-muted-foreground py-4">
+                        {t('Searching...')}
                       </div>
-                    ))}
-                </CardContent>
+                    )}
+                    {!isFetching && profiles.length === 0 && (
+                      <div className="text-center text-sm text-muted-foreground py-4">
+                        {t('No users found')}
+                      </div>
+                    )}
+                    {!isFetching &&
+                      profiles.map((profile) => {
+                        const isAdded = selectedPubkeys.includes(profile.pubkey)
+                        return (
+                          <div
+                            key={profile.pubkey}
+                            className="flex items-center gap-2 hover:bg-accent rounded px-2 transition-colors"
+                          >
+                            <UserAvatar userId={profile.pubkey} className="shrink-0" />
+                            <div className="flex-1 overflow-hidden">
+                              <Username
+                                userId={profile.pubkey}
+                                className="font-semibold truncate max-w-full w-fit"
+                              />
+                              <Nip05 pubkey={profile.pubkey} />
+                            </div>
+                            <Button
+                              variant={isAdded ? "secondary" : "outline"}
+                              size="sm"
+                              onClick={() => handleAddPubkey(profile.pubkey)}
+                              disabled={isAdded}
+                              className="flex-shrink-0 h-8 px-3"
+                            >
+                              {isAdded ? (
+                                <>
+                                  <Check className="w-3 h-3 mr-1" />
+                                  {t('Added')}
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  {t('Add')}
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )
+                      })}
+                  </CardContent>
+                </ScrollArea>
               </Card>
             )}
           </div>
@@ -238,26 +262,33 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
                 {t('Members')} ({selectedPubkeys.length})
               </Label>
               <Card>
-                <CardContent className="p-4 max-h-96 overflow-y-auto space-y-2">
-                  {selectedPubkeys.map((pubkey) => (
-                    <div
-                      key={pubkey}
-                      className="flex items-center gap-2 hover:bg-accent rounded px-2 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <UserItem pubkey={pubkey} hideFollowButton />
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemovePubkey(pubkey)}
-                        className="flex-shrink-0"
+                <ScrollArea className="h-96">
+                  <CardContent className="p-4 space-y-2">
+                    {selectedPubkeys.map((pubkey) => (
+                      <div
+                        key={pubkey}
+                        className="flex items-center gap-2 hover:bg-accent rounded px-2 transition-colors"
                       >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
+                        <UserAvatar userId={pubkey} className="shrink-0" />
+                        <div className="flex-1 overflow-hidden">
+                          <Username
+                            userId={pubkey}
+                            className="font-semibold truncate max-w-full w-fit"
+                          />
+                          <Nip05 pubkey={pubkey} />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemovePubkey(pubkey)}
+                          className="flex-shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </ScrollArea>
               </Card>
             </div>
           )}
