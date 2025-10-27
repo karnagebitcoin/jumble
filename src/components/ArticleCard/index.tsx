@@ -4,12 +4,13 @@ import { FormattedTimestamp } from '@/components/FormattedTimestamp'
 import { SecondaryPageLink } from '@/PageManager'
 import { toArticle } from '@/lib/link'
 import { NostrEvent } from 'nostr-tools'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { nip19 } from 'nostr-tools'
 import { useFetchProfile } from '@/hooks'
 
 export default function ArticleCard({ event }: { event: NostrEvent }) {
   const { profile } = useFetchProfile(event.pubkey)
+  const [shouldShowImage, setShouldShowImage] = useState(true)
 
   const { title, summary, image, publishedAt, identifier } = useMemo(() => {
     const titleTag = event.tags.find((tag) => tag[0] === 'title')
@@ -26,6 +27,32 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
       identifier: dTag?.[1] || ''
     }
   }, [event])
+
+  // Check if the image URL returns an error status
+  useEffect(() => {
+    if (!image) {
+      setShouldShowImage(false)
+      return
+    }
+
+    // Make a HEAD request to check the status
+    fetch(image, { method: 'HEAD' })
+      .then((response) => {
+        // Check for x-status header or HTTP status
+        const xStatus = response.headers.get('x-status')
+        if (xStatus && parseInt(xStatus) >= 400) {
+          setShouldShowImage(false)
+        } else if (!response.ok) {
+          setShouldShowImage(false)
+        } else {
+          setShouldShowImage(true)
+        }
+      })
+      .catch(() => {
+        // If fetch fails, don't show the image
+        setShouldShowImage(false)
+      })
+  }, [image])
 
   const naddr = useMemo(() => {
     const dTag = event.tags.find((tag) => tag[0] === 'd')
@@ -74,13 +101,14 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
               <FormattedTimestamp timestamp={publishedAt} />
             </div>
           </div>
-          {image && (
+          {image && shouldShowImage && (
             <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden bg-muted">
               <img
                 src={image}
                 alt={title}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={() => setShouldShowImage(false)}
               />
             </div>
           )}
