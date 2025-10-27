@@ -38,6 +38,8 @@ const ListsPage = forwardRef((_, ref) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<TStarterPack[]>([])
+  const [allPublicLists, setAllPublicLists] = useState<TStarterPack[]>([])
+  const [isLoadingPublicLists, setIsLoadingPublicLists] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [listToDelete, setListToDelete] = useState<string | null>(null)
 
@@ -49,42 +51,64 @@ const ListsPage = forwardRef((_, ref) => {
     }
   }, [pubkey])
 
+  // Fetch public starter packs from relays on mount
   useEffect(() => {
-    const searchLists = async () => {
-      if (!searchQuery.trim()) {
-        setSearchResults([])
-        return
-      }
-
-      setIsSearching(true)
+    const fetchPublicLists = async () => {
+      setIsLoadingPublicLists(true)
       try {
-        // Search for starter pack events on relays
-        const events = await client.fetchEvents(BIG_RELAY_URLS.slice(0, 4), {
+        // Fetch recent starter pack events from big relays
+        const events = await client.fetchEvents(BIG_RELAY_URLS.slice(0, 5), {
           kinds: [ExtendedKind.STARTER_PACK],
-          limit: 20
+          limit: 50
         })
 
-        const parsedLists: TStarterPack[] = events
-          .map((event) => parseStarterPackEvent(event))
-          .filter((list) => {
-            const query = searchQuery.toLowerCase()
-            return (
-              list.title.toLowerCase().includes(query) ||
-              list.description?.toLowerCase().includes(query)
-            )
-          })
+        const parsedLists: TStarterPack[] = events.map((event) => parseStarterPackEvent(event))
 
-        setSearchResults(parsedLists)
+        // Sort by event creation time (most recent first)
+        parsedLists.sort((a, b) => b.event.created_at - a.event.created_at)
+
+        // Remove duplicates (same author + d-tag)
+        const uniqueLists = parsedLists.filter((list, index, self) =>
+          index === self.findIndex((l) =>
+            l.event.pubkey === list.event.pubkey && l.id === list.id
+          )
+        )
+
+        setAllPublicLists(uniqueLists)
       } catch (error) {
-        console.error('Failed to search lists:', error)
+        console.error('Failed to fetch public lists:', error)
       } finally {
-        setIsSearching(false)
+        setIsLoadingPublicLists(false)
       }
     }
 
-    const debounce = setTimeout(searchLists, 300)
+    fetchPublicLists()
+  }, [])
+
+  // Search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+
+    const searchInLists = () => {
+      const query = searchQuery.toLowerCase()
+      const filtered = allPublicLists.filter((list) => {
+        return (
+          list.title.toLowerCase().includes(query) ||
+          list.description?.toLowerCase().includes(query)
+        )
+      })
+      setSearchResults(filtered)
+      setIsSearching(false)
+    }
+
+    const debounce = setTimeout(searchInLists, 300)
     return () => clearTimeout(debounce)
-  }, [searchQuery])
+  }, [searchQuery, allPublicLists])
 
   const parseStarterPackEvent = (event: Event): TStarterPack => {
     const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
@@ -234,14 +258,20 @@ const ListsPage = forwardRef((_, ref) => {
       <div className="p-4 space-y-6">
         {/* Search Bar */}
         <div className="space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('Search starter packs...')}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('Search starter packs...')}
+                className="pl-9"
+              />
+            </div>
+            <Button onClick={handleCreateList} size="default">
+              <Plus className="w-4 h-4 mr-2" />
+              {t('Create')}
+            </Button>
           </div>
         </div>
 
@@ -264,15 +294,9 @@ const ListsPage = forwardRef((_, ref) => {
         )}
 
         {/* My Lists */}
-        {!searchQuery && (
+        {!searchQuery && lists.length > 0 && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">{t('My Lists')}</h2>
-              <Button onClick={handleCreateList} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                {t('Create List')}
-              </Button>
-            </div>
+            <h2 className="text-xl font-bold">{t('My Lists')}</h2>
 
             {isLoadingMyLists && (
               <div className="text-center text-muted-foreground py-8">
@@ -280,16 +304,33 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
             )}
 
-            {!isLoadingMyLists && lists.length === 0 && (
+            <div className="grid gap-4">
+              {lists.map((list) => renderListCard(list, true))}
+            </div>
+          </div>
+        )}
+
+        {/* Discover Public Lists */}
+        {!searchQuery && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">{t('Discover Starter Packs')}</h2>
+
+            {isLoadingPublicLists && (
+              <div className="text-center text-muted-foreground py-8">
+                {t('Loading starter packs...')}
+              </div>
+            )}
+
+            {!isLoadingPublicLists && allPublicLists.length === 0 && (
               <div className="text-center text-muted-foreground py-8">
                 <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>{t('No lists yet')}</p>
-                <p className="text-sm">{t('Create your first list to get started')}</p>
+                <p>{t('No starter packs found')}</p>
+                <p className="text-sm">{t('Try searching or create your own')}</p>
               </div>
             )}
 
             <div className="grid gap-4">
-              {lists.map((list) => renderListCard(list, true))}
+              {allPublicLists.map((list) => renderListCard(list, list.event.pubkey === pubkey))}
             </div>
           </div>
         )}
