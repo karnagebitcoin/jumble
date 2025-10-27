@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import NoteList from '@/components/NoteList'
+import ProfileList from '@/components/ProfileList'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { toEditList } from '@/lib/link'
-import { Edit, Pin, Users } from 'lucide-react'
+import { Edit, Pin, Users, Check, Copy, UserPlus, Loader } from 'lucide-react'
 import { forwardRef, useMemo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDeckView } from '@/providers/DeckViewProvider'
@@ -14,7 +16,8 @@ import { toast } from 'sonner'
 import { useNostr } from '@/providers/NostrProvider'
 import Username from '@/components/Username'
 import client from '@/services/client.service'
-import { Event } from 'nostr-tools'
+import { Event, nip19 } from 'nostr-tools'
+import { useFollowList } from '@/providers/FollowListProvider'
 
 type ListPageProps = {
   index?: number
@@ -27,9 +30,13 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const { lists, isLoading: isLoadingMyLists } = useLists()
   const { deckViewMode, pinColumn, pinnedColumns } = useDeckView()
   const { layoutMode } = useLayoutMode()
-  const { pubkey: myPubkey } = useNostr()
+  const { pubkey: myPubkey, checkLogin } = useNostr()
+  const { followings, follow } = useFollowList()
   const [externalList, setExternalList] = useState<TStarterPack | null>(null)
   const [isLoadingExternal, setIsLoadingExternal] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const [isFollowingAll, setIsFollowingAll] = useState(false)
+  const [activeTab, setActiveTab] = useState('notes')
 
   // Parse listId - could be "d-tag" or "pubkey:d-tag"
   const { ownerPubkey, dTag } = useMemo(() => {
@@ -99,6 +106,14 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     [pinnedColumns, listId]
   )
 
+  // Calculate unfollowed users
+  const unfollowedUsers = useMemo(() => {
+    if (!displayList || !myPubkey) return []
+    return displayList.pubkeys.filter(
+      (pubkey) => pubkey !== myPubkey && !followings.includes(pubkey)
+    )
+  }, [displayList, followings, myPubkey])
+
   const handleEdit = () => {
     if (isOwnList) {
       push(toEditList(dTag))
@@ -118,6 +133,58 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
       props: { listId, title: displayList?.title || 'List' }
     })
     toast.success(t('List pinned to deck view'))
+  }
+
+  const handleCopyLink = async () => {
+    if (!displayList || !ownerPubkey) return
+
+    try {
+      // Create naddr for the starter pack
+      const naddr = nip19.naddrEncode({
+        kind: ExtendedKind.STARTER_PACK,
+        pubkey: ownerPubkey,
+        identifier: dTag
+      })
+
+      const shareUrl = `${window.location.origin}/lists/${ownerPubkey}:${dTag}`
+      await navigator.clipboard.writeText(shareUrl)
+
+      setLinkCopied(true)
+      toast.success(t('Link copied to clipboard'))
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy link:', error)
+      toast.error(t('Failed to copy link'))
+    }
+  }
+
+  const handleFollowAll = async () => {
+    checkLogin(async () => {
+      if (unfollowedUsers.length === 0) {
+        toast.info(t('You are already following everyone in this list'))
+        return
+      }
+
+      setIsFollowingAll(true)
+      try {
+        let successCount = 0
+        for (const pubkey of unfollowedUsers) {
+          try {
+            await follow(pubkey)
+            successCount++
+          } catch (error) {
+            console.error(`Failed to follow ${pubkey}:`, error)
+          }
+        }
+        const word = successCount === 1 ? t('user') : t('users')
+        toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
+      } catch (error) {
+        console.error('Failed to follow all:', error)
+        toast.error(t('Failed to follow all users'))
+      } finally {
+        setIsFollowingAll(false)
+      }
+    })
   }
 
   const isLoading = isLoadingMyLists || isLoadingExternal
@@ -150,6 +217,14 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
       title={displayList.title}
       controls={
         <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="titlebar-icon"
+            onClick={handleCopyLink}
+            title={t('Copy Link')}
+          >
+            {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          </Button>
           {isMultiColumn && !isPinned && (
             <Button variant="ghost" size="titlebar-icon" onClick={handlePin} title={t('Pin to deck')}>
               <Pin className="w-4 h-4" />
@@ -173,10 +248,10 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
             />
           </div>
         )}
-        {!isOwnList && (
+        {!isOwnList && ownerPubkey && (
           <div className="text-sm text-muted-foreground mb-2">
-            <span>{t('by')}</span>{' '}
-            <Username pubkey={ownerPubkey || ''} className="font-medium" />
+            <span>{t('By')}: </span>
+            <Username pubkey={ownerPubkey} className="font-medium inline" />
           </div>
         )}
         <div className="text-sm text-muted-foreground mb-4">
@@ -200,12 +275,47 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
           )}
         </div>
       ) : (
-        <NoteList
-          filter={{
-            authors: displayList.pubkeys,
-            kinds: [1, 6]
-          }}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-2 mx-4" style={{ width: 'calc(100% - 2rem)' }}>
+            <TabsTrigger value="notes">{t('Notes')}</TabsTrigger>
+            <TabsTrigger value="people">{t('People')}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="notes" className="mt-0">
+            <NoteList
+              filter={{
+                authors: displayList.pubkeys,
+                kinds: [1, 6]
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="people" className="mt-0">
+            {myPubkey && unfollowedUsers.length > 0 && (
+              <div className="px-4 py-3 border-b">
+                <Button
+                  onClick={handleFollowAll}
+                  disabled={isFollowingAll}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {isFollowingAll ? (
+                    <>
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      {t('Following...')}
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      {t('Follow All ({{count}})', { count: unfollowedUsers.length })}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            <ProfileList pubkeys={displayList.pubkeys} />
+          </TabsContent>
+        </Tabs>
       )}
     </SecondaryPageLayout>
   )

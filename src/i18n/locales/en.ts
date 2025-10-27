@@ -571,6 +571,18 @@ export default {
     'Please login to view reads from people you follow': 'Please login to view reads from people you follow',
     'Follow some people to see their long-form articles here': 'Follow some people to see their long-form articles here',
     'No articles found': 'No articles found',
-    'Load More': 'Load More'
+    'Load More': 'Load More',
+    'Copy Link': 'Copy Link',
+    'Link copied to clipboard': 'Link copied to clipboard',
+    'Failed to copy link': 'Failed to copy link',
+    'By': 'By',
+    'People': 'People',
+    'Follow All ({{count}})': 'Follow All ({{count}})',
+    'Following...': 'Following...',
+    'You are already following everyone in this list': 'You are already following everyone in this list',
+    'Followed {{count}} {{word}}': 'Followed {{count}} {{word}}',
+    'user': 'user',
+    'users': 'users',
+    'Failed to follow all users': 'Failed to follow all users'
   }
 }
