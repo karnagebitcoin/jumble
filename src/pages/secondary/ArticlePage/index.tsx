@@ -71,7 +71,7 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={articleData.title} displayScrollToTopButton>
       <article className="px-4 pt-3 pb-8 max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6 select-text">{articleData.title}</h1>
+        <h1 className="text-3xl font-bold mb-6 select-text">{articleData.title}</h1>
 
         <div className="flex items-center gap-3 mb-6">
           <UserAvatar userId={event.pubkey} className="w-10 h-10" />
@@ -165,25 +165,25 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
                 <td {...props} className="px-4 py-2 border-t border-border" />
               ),
               h1: ({ node, ...props }) => (
-                <h1 {...props} className="text-4xl font-bold mt-8 mb-4" />
+                <h1 {...props} className="text-3xl font-bold mt-8 mb-4" />
               ),
               h2: ({ node, ...props }) => (
-                <h2 {...props} className="text-3xl font-bold mt-6 mb-3" />
+                <h2 {...props} className="text-2xl font-bold mt-6 mb-3" />
               ),
               h3: ({ node, ...props }) => (
-                <h3 {...props} className="text-2xl font-bold mt-5 mb-2" />
+                <h3 {...props} className="text-xl font-bold mt-5 mb-2" />
               ),
               h4: ({ node, ...props }) => (
-                <h4 {...props} className="text-xl font-bold mt-4 mb-2" />
+                <h4 {...props} className="text-lg font-bold mt-4 mb-2" />
               ),
               ul: ({ node, ...props }) => (
-                <ul {...props} className="list-disc list-inside my-4 space-y-2" />
+                <ul {...props} className="list-disc list-outside ml-6 my-4 space-y-2" />
               ),
               ol: ({ node, ...props }) => (
-                <ol {...props} className="list-decimal list-inside my-4 space-y-2" />
+                <ol {...props} className="list-decimal list-outside ml-6 my-4 space-y-2" />
               ),
               li: ({ node, ...props }) => (
-                <li {...props} className="ml-4" />
+                <li {...props} />
               ),
               p: ({ node, ...props }) => (
                 <p {...props} className="my-4 leading-relaxed" />
