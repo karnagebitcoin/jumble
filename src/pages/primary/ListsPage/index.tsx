@@ -30,14 +30,15 @@ import { Event, nip19 } from 'nostr-tools'
 import { TStarterPack } from '@/providers/ListsProvider'
 import NoteList from '@/components/NoteList'
 import { useFollowList } from '@/providers/FollowListProvider'
+import { createFollowListDraftEvent } from '@/lib/draft-event'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
   const layoutRef = useRef<TPageRef>(null)
-  const { pubkey, checkLogin } = useNostr()
+  const { pubkey, checkLogin, publish, updateFollowListEvent } = useNostr()
   const { push } = useSecondaryPage()
   const { lists, isLoading: isLoadingMyLists, deleteList, fetchLists } = useLists()
-  const { followList, followingPubkeys } = useFollowList()
+  const { followings } = useFollowList()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<TStarterPack[]>([])
@@ -227,10 +228,10 @@ const ListsPage = forwardRef((_, ref) => {
       return
     }
 
-    // Ensure followingPubkeys is an array
-    const currentFollowing = Array.isArray(followingPubkeys) ? followingPubkeys : []
+    // Ensure followings is an array
+    const currentFollowing = Array.isArray(followings) ? followings : []
 
-    // Filter out already followed pubkeys
+    // Filter out already followed pubkeys and self
     const pubkeysToFollow = listPubkeys.filter(
       (pk) => pk && !currentFollowing.includes(pk) && pk !== pubkey
     )
@@ -241,7 +242,27 @@ const ListsPage = forwardRef((_, ref) => {
     }
 
     const { unwrap } = toast.promise(
-      followList([...currentFollowing, ...pubkeysToFollow]),
+      (async () => {
+        // Create a new follow list event with all the new follows at once
+        const followListEvent = await client.fetchFollowListEvent(pubkey)
+        const existingTags = followListEvent?.tags ?? []
+        const newTags = [...existingTags]
+
+        // Add new p tags for users to follow
+        pubkeysToFollow.forEach(pk => {
+          if (!newTags.some(tag => tag[0] === 'p' && tag[1] === pk)) {
+            newTags.push(['p', pk])
+          }
+        })
+
+        const newFollowListDraftEvent = createFollowListDraftEvent(
+          newTags,
+          followListEvent?.content
+        )
+
+        const newFollowListEvent = await publish(newFollowListDraftEvent)
+        await updateFollowListEvent(newFollowListEvent)
+      })(),
       {
         loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
         success: t('Successfully followed {{count}} users!', { count: pubkeysToFollow.length }),
