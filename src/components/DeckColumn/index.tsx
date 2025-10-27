@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { TPinnedColumn, TFeedSubRequest } from '@/types'
-import { X, Compass, Bell, UserRound, Search, Server, Bookmark, BookOpen } from 'lucide-react'
+import { X, Compass, Bell, UserRound, Search, Server, Bookmark, BookOpen, List, Users } from 'lucide-react'
 import { useRef, useEffect, useState } from 'react'
 import Explore from '@/components/Explore'
 import NotificationList from '@/components/NotificationList'
@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { useFetchProfile, useFetchFollowings } from '@/hooks'
 import Username from '../Username'
 import { useNostr } from '@/providers/NostrProvider'
+import { useLists } from '@/providers/ListsProvider'
 import client from '@/services/client.service'
 
 export default function DeckColumn({ column }: { column: TPinnedColumn }) {
@@ -117,6 +118,16 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
     case 'reads':
       titlebar = <ReadsTitlebar onClose={() => unpinColumn(column.id)} />
       content = <ReadsContent />
+      break
+    case 'lists':
+      titlebar = <ListsIndexTitlebar onClose={() => unpinColumn(column.id)} />
+      content = <ListsIndexContent />
+      break
+    case 'list':
+      if (column.props?.listId) {
+        titlebar = <ListTitlebar listId={column.props.listId} title={column.props.title} onClose={() => unpinColumn(column.id)} />
+        content = <ListContent listId={column.props.listId} />
+      }
       break
   }
 
@@ -337,4 +348,114 @@ function ReadsContent() {
   }
 
   return <ArticleList subRequests={subRequests} />
+}
+
+function ListsIndexTitlebar({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <List className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {t('Lists')}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function ListTitlebar({ listId, title, onClose }: { listId: string; title?: string; onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <Users className="shrink-0" />
+        <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
+          {title || 'List'}
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
+        <X className="size-4" />
+      </Button>
+    </div>
+  )
+}
+
+function ListsIndexContent() {
+  const { t } = useTranslation()
+  const { lists, isLoading } = useLists()
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 px-4">
+        <div className="text-muted-foreground">{t('Loading lists...')}</div>
+      </div>
+    )
+  }
+
+  if (lists.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4 px-4">
+        <Users className="w-16 h-16 text-muted-foreground opacity-50" />
+        <div className="text-muted-foreground text-center">{t('No lists yet')}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-4 pt-4">
+      {/* Import the ListsIndexPage content here or create a reusable component */}
+      <div className="text-muted-foreground">{t('Lists index view in deck')}</div>
+    </div>
+  )
+}
+
+function ListContent({ listId }: { listId: string }) {
+  const { t } = useTranslation()
+  const { lists, isLoading } = useLists()
+  const list = lists.find((l) => l.id === listId)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">{t('Loading list...')}</div>
+      </div>
+    )
+  }
+
+  if (!list) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Users className="w-16 h-16 text-muted-foreground opacity-50" />
+        <div className="text-muted-foreground">{t('List not found')}</div>
+      </div>
+    )
+  }
+
+  if (list.pubkeys.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Users className="w-16 h-16 text-muted-foreground opacity-50" />
+        <div className="text-muted-foreground">{t('No members in this list')}</div>
+      </div>
+    )
+  }
+
+  return (
+    <NormalFeed
+      subRequests={[
+        {
+          urls: BIG_RELAY_URLS,
+          filter: {
+            authors: list.pubkeys,
+            kinds: [1, 6]
+          }
+        }
+      ]}
+      showRelayCloseReason
+      isInDeckView={true}
+    />
+  )
 }

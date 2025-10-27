@@ -9,6 +9,7 @@ import { cn, isSupportCheckConnectionType } from '@/lib/utils'
 import { useContentPolicy } from '@/providers/ContentPolicyProvider'
 import { useDistractionFreeMode } from '@/providers/DistractionFreeModeProvider'
 import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
+import { useListsVisibility } from '@/providers/ListsVisibilityProvider'
 import { useUserTrust } from '@/providers/UserTrustProvider'
 import localStorageService from '@/services/local-storage.service'
 import { TDistractionFreeMode, TMediaAutoLoadPolicy } from '@/types'
@@ -43,6 +44,7 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
     hideReadsInProfiles,
     setHideReadsInProfiles
   } = useReadsVisibility()
+  const { hideListsInNavigation, setHideListsInNavigation } = useListsVisibility()
 
   const handleLanguageChange = (value: TLanguage) => {
     i18n.changeLanguage(value)
@@ -212,6 +214,19 @@ const GeneralSettingsPage = forwardRef(({ index }: { index?: number }, ref) => {
             id="hide-reads-in-profiles"
             checked={hideReadsInProfiles}
             onCheckedChange={setHideReadsInProfiles}
+          />
+        </SettingItem>
+        <SettingItem className="flex-col items-start gap-3 pt-4">
+          <Label className="text-base font-semibold">{t('Lists')}</Label>
+        </SettingItem>
+        <SettingItem>
+          <Label htmlFor="hide-lists-in-navigation" className="text-base font-normal">
+            {t('Hide lists in navigation')}
+          </Label>
+          <Switch
+            id="hide-lists-in-navigation"
+            checked={hideListsInNavigation}
+            onCheckedChange={setHideListsInNavigation}
           />
         </SettingItem>
         <SettingItem>

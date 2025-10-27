@@ -22,6 +22,9 @@ import SettingsPage from './pages/secondary/SettingsPage'
 import TranslationPage from './pages/secondary/TranslationPage'
 import WalletPage from './pages/secondary/WalletPage'
 import WidgetsSettingsPage from './pages/secondary/WidgetsSettingsPage'
+import ListsIndexPage from './pages/secondary/ListsIndexPage'
+import ListPage from './pages/secondary/ListPage'
+import ListEditorPage from './pages/secondary/ListEditorPage'
 
 const ROUTES = [
   { path: '/notes', element: <NoteListPage /> },
@@ -45,7 +48,11 @@ const ROUTES = [
   { path: '/settings/ai-tools', element: <AIToolsPage /> },
   { path: '/profile-editor', element: <ProfileEditorPage /> },
   { path: '/mutes', element: <MuteListPage /> },
-  { path: '/rizful', element: <RizfulPage /> }
+  { path: '/rizful', element: <RizfulPage /> },
+  { path: '/lists', element: <ListsIndexPage /> },
+  { path: '/lists/create', element: <ListEditorPage /> },
+  { path: '/lists/:id', element: <ListPage listId="" /> },
+  { path: '/lists/:id/edit', element: <ListEditorPage listId="" /> }
 ]
 
 export const routes = ROUTES.map(({ path, element }) => ({

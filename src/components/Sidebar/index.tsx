@@ -2,6 +2,7 @@ import Icon from '@/assets/Icon'
 import Logo from '@/assets/Logo'
 import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
+import { useListsVisibility } from '@/providers/ListsVisibilityProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { cn } from '@/lib/utils'
 import AccountButton from './AccountButton'
@@ -11,6 +12,7 @@ import NotificationsButton from './NotificationButton'
 import PostButton from './PostButton'
 import ProfileButton from './ProfileButton'
 import ReadsButton from './ReadsButton'
+import ListsButton from './ListsButton'
 import SearchButton from './SearchButton'
 import SettingsButton from './SettingsButton'
 import MultiColumnToggle from './MultiColumnToggle'
@@ -19,6 +21,7 @@ export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
   const { compactSidebar } = useCompactSidebar()
   const { hideReadsInNavigation } = useReadsVisibility()
+  const { hideListsInNavigation } = useListsVisibility()
 
   if (isSmallScreen) return null
 
@@ -37,6 +40,7 @@ export default function PrimaryPageSidebar() {
         </div>
         <HomeButton />
         {!hideReadsInNavigation && <ReadsButton />}
+        {!hideListsInNavigation && <ListsButton />}
         <RelaysButton />
         <NotificationsButton />
         <SearchButton />
