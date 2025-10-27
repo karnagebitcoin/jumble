@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2, Star, Pin } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2, Star, Pin, Check } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -59,6 +59,7 @@ const ListsPage = forwardRef((_, ref) => {
   const [favoriteLists, setFavoriteLists] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState('notes')
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set())
+  const [followedLists, setFollowedLists] = useState<Set<string>>(new Set())
 
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -69,8 +70,8 @@ const ListsPage = forwardRef((_, ref) => {
   }, [pubkey])
 
   useEffect(() => {
-    setFavoriteLists(localStorageService.getFavoriteLists())
-  }, [])
+    setFavoriteLists(localStorageService.getFavoriteLists(pubkey))
+  }, [pubkey])
 
   // Fetch public starter packs from relays on mount
   useEffect(() => {
@@ -256,6 +257,8 @@ const ListsPage = forwardRef((_, ref) => {
       return
     }
 
+    const listKey = `${selectedList.event.pubkey}:${selectedList.id}`
+
     const { unwrap } = toast.promise(
       (async () => {
         // Create a new follow list event with all the new follows at once
@@ -277,6 +280,9 @@ const ListsPage = forwardRef((_, ref) => {
 
         const newFollowListEvent = await publish(newFollowListDraftEvent)
         await updateFollowListEvent(newFollowListEvent)
+
+        // Mark list as followed
+        setFollowedLists(prev => new Set(prev).add(listKey))
       })(),
       {
         loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
@@ -324,18 +330,18 @@ const ListsPage = forwardRef((_, ref) => {
 
   const toggleFavorite = (e: React.MouseEvent, listKey: string) => {
     e.stopPropagation()
-    const isFavorite = localStorageService.isFavoriteList(listKey)
+    const isFavorite = localStorageService.isFavoriteList(listKey, pubkey)
 
     if (isFavorite) {
-      localStorageService.removeFavoriteList(listKey)
+      localStorageService.removeFavoriteList(listKey, pubkey)
       toast.success(t('Removed from favorites'))
     } else {
-      localStorageService.addFavoriteList(listKey)
+      localStorageService.addFavoriteList(listKey, pubkey)
       toast.success(t('Added to favorites'))
     }
 
     // Update the state immediately to reflect the change
-    setFavoriteLists(localStorageService.getFavoriteLists())
+    setFavoriteLists(localStorageService.getFavoriteLists(pubkey))
   }
 
   const renderListCard = (list: TStarterPack, isOwned: boolean = false) => {
@@ -396,6 +402,9 @@ const ListsPage = forwardRef((_, ref) => {
 
           const newFollowListEvent = await publish(newFollowListDraftEvent)
           await updateFollowListEvent(newFollowListEvent)
+
+          // Mark list as followed
+          setFollowedLists(prev => new Set(prev).add(listKey))
         })(),
         {
           loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
@@ -462,13 +471,20 @@ const ListsPage = forwardRef((_, ref) => {
               <div className="flex gap-1 flex-shrink-0">
                 {!isOwned && (
                   <Button
-                    variant="outline"
+                    variant={followedLists.has(listKey) ? "default" : "outline"}
                     size="sm"
                     onClick={handleFollowAllClick}
-                    title={t('Follow all members')}
+                    title={followedLists.has(listKey) ? t('Followed all members') : t('Follow all members')}
                     className="text-xs px-2 h-8 whitespace-nowrap"
                   >
-                    {t('Follow all')}
+                    {followedLists.has(listKey) ? (
+                      <>
+                        <Check className="w-3 h-3 mr-1" />
+                        {t('Followed')}
+                      </>
+                    ) : (
+                      t('Follow all')
+                    )}
                   </Button>
                 )}
                 {isMultiColumn && (
@@ -548,6 +564,7 @@ const ListsPage = forwardRef((_, ref) => {
     const pubkeys = Array.isArray(selectedList?.pubkeys) ? selectedList.pubkeys : []
     const memberCount = pubkeys.length
     const validPubkeys = pubkeys.filter(pk => pk && typeof pk === 'string' && pk.length > 0)
+    const selectedListKey = `${selectedList.event.pubkey}:${selectedList.id}`
 
     content = (
       <div className="flex flex-col h-full">
@@ -578,13 +595,22 @@ const ListsPage = forwardRef((_, ref) => {
                   <Star className={`w-4 h-4 ${favoriteLists.includes(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} />
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={followedLists.has(selectedListKey) ? "default" : "outline"}
                   size="sm"
                   onClick={handleFollowAll}
                   disabled={!pubkey}
                 >
-                  <UserPlus className="w-4 h-4 mr-1" />
-                  {t('Follow All')}
+                  {followedLists.has(selectedListKey) ? (
+                    <>
+                      <Check className="w-4 h-4 mr-1" />
+                      {t('Followed')}
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      {t('Follow All')}
+                    </>
+                  )}
                 </Button>
                 <Button
                   variant="outline"

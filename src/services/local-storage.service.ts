@@ -93,7 +93,7 @@ class LocalStorageService {
   private distractionFreeMode: TDistractionFreeMode = DISTRACTION_FREE_MODE.DRAIN_MY_TIME
   private hideReadsInNavigation: boolean = false
   private hideReadsInProfiles: boolean = false
-  private favoriteLists: string[] = []
+  private favoriteListsMap: Record<string, string[]> = {}
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -364,9 +364,19 @@ class LocalStorageService {
     this.hideReadsInProfiles =
       window.localStorage.getItem(StorageKey.HIDE_READS_IN_PROFILES) === 'true'
 
-    const favoriteListsStr = window.localStorage.getItem(StorageKey.FAVORITE_LISTS)
-    if (favoriteListsStr) {
-      this.favoriteLists = JSON.parse(favoriteListsStr)
+    const favoriteListsMapStr = window.localStorage.getItem(StorageKey.FAVORITE_LISTS)
+    if (favoriteListsMapStr) {
+      try {
+        const parsed = JSON.parse(favoriteListsMapStr)
+        // Handle migration from old array format to new map format
+        if (Array.isArray(parsed)) {
+          this.favoriteListsMap = { _global: parsed }
+        } else {
+          this.favoriteListsMap = parsed
+        }
+      } catch {
+        this.favoriteListsMap = {}
+      }
     }
 
     // Clean up deprecated data
@@ -933,24 +943,31 @@ class LocalStorageService {
     window.localStorage.setItem(StorageKey.HIDE_READS_IN_PROFILES, hide.toString())
   }
 
-  getFavoriteLists() {
-    return this.favoriteLists
+  getFavoriteLists(pubkey?: string | null) {
+    const key = pubkey || '_global'
+    return this.favoriteListsMap[key] || []
   }
 
-  addFavoriteList(listKey: string) {
-    if (!this.favoriteLists.includes(listKey)) {
-      this.favoriteLists = [...this.favoriteLists, listKey]
-      window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteLists))
+  addFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    if (!currentFavorites.includes(listKey)) {
+      this.favoriteListsMap[key] = [...currentFavorites, listKey]
+      window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteListsMap))
     }
   }
 
-  removeFavoriteList(listKey: string) {
-    this.favoriteLists = this.favoriteLists.filter((key) => key !== listKey)
-    window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteLists))
+  removeFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    this.favoriteListsMap[key] = currentFavorites.filter((k) => k !== listKey)
+    window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteListsMap))
   }
 
-  isFavoriteList(listKey: string) {
-    return this.favoriteLists.includes(listKey)
+  isFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    return currentFavorites.includes(listKey)
   }
 }
 
