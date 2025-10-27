@@ -79,6 +79,7 @@ export const StorageKey = {
   HIDE_READS_IN_NAVIGATION: 'hideReadsInNavigation',
   HIDE_READS_IN_PROFILES: 'hideReadsInProfiles',
   HIDE_LISTS_IN_NAVIGATION: 'hideListsInNavigation',
+  FAVORITE_LISTS: 'favoriteLists',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated

@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2 } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2, Star } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -31,6 +31,9 @@ import { TStarterPack } from '@/providers/ListsProvider'
 import NoteList from '@/components/NoteList'
 import { useFollowList } from '@/providers/FollowListProvider'
 import { createFollowListDraftEvent } from '@/lib/draft-event'
+import localStorageService from '@/services/local-storage.service'
+import ProfileList from '@/components/ProfileList'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
@@ -48,6 +51,8 @@ const ListsPage = forwardRef((_, ref) => {
   const [listToDelete, setListToDelete] = useState<string | null>(null)
   const [selectedList, setSelectedList] = useState<TStarterPack | null>(null)
   const [isLoadingSelectedList, setIsLoadingSelectedList] = useState(false)
+  const [favoriteLists, setFavoriteLists] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState('notes')
 
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -56,6 +61,10 @@ const ListsPage = forwardRef((_, ref) => {
       fetchLists()
     }
   }, [pubkey])
+
+  useEffect(() => {
+    setFavoriteLists(localStorageService.getFavoriteLists())
+  }, [])
 
   // Fetch public starter packs from relays on mount
   useEffect(() => {
@@ -307,10 +316,27 @@ const ListsPage = forwardRef((_, ref) => {
     }
   }
 
+  const toggleFavorite = (e: React.MouseEvent, listKey: string) => {
+    e.stopPropagation()
+    const isFavorite = localStorageService.isFavoriteList(listKey)
+
+    if (isFavorite) {
+      localStorageService.removeFavoriteList(listKey)
+      toast.success(t('Removed from favorites'))
+    } else {
+      localStorageService.addFavoriteList(listKey)
+      toast.success(t('Added to favorites'))
+    }
+
+    setFavoriteLists(localStorageService.getFavoriteLists())
+  }
+
   const renderListCard = (list: TStarterPack, isOwned: boolean = false) => {
     // Ensure we have a valid pubkeys array
     const pubkeys = Array.isArray(list?.pubkeys) ? list.pubkeys : []
     const memberCount = pubkeys.length
+    const listKey = `${list.event.pubkey}:${list.id}`
+    const isFavorite = localStorageService.isFavoriteList(listKey)
 
     const handleFollowAllClick = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -404,26 +430,36 @@ const ListsPage = forwardRef((_, ref) => {
                   )}
                 </div>
               </div>
-              {isOwned && (
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => handleEditList(e, list.id)}
-                    title={t('Edit')}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => handleDeleteList(e, list.id)}
-                    title={t('Delete')}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+              <div className="flex gap-1 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => toggleFavorite(e, listKey)}
+                  title={isFavorite ? t('Remove from favorites') : t('Add to favorites')}
+                >
+                  <Star className={`w-4 h-4 ${isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                </Button>
+                {isOwned && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleEditList(e, list.id)}
+                      title={t('Edit')}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleDeleteList(e, list.id)}
+                      title={t('Delete')}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -562,18 +598,41 @@ const ListsPage = forwardRef((_, ref) => {
               )}
             </div>
           ) : (
-            <NoteList
-              subRequests={[
-                {
-                  urls: BIG_RELAY_URLS,
-                  filter: {
-                    authors: validPubkeys,
-                    kinds: [1, 6]
-                  }
-                }
-              ]}
-              showKinds={[1, 6]}
-            />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="border-b px-4">
+                <TabsList className="w-full justify-start h-auto p-0 bg-transparent">
+                  <TabsTrigger
+                    value="notes"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  >
+                    {t('Notes')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="people"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  >
+                    {t('People')} ({memberCount})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="notes" className="mt-0">
+                <NoteList
+                  subRequests={[
+                    {
+                      urls: BIG_RELAY_URLS,
+                      filter: {
+                        authors: validPubkeys,
+                        kinds: [1, 6]
+                      }
+                    }
+                  ]}
+                  showKinds={[1, 6]}
+                />
+              </TabsContent>
+              <TabsContent value="people" className="mt-0">
+                <ProfileList pubkeys={validPubkeys} />
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </div>
@@ -633,6 +692,31 @@ const ListsPage = forwardRef((_, ref) => {
                 {searchResults.map((list) => renderListCard(list, list?.event?.pubkey === pubkey))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Favorites */}
+        {!searchQuery && favoriteLists.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">{t('Favorites')}</h2>
+            <div className="grid gap-4">
+              {favoriteLists.map((listKey) => {
+                const [pubkeyPart, idPart] = listKey.split(':')
+                // Check if it's in my lists
+                const ownList = lists.find((l) => l.id === idPart && l.event.pubkey === pubkeyPart)
+                if (ownList) {
+                  return renderListCard(ownList, true)
+                }
+                // Check if it's in public lists
+                const publicList = allPublicLists.find(
+                  (l) => l.id === idPart && l.event.pubkey === pubkeyPart
+                )
+                if (publicList) {
+                  return renderListCard(publicList, false)
+                }
+                return null
+              }).filter(Boolean)}
+            </div>
           </div>
         )}
 
