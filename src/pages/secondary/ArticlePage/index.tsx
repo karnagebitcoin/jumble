@@ -14,6 +14,8 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import { remarkNostrLinks, nostrSanitizeSchema } from '@/lib/markdown'
+import { EmbeddedNote } from '@/components/Embedded/EmbeddedNote'
+import { nip19 } from 'nostr-tools'
 
 const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
@@ -132,16 +134,43 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
             remarkPlugins={[remarkGfm, remarkNostrLinks]}
             rehypePlugins={[rehypeRaw, [rehypeSanitize, nostrSanitizeSchema]]}
             components={{
-              a: ({ node, ...props }) => {
-                const isExternal = props.href?.startsWith('http')
-                const isNostr = props.href?.startsWith('nostr:') || props.href?.startsWith('#/')
+              a: ({ node, href, children, ...props }) => {
+                // Check if this is a Nostr note link
+                if (href?.startsWith('#/note/')) {
+                  const noteId = href.replace('#/note/', '')
+
+                  // Check if it's a note1 or nevent1 identifier
+                  if (noteId.startsWith('note1') || noteId.startsWith('nevent1')) {
+                    try {
+                      // Decode to validate it's a proper note identifier
+                      const decoded = nip19.decode(noteId)
+
+                      if (decoded.type === 'note' || decoded.type === 'nevent') {
+                        // Render as embedded note
+                        return (
+                          <div className="my-6 not-prose">
+                            <EmbeddedNote noteId={noteId} />
+                          </div>
+                        )
+                      }
+                    } catch (e) {
+                      console.error('Failed to decode note identifier:', e)
+                    }
+                  }
+                }
+
+                // Regular link handling
+                const isExternal = href?.startsWith('http')
                 return (
                   <a
                     {...props}
+                    href={href}
                     target={isExternal ? "_blank" : undefined}
                     rel={isExternal ? "noopener noreferrer" : undefined}
                     className="text-primary hover:underline break-words"
-                  />
+                  >
+                    {children}
+                  </a>
                 )
               },
               img: ({ node, src, alt, ...props }) => {
