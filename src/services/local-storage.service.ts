@@ -939,7 +939,7 @@ class LocalStorageService {
 
   addFavoriteList(listKey: string) {
     if (!this.favoriteLists.includes(listKey)) {
-      this.favoriteLists.push(listKey)
+      this.favoriteLists = [...this.favoriteLists, listKey]
       window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteLists))
     }
   }
