@@ -1,21 +1,17 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { useAI } from '@/providers/AIProvider'
+import storage from '@/services/local-storage.service'
+import { useNostr } from '@/providers/NostrProvider'
 import { useTranslationService } from '@/providers/TranslationServiceProvider'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const DEFAULT_MODEL = 'google/gemini-2.0-flash-001'
+
 export default function OpenRouter() {
   const { t } = useTranslation()
   const { config, updateConfig } = useTranslationService()
-  const { serviceConfig: aiServiceConfig } = useAI()
+  const { pubkey } = useNostr()
   const [apiKey, setApiKey] = useState(
     config.service === 'openrouter' ? (config.api_key ?? '') : ''
   )
@@ -24,15 +20,22 @@ export default function OpenRouter() {
   )
   const initialized = useRef(false)
 
+  // Get AI config from storage
+  const aiServiceConfig = storage.getAIServiceConfig(pubkey)
+
   // Pre-populate from AI tools if available
   useEffect(() => {
     if (config.service === 'openrouter' && !apiKey && aiServiceConfig.apiKey) {
       setApiKey(aiServiceConfig.apiKey)
     }
-    if (config.service === 'openrouter' && !model && aiServiceConfig.model) {
-      setModel(aiServiceConfig.model)
+    if (config.service === 'openrouter' && !model) {
+      if (aiServiceConfig.model) {
+        setModel(aiServiceConfig.model)
+      } else {
+        setModel(DEFAULT_MODEL)
+      }
     }
-  }, [aiServiceConfig])
+  }, [])
 
   useEffect(() => {
     if (!initialized.current) {
@@ -49,18 +52,22 @@ export default function OpenRouter() {
 
   const hasAIConfig = !!(aiServiceConfig.apiKey && aiServiceConfig.model)
 
+  const usingAIKey = !apiKey && hasAIConfig
+  const usingAIModel = !model && aiServiceConfig.model
+  const usingDefaultModel = !model && !aiServiceConfig.model
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="openrouter-api-key" className="text-base">
-          API Key {hasAIConfig && !apiKey && <span className="text-muted-foreground text-sm">(Using AI Tools key)</span>}
+          API Key {usingAIKey && <span className="text-muted-foreground text-sm">(Using AI Tools key)</span>}
         </Label>
         <Input
           id="openrouter-api-key"
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          placeholder={hasAIConfig && !apiKey ? 'Using AI Tools API key' : 'Enter OpenRouter API Key'}
+          placeholder={usingAIKey ? 'Using AI Tools API key' : 'Enter OpenRouter API Key'}
         />
         {!apiKey && !hasAIConfig && (
           <p className="text-sm text-muted-foreground">
@@ -70,18 +77,25 @@ export default function OpenRouter() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="openrouter-model" className="text-base">
-          Model {hasAIConfig && !model && <span className="text-muted-foreground text-sm">(Using AI Tools model)</span>}
+          Model {usingAIModel && <span className="text-muted-foreground text-sm">(Using AI Tools model)</span>}
+          {usingDefaultModel && <span className="text-muted-foreground text-sm">(Default: {DEFAULT_MODEL})</span>}
         </Label>
         <Input
           id="openrouter-model"
           type="text"
           value={model}
           onChange={(e) => setModel(e.target.value)}
-          placeholder={hasAIConfig && !model ? 'Using AI Tools model' : 'e.g., anthropic/claude-3.5-sonnet'}
+          placeholder={
+            usingAIModel
+              ? `Using AI Tools model: ${aiServiceConfig.model}`
+              : usingDefaultModel
+              ? `Default: ${DEFAULT_MODEL}`
+              : 'e.g., anthropic/claude-3.5-sonnet'
+          }
         />
-        {!model && !hasAIConfig && (
+        {!hasAIConfig && (
           <p className="text-sm text-muted-foreground">
-            You can configure a model in AI Tools settings or enter one here
+            Default model is {DEFAULT_MODEL}. You can change it here or configure in AI Tools settings.
           </p>
         )}
       </div>

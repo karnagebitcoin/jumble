@@ -9,7 +9,6 @@ import { Event, kinds } from 'nostr-tools'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNostr } from './NostrProvider'
-import { useAI } from './AIProvider'
 
 const translatedEventCache: Map<string, Event> = new Map()
 const translatedTextCache: Map<string, string> = new Map()
@@ -40,7 +39,6 @@ export function TranslationServiceProvider({ children }: { children: React.React
   const { i18n } = useTranslation()
   const [config, setConfig] = useState<TTranslationServiceConfig>({ service: 'jumble' })
   const { pubkey, startLogin } = useNostr()
-  const { serviceConfig: aiServiceConfig } = useAI()
   const [translatedEventIdSet, setTranslatedEventIdSet] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -80,8 +78,9 @@ export function TranslationServiceProvider({ children }: { children: React.React
       return await libreTranslate.translate(text, target, config.server, config.api_key)
     } else if (config.service === 'openrouter') {
       // Use API key from config first, fall back to AI tools config
+      const aiServiceConfig = storage.getAIServiceConfig(pubkey)
       const apiKey = config.api_key || aiServiceConfig.apiKey
-      const model = config.model || aiServiceConfig.model
+      const model = config.model || aiServiceConfig.model || 'google/gemini-2.0-flash-001'
       return await openrouterTranslate.translate(text, target, apiKey, model)
     }
     throw new Error('Invalid translation service')
