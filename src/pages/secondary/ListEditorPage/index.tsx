@@ -6,13 +6,11 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists } from '@/providers/ListsProvider'
 import { useSearchProfiles } from '@/hooks/useSearchProfiles'
 import { useSecondaryPage } from '@/PageManager'
-import { Search, X, UserPlus, Upload, Image as ImageIcon } from 'lucide-react'
+import { Search, X, Upload } from 'lucide-react'
 import { forwardRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import UserAvatar from '@/components/UserAvatar'
-import Username from '@/components/Username'
-import Nip05 from '@/components/Nip05'
+import UserItem from '@/components/UserItem'
 import { Card, CardContent } from '@/components/ui/card'
 import Uploader from '@/components/PostEditor/Uploader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -199,7 +197,7 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
             {/* Search Results */}
             {searchQuery && (
               <Card>
-                <CardContent className="p-2 max-h-96 overflow-y-auto">
+                <CardContent className="p-4 max-h-96 overflow-y-auto space-y-2">
                   {isFetching && (
                     <div className="text-center text-sm text-muted-foreground py-4">
                       {t('Searching...')}
@@ -214,30 +212,18 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
                     profiles.map((profile) => (
                       <div
                         key={profile.pubkey}
-                        className="flex items-center justify-between p-3 hover:bg-accent rounded cursor-pointer transition-colors"
+                        className="hover:bg-accent rounded px-2 cursor-pointer transition-colors"
                         onClick={() => handleAddPubkey(profile.pubkey)}
                       >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <UserAvatar pubkey={profile.pubkey} className="w-12 h-12 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <Username pubkey={profile.pubkey} className="font-medium truncate" />
-                            </div>
-                            {profile.nip05 && (
-                              <div className="text-sm text-muted-foreground truncate">
-                                <Nip05 nip05={profile.nip05} pubkey={profile.pubkey} />
-                              </div>
-                            )}
+                        <UserItem
+                          pubkey={profile.pubkey}
+                          hideFollowButton={selectedPubkeys.includes(profile.pubkey)}
+                        />
+                        {selectedPubkeys.includes(profile.pubkey) && (
+                          <div className="text-xs text-muted-foreground ml-14 -mt-2 mb-2">
+                            {t('Already added')}
                           </div>
-                        </div>
-                        <Button
-                          variant={selectedPubkeys.includes(profile.pubkey) ? "secondary" : "ghost"}
-                          size="icon"
-                          disabled={selectedPubkeys.includes(profile.pubkey)}
-                          className="flex-shrink-0"
-                        >
-                          <UserPlus className="w-4 h-4" />
-                        </Button>
+                        )}
                       </div>
                     ))}
                 </CardContent>
@@ -252,17 +238,14 @@ const ListEditorPage = forwardRef<HTMLDivElement, ListEditorPageProps>(
                 {t('Members')} ({selectedPubkeys.length})
               </Label>
               <Card>
-                <CardContent className="p-2 max-h-96 overflow-y-auto">
+                <CardContent className="p-4 max-h-96 overflow-y-auto space-y-2">
                   {selectedPubkeys.map((pubkey) => (
                     <div
                       key={pubkey}
-                      className="flex items-center justify-between p-3 hover:bg-accent rounded transition-colors"
+                      className="flex items-center gap-2 hover:bg-accent rounded px-2 transition-colors"
                     >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <UserAvatar pubkey={pubkey} className="w-12 h-12 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <Username pubkey={pubkey} className="font-medium truncate" />
-                        </div>
+                      <div className="flex-1">
+                        <UserItem pubkey={pubkey} hideFollowButton />
                       </div>
                       <Button
                         variant="ghost"
