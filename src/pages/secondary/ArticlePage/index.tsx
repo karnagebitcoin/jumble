@@ -12,6 +12,9 @@ import { forwardRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
+import { remarkNostrLinks, nostrSanitizeSchema } from '@/lib/markdown'
 
 const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
@@ -99,20 +102,94 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
 
         <div className="prose prose-lg dark:prose-invert max-w-none select-text">
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm, remarkNostrLinks]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize, nostrSanitizeSchema]]}
             components={{
-              a: ({ node, ...props }) => (
-                <a {...props} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />
-              ),
-              img: ({ node, ...props }) => (
-                <img {...props} className="rounded-lg max-w-full h-auto" loading="lazy" />
-              ),
-              code: ({ node, inline, ...props }: any) => (
-                inline ? (
-                  <code {...props} className="bg-muted px-1.5 py-0.5 rounded text-sm" />
-                ) : (
-                  <code {...props} className="block bg-muted p-4 rounded-lg overflow-x-auto" />
+              a: ({ node, ...props }) => {
+                const isExternal = props.href?.startsWith('http')
+                const isNostr = props.href?.startsWith('nostr:') || props.href?.startsWith('#/')
+                return (
+                  <a
+                    {...props}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    className="text-primary hover:underline break-words"
+                  />
                 )
+              },
+              img: ({ node, ...props }) => (
+                <img
+                  {...props}
+                  className="rounded-lg max-w-full h-auto my-4"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
+                />
+              ),
+              code: ({ node, inline, className, children, ...props }: any) => {
+                const match = /language-(\w+)/.exec(className || '')
+                return inline ? (
+                  <code {...props} className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
+                    {children}
+                  </code>
+                ) : (
+                  <div className="my-4">
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    </pre>
+                  </div>
+                )
+              },
+              pre: ({ node, ...props }) => (
+                <div {...props} />
+              ),
+              blockquote: ({ node, ...props }) => (
+                <blockquote
+                  {...props}
+                  className="border-l-4 border-primary/50 pl-4 italic my-4 text-muted-foreground"
+                />
+              ),
+              table: ({ node, ...props }) => (
+                <div className="overflow-x-auto my-4">
+                  <table {...props} className="min-w-full divide-y divide-border" />
+                </div>
+              ),
+              th: ({ node, ...props }) => (
+                <th {...props} className="px-4 py-2 text-left font-semibold bg-muted" />
+              ),
+              td: ({ node, ...props }) => (
+                <td {...props} className="px-4 py-2 border-t border-border" />
+              ),
+              h1: ({ node, ...props }) => (
+                <h1 {...props} className="text-4xl font-bold mt-8 mb-4" />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2 {...props} className="text-3xl font-bold mt-6 mb-3" />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 {...props} className="text-2xl font-bold mt-5 mb-2" />
+              ),
+              h4: ({ node, ...props }) => (
+                <h4 {...props} className="text-xl font-bold mt-4 mb-2" />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul {...props} className="list-disc list-inside my-4 space-y-2" />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol {...props} className="list-decimal list-inside my-4 space-y-2" />
+              ),
+              li: ({ node, ...props }) => (
+                <li {...props} className="ml-4" />
+              ),
+              p: ({ node, ...props }) => (
+                <p {...props} className="my-4 leading-relaxed" />
+              ),
+              hr: ({ node, ...props }) => (
+                <hr {...props} className="my-8 border-border" />
               )
             }}
           >
