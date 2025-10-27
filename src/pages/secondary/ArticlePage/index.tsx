@@ -4,6 +4,7 @@ import UserAvatar from '@/components/UserAvatar'
 import { FormattedTimestamp } from '@/components/FormattedTimestamp'
 import NoteInteractions from '@/components/NoteInteractions'
 import NoteStats from '@/components/NoteStats'
+import ReplyNoteList from '@/components/ReplyNoteList'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchEvent } from '@/hooks'
@@ -200,6 +201,11 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
         <div className="mt-8 pt-8 border-t">
           <NoteStats event={event} fetchIfNotExisting displayTopZapsAndLikes />
           <NoteInteractions className="mt-4" event={event} />
+        </div>
+
+        <div className="mt-8 pt-8 border-t">
+          <h2 className="text-xl font-bold mb-4">{t('Comments')}</h2>
+          <ReplyNoteList index={index} event={event} />
         </div>
       </article>
     </SecondaryPageLayout>
