@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -28,6 +28,7 @@ import client from '@/services/client.service'
 import { ExtendedKind, BIG_RELAY_URLS } from '@/constants'
 import { Event } from 'nostr-tools'
 import { TStarterPack } from '@/providers/ListsProvider'
+import NoteList from '@/components/NoteList'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
@@ -42,6 +43,8 @@ const ListsPage = forwardRef((_, ref) => {
   const [isLoadingPublicLists, setIsLoadingPublicLists] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [listToDelete, setListToDelete] = useState<string | null>(null)
+  const [selectedList, setSelectedList] = useState<TStarterPack | null>(null)
+  const [isLoadingSelectedList, setIsLoadingSelectedList] = useState(false)
 
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -135,8 +138,53 @@ const ListsPage = forwardRef((_, ref) => {
     push(toCreateList())
   }
 
-  const handleListClick = (id: string) => {
-    push(toList(id))
+  const handleListClick = async (listId: string) => {
+    // Parse listId - could be "d-tag" or "pubkey:d-tag"
+    let ownerPubkey: string | undefined
+    let dTag: string
+
+    if (listId.includes(':')) {
+      const [pubkey, tag] = listId.split(':')
+      ownerPubkey = pubkey
+      dTag = tag
+    } else {
+      ownerPubkey = pubkey
+      dTag = listId
+    }
+
+    // Check if it's in our lists
+    const ownList = lists.find((l) => l.id === dTag)
+
+    if (ownList) {
+      setSelectedList(ownList)
+      return
+    }
+
+    // Otherwise, fetch the external list
+    if (!ownerPubkey || !dTag) return
+
+    setIsLoadingSelectedList(true)
+    try {
+      const events = await client.fetchEvents(BIG_RELAY_URLS.slice(0, 5), {
+        kinds: [ExtendedKind.STARTER_PACK],
+        authors: [ownerPubkey],
+        '#d': [dTag],
+        limit: 1
+      })
+
+      if (events.length > 0) {
+        const event = events[0]
+        const parsedList = parseStarterPackEvent(event)
+        setSelectedList(parsedList)
+      } else {
+        toast.error(t('List not found'))
+      }
+    } catch (error) {
+      console.error('Failed to fetch list:', error)
+      toast.error(t('Failed to load list'))
+    } finally {
+      setIsLoadingSelectedList(false)
+    }
   }
 
   const handleEditList = (e: React.MouseEvent, id: string) => {
@@ -166,74 +214,87 @@ const ListsPage = forwardRef((_, ref) => {
   const renderListCard = (list: TStarterPack, isOwned: boolean = false) => (
     <Card
       key={`${list.event.pubkey}-${list.id}`}
-      className="cursor-pointer hover:bg-accent/50 transition-colors"
+      className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
       onClick={() => handleListClick(`${list.event.pubkey}:${list.id}`)}
     >
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-3 mb-2">
-              {list.image && (
-                <img
-                  src={list.image}
-                  alt={list.title}
-                  className="w-12 h-12 rounded object-cover flex-shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg truncate">{list.title}</h3>
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    ({list.pubkeys.length}{' '}
-                    {list.pubkeys.length === 1 ? t('member') : t('members')})
-                  </span>
-                </div>
+        <div className="flex flex-col gap-3">
+          {/* Header with image and title */}
+          <div className="flex items-start gap-3">
+            {list.image && (
+              <img
+                src={list.image}
+                alt={list.title}
+                className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg line-clamp-2 mb-1">{list.title}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">
+                  {list.pubkeys.length}{' '}
+                  {list.pubkeys.length === 1 ? t('member') : t('members')}
+                </span>
                 {!isOwned && (
-                  <div className="text-xs text-muted-foreground mb-1">
-                    <span>{t('by')}</span>{' '}
-                    <Username pubkey={list.event.pubkey} className="font-medium" />
-                  </div>
+                  <>
+                    <span className="text-muted-foreground">•</span>
+                    <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
+                      <span>{t('by')}</span>
+                      <Username pubkey={list.event.pubkey} className="font-medium inline" />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
-            {list.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                {list.description}
-              </p>
-            )}
-            {list.pubkeys.length > 0 && (
-              <div className="flex -space-x-2">
-                {list.pubkeys.slice(0, 5).map((pubkey) => (
-                  <div key={pubkey} className="ring-2 ring-background rounded-full">
-                    <UserAvatar pubkey={pubkey} className="w-8 h-8" />
-                  </div>
-                ))}
-                {list.pubkeys.length > 5 && (
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted ring-2 ring-background text-xs font-medium">
-                    +{list.pubkeys.length - 5}
-                  </div>
-                )}
+            {isOwned && (
+              <div className="flex gap-1 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleEditList(e, list.id)}
+                  title={t('Edit')}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleDeleteList(e, list.id)}
+                  title={t('Delete')}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             )}
           </div>
-          {isOwned && (
-            <div className="flex gap-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => handleEditList(e, list.id)}
-                title={t('Edit')}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => handleDeleteList(e, list.id)}
-                title={t('Delete')}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+
+          {/* Description */}
+          {list.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {list.description}
+            </p>
+          )}
+
+          {/* Profile avatars */}
+          {list.pubkeys.length > 0 && (
+            <div className="flex items-center -space-x-2 overflow-hidden">
+              {list.pubkeys.slice(0, 5).map((pubkey, index) => (
+                <div
+                  key={pubkey}
+                  className="ring-2 ring-background rounded-full"
+                  style={{ zIndex: 5 - index }}
+                >
+                  <UserAvatar pubkey={pubkey} className="w-8 h-8" />
+                </div>
+              ))}
+              {list.pubkeys.length > 5 && (
+                <div
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-muted ring-2 ring-background text-xs font-medium"
+                  style={{ zIndex: 0 }}
+                >
+                  +{list.pubkeys.length - 5}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -243,7 +304,92 @@ const ListsPage = forwardRef((_, ref) => {
 
   let content: React.ReactNode = null
 
-  if (!pubkey) {
+  // Show selected list view
+  if (selectedList) {
+    const isOwnList = selectedList.event.pubkey === pubkey
+    content = (
+      <div className="flex flex-col h-full">
+        {/* List Header */}
+        <div className="border-b px-4 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedList(null)}
+            className="mb-3"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {t('Back to Lists')}
+          </Button>
+
+          <div className="flex items-start gap-4">
+            {selectedList.image && (
+              <img
+                src={selectedList.image}
+                alt={selectedList.title}
+                className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <h2 className="text-2xl font-bold mb-1">{selectedList.title}</h2>
+                {isOwnList && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => push(toEditList(selectedList.id))}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    {t('Edit')}
+                  </Button>
+                )}
+              </div>
+              {!isOwnList && (
+                <div className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
+                  <span>{t('by')}</span>
+                  <Username pubkey={selectedList.event.pubkey} className="font-medium" />
+                </div>
+              )}
+              <div className="text-sm text-muted-foreground mb-3">
+                {selectedList.pubkeys.length}{' '}
+                {selectedList.pubkeys.length === 1 ? t('member') : t('members')}
+              </div>
+              {selectedList.description && (
+                <p className="text-sm text-muted-foreground">{selectedList.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* List Content */}
+        <div className="flex-1 overflow-auto">
+          {selectedList.pubkeys.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-4">
+              <Users className="w-16 h-16 text-muted-foreground opacity-50" />
+              <div className="text-muted-foreground">{t('No members in this list')}</div>
+              {isOwnList && (
+                <Button onClick={() => push(toEditList(selectedList.id))} variant="outline">
+                  {t('Add Members')}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <NoteList
+              filter={{
+                authors: selectedList.pubkeys,
+                kinds: [1, 6]
+              }}
+            />
+          )}
+        </div>
+      </div>
+    )
+  } else if (isLoadingSelectedList) {
+    content = (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">{t('Loading list...')}</div>
+      </div>
+    )
+  } else if (!pubkey) {
     content = (
       <div className="flex flex-col items-center justify-center w-full pt-8 gap-4">
         <Users className="w-16 h-16 opacity-50" />
@@ -342,7 +488,7 @@ const ListsPage = forwardRef((_, ref) => {
     <PrimaryPageLayout
       pageName="lists"
       ref={layoutRef}
-      titlebar={<ListsPageTitlebar />}
+      titlebar={<ListsPageTitlebar selectedList={selectedList} />}
       displayScrollToTopButton
     >
       {content}
@@ -368,12 +514,14 @@ const ListsPage = forwardRef((_, ref) => {
 ListsPage.displayName = 'ListsPage'
 export default ListsPage
 
-function ListsPageTitlebar() {
+function ListsPageTitlebar({ selectedList }: { selectedList: TStarterPack | null }) {
   const { t } = useTranslation()
 
   return (
     <div className="flex gap-1 items-center h-full justify-between">
-      <div className="font-semibold text-lg flex-1 pl-4">{t('Lists')}</div>
+      <div className="font-semibold text-lg flex-1 pl-4 truncate">
+        {selectedList ? selectedList.title : t('Lists')}
+      </div>
       <div className="shrink-0 flex gap-1 items-center">
         <PinButton column={{ type: 'lists' }} size="titlebar-icon" />
       </div>
