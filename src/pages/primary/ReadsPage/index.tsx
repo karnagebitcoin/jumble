@@ -49,7 +49,7 @@ const ReadsPage = forwardRef((_, ref) => {
   }, [pubkey, followings])
 
   let content: React.ReactNode = null
-  
+
   if (!pubkey) {
     content = (
       <div className="flex justify-center w-full pt-8">
@@ -94,7 +94,7 @@ function ReadsPageTitlebar({
 
   return (
     <div className="flex gap-1 items-center h-full justify-between">
-      <div className="font-semibold text-lg flex-1">{t('Reads')}</div>
+      <div className="font-semibold text-lg flex-1 pl-4">{t('Reads')}</div>
       <div className="shrink-0 flex gap-1 items-center">
         <PinButton column={{ type: 'reads' }} />
         {!supportTouch && <RefreshButton onClick={() => articleListRef.current?.refresh()} />}
