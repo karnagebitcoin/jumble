@@ -18,10 +18,11 @@ export default function Widgets() {
   const { enabledWidgets, pinnedNoteWidgets, aiPromptWidgets } = useWidgets()
   const { pageTheme } = usePageTheme()
 
-  // Use border for pure-black theme, shadow for others
+  // Use border for pure-black and white themes, shadow for others
   const widgetClassName = cn(
     "rounded-xl bg-card overflow-hidden",
-    pageTheme === 'pure-black' ? "border border-neutral-900" : "shadow-lg"
+    pageTheme === 'pure-black' ? "border border-neutral-900" :
+    pageTheme === 'white' ? "border border-border" : "shadow-lg"
   )
 
   // Filter out AI prompt widgets from the regular widget list

@@ -48,6 +48,8 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
         return <Moon className="w-5 h-5" />
       case 'pure-black':
         return <Moon className="w-5 h-5 fill-current" />
+      case 'white':
+        return <Sun className="w-5 h-5 stroke-[3]" />
       case 'system':
         return <Monitor className="w-5 h-5" />
       default:
@@ -59,6 +61,8 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
     switch (theme) {
       case 'pure-black':
         return 'Pure Black'
+      case 'white':
+        return 'White'
       default:
         return t(theme)
     }
@@ -71,14 +75,17 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
           <Label className="text-base font-normal">
             {t('Theme')}
           </Label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-            {(['system', 'light', 'dark', 'pure-black'] as const).map((theme) => (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 w-full">
+            {(['system', 'light', 'white', 'dark', 'pure-black'] as const).map((theme) => (
               <button
                 key={theme}
                 onClick={() => {
                   if (theme === 'pure-black') {
                     setThemeSetting('dark')
                     setPageTheme('pure-black')
+                  } else if (theme === 'white') {
+                    setThemeSetting('light')
+                    setPageTheme('white')
                   } else {
                     setThemeSetting(theme)
                     setPageTheme('default')
@@ -87,7 +94,8 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 className={cn(
                   'relative flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105',
                   (theme === 'pure-black' && pageTheme === 'pure-black') ||
-                  (theme !== 'pure-black' && themeSetting === theme && pageTheme === 'default')
+                  (theme === 'white' && pageTheme === 'white') ||
+                  (theme !== 'pure-black' && theme !== 'white' && themeSetting === theme && pageTheme === 'default')
                     ? 'border-primary'
                     : 'border-border hover:border-muted-foreground/30'
                 )}
@@ -97,7 +105,8 @@ const AppearanceSettingsPage = forwardRef(({ index }: { index?: number }, ref) =
                 </div>
                 <span className="text-xs font-medium capitalize">{getThemeLabel(theme)}</span>
                 {((theme === 'pure-black' && pageTheme === 'pure-black') ||
-                  (theme !== 'pure-black' && themeSetting === theme && pageTheme === 'default')) && (
+                  (theme === 'white' && pageTheme === 'white') ||
+                  (theme !== 'pure-black' && theme !== 'white' && themeSetting === theme && pageTheme === 'default')) && (
                   <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
                     <Check className="w-3 h-3" />
                   </div>

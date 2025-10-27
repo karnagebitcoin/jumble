@@ -153,6 +153,15 @@
     --popover: 0 0% 0%;
     --border: 0 0% 15%;
   }
+
+  /* Page Theme: White (outline style) */
+  .light.page-theme-white {
+    --surface-background: 0 0% 100%;
+    --background: 0 0% 100%;
+    --card: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --border: 240 5.9% 90%;
+  }
 }
 
 @keyframes progressFill {

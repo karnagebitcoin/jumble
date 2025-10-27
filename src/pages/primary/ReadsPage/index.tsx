@@ -96,7 +96,7 @@ function ReadsPageTitlebar({
     <div className="flex gap-1 items-center h-full justify-between">
       <div className="font-semibold text-lg flex-1 pl-4">{t('Reads')}</div>
       <div className="shrink-0 flex gap-1 items-center">
-        <PinButton column={{ type: 'reads' }} />
+        <PinButton column={{ type: 'reads' }} size="titlebar-icon" />
         {!supportTouch && <RefreshButton onClick={() => articleListRef.current?.refresh()} />}
       </div>
     </div>

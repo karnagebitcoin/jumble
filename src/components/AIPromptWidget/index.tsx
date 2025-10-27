@@ -254,7 +254,8 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
     <div
       className={cn(
         'fixed bottom-4 right-4 w-[420px] max-h-[600px] rounded-xl shadow-2xl bg-card flex flex-col z-50',
-        pageTheme === 'pure-black' ? 'border border-neutral-900' : 'border'
+        pageTheme === 'pure-black' ? 'border border-neutral-900' :
+        pageTheme === 'white' ? 'border border-border shadow-xl' : 'border'
       )}
     >
       {/* Header */}

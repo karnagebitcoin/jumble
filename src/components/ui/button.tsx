@@ -24,7 +24,7 @@ const buttonVariants = cva(
         sm: 'h-8 px-3 text-xs',
         lg: 'h-10 px-8',
         icon: 'h-9 w-9',
-        'titlebar-icon': 'h-10 w-10 shrink-0 [&_svg]:size-5'
+        'titlebar-icon': 'h-10 w-10 shrink-0 [&_svg]:size-5 text-muted-foreground hover:text-muted-foreground/80'
       }
     },
     defaultVariants: {

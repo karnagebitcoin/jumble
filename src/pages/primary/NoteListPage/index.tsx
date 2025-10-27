@@ -156,15 +156,15 @@ function NoteListPageTitlebar({
   let pinButton: React.ReactNode = null
 
   if (feedInfo.feedType === 'bookmarks') {
-    pinButton = <PinButton column={{ type: 'bookmarks' }} />
+    pinButton = <PinButton column={{ type: 'bookmarks' }} size="titlebar-icon" />
   } else if (feedInfo.feedType === 'relay' && feedInfo.id) {
-    pinButton = <PinButton column={{ type: 'relay', props: { url: feedInfo.id } }} />
+    pinButton = <PinButton column={{ type: 'relay', props: { url: feedInfo.id } }} size="titlebar-icon" />
   } else if (feedInfo.feedType === 'relays' && feedInfo.id) {
-    pinButton = <PinButton column={{ type: 'relays', props: { activeRelaySetId: feedInfo.id } }} />
+    pinButton = <PinButton column={{ type: 'relays', props: { activeRelaySetId: feedInfo.id } }} size="titlebar-icon" />
   } else if (feedInfo.feedType === 'custom' && feedInfo.id) {
     const customFeed = customFeeds.find((f) => f.id === feedInfo.id)
     if (customFeed) {
-      pinButton = <PinButton column={{ type: 'custom', props: { customFeedId: feedInfo.id } }} />
+      pinButton = <PinButton column={{ type: 'custom', props: { customFeedId: feedInfo.id } }} size="titlebar-icon" />
     }
   }
 

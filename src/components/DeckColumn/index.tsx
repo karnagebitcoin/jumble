@@ -128,13 +128,15 @@ export default function DeckColumn({ column }: { column: TPinnedColumn }) {
     <div
       className={cn(
         'rounded-lg shadow-lg bg-background overflow-hidden flex flex-col',
-        pageTheme === 'pure-black' && 'border border-neutral-900'
+        pageTheme === 'pure-black' && 'border border-neutral-900',
+        pageTheme === 'white' && 'border border-border shadow-none'
       )}
     >
       {titlebar && (
         <div className={cn(
           "sticky top-0 z-10 border-b bg-background h-12 flex items-center",
-          pageTheme === 'pure-black' && 'border-neutral-900'
+          pageTheme === 'pure-black' && 'border-neutral-900',
+          pageTheme === 'white' && 'border-border'
         )}>
           {titlebar}
         </div>
