@@ -44,7 +44,7 @@ function RelayCollection({ collection }: { collection: TAwesomeRelayCollection }
     <div>
       <div
         className={cn(
-          'sticky bg-background z-20 px-4 py-3 text-2xl font-semibold max-md:border-b',
+          'sticky bg-background z-20 px-4 py-3 text-xl font-semibold max-md:border-b',
           deepBrowsing ? 'top-12' : 'top-24'
         )}
       >
