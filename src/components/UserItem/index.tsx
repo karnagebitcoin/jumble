@@ -8,11 +8,13 @@ import { cn } from '@/lib/utils'
 export default function UserItem({
   pubkey,
   hideFollowButton,
-  className
+  className,
+  compactFollowButton
 }: {
   pubkey: string
   hideFollowButton?: boolean
   className?: string
+  compactFollowButton?: boolean
 }) {
   return (
     <div className={cn('flex gap-2 items-center h-14', className)}>
@@ -25,7 +27,7 @@ export default function UserItem({
         />
         <Nip05 pubkey={pubkey} />
       </div>
-      {!hideFollowButton && <FollowButton pubkey={pubkey} />}
+      {!hideFollowButton && <FollowButton pubkey={pubkey} size={compactFollowButton ? 'sm' : 'default'} />}
     </div>
   )
 }

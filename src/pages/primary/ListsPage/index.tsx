@@ -53,6 +53,7 @@ const ListsPage = forwardRef((_, ref) => {
   const [isLoadingSelectedList, setIsLoadingSelectedList] = useState(false)
   const [favoriteLists, setFavoriteLists] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState('notes')
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set())
 
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -337,6 +338,8 @@ const ListsPage = forwardRef((_, ref) => {
     const memberCount = pubkeys.length
     const listKey = `${list.event.pubkey}:${list.id}`
     const isFavorite = localStorageService.isFavoriteList(listKey)
+    const isExpanded = expandedDescriptions.has(listKey)
+    const descriptionNeedsTruncation = (list.description?.length || 0) > 240
 
     const handleFollowAllClick = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -464,36 +467,40 @@ const ListsPage = forwardRef((_, ref) => {
 
             {/* Description */}
             {list.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {list.description}
-              </p>
+              <div className="text-sm text-muted-foreground">
+                {descriptionNeedsTruncation && !isExpanded ? (
+                  <>
+                    {list.description.substring(0, 240)}...{' '}
+                    <button
+                      className="text-primary hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setExpandedDescriptions(prev => new Set(prev).add(listKey))
+                      }}
+                    >
+                      {t('more')}
+                    </button>
+                  </>
+                ) : (
+                  list.description
+                )}
+              </div>
             )}
 
             {/* Actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                className="flex-1"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleListClick(`${list.event.pubkey}:${list.id}`)
-                }}
-              >
-                {t('View')}
-              </Button>
-              {!isOwned && (
+            {!isOwned && (
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   className="flex-1"
                   onClick={handleFollowAllClick}
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
+                  <UserPlus className="w-4 h-4 mr-1" />
                   {t('Follow All')}
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -526,12 +533,24 @@ const ListsPage = forwardRef((_, ref) => {
             {memberCount > 0 && (
               <div className="flex gap-2">
                 <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const listKey = `${selectedList.event.pubkey}:${selectedList.id}`
+                    toggleFavorite(e, listKey)
+                  }}
+                  title={localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? t('Remove from favorites') : t('Add to favorites')}
+                >
+                  <Star className={`w-4 h-4 ${localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : ''}`} />
+                </Button>
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={handleFollowAll}
                   disabled={!pubkey}
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
+                  <UserPlus className="w-4 h-4 mr-1" />
                   {t('Follow All')}
                 </Button>
                 <Button
@@ -539,7 +558,7 @@ const ListsPage = forwardRef((_, ref) => {
                   size="sm"
                   onClick={handleShare}
                 >
-                  <Share2 className="w-4 h-4 mr-2" />
+                  <Share2 className="w-4 h-4 mr-1" />
                   {t('Share')}
                 </Button>
               </div>
@@ -599,17 +618,17 @@ const ListsPage = forwardRef((_, ref) => {
             </div>
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="border-b px-4">
-                <TabsList className="w-full justify-start h-auto p-0 bg-transparent">
+              <div className="border-b">
+                <TabsList className="w-full justify-start h-auto p-0 bg-transparent px-4">
                   <TabsTrigger
                     value="notes"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3"
                   >
                     {t('Notes')}
                   </TabsTrigger>
                   <TabsTrigger
                     value="people"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3"
                   >
                     {t('People')} ({memberCount})
                   </TabsTrigger>
@@ -630,7 +649,7 @@ const ListsPage = forwardRef((_, ref) => {
                 />
               </TabsContent>
               <TabsContent value="people" className="mt-0">
-                <ProfileList pubkeys={validPubkeys} />
+                <ProfileList pubkeys={validPubkeys} compactFollowButton />
               </TabsContent>
             </Tabs>
           )}

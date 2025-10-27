@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import UserItem from '../UserItem'
 
-export default function ProfileList({ pubkeys }: { pubkeys: string[] }) {
+export default function ProfileList({ pubkeys, compactFollowButton }: { pubkeys: string[]; compactFollowButton?: boolean }) {
   const [visiblePubkeys, setVisiblePubkeys] = useState<string[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -37,7 +37,7 @@ export default function ProfileList({ pubkeys }: { pubkeys: string[] }) {
   return (
     <div className="px-4 pt-2">
       {visiblePubkeys.map((pubkey, index) => (
-        <UserItem key={`${index}-${pubkey}`} pubkey={pubkey} />
+        <UserItem key={`${index}-${pubkey}`} pubkey={pubkey} compactFollowButton={compactFollowButton} />
       ))}
       {pubkeys.length > visiblePubkeys.length && <div ref={bottomRef} />}
     </div>
