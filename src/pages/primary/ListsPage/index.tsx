@@ -224,9 +224,12 @@ const ListsPage = forwardRef((_, ref) => {
       return
     }
 
+    // Ensure followingPubkeys is an array
+    const currentFollowing = Array.isArray(followingPubkeys) ? followingPubkeys : []
+
     // Filter out already followed pubkeys
     const pubkeysToFollow = selectedList.pubkeys.filter(
-      (pk) => !followingPubkeys.includes(pk) && pk !== pubkey
+      (pk) => pk && !currentFollowing.includes(pk) && pk !== pubkey
     )
 
     if (pubkeysToFollow.length === 0) {
@@ -235,7 +238,7 @@ const ListsPage = forwardRef((_, ref) => {
     }
 
     const { unwrap } = toast.promise(
-      followList([...followingPubkeys, ...pubkeysToFollow]),
+      followList([...currentFollowing, ...pubkeysToFollow]),
       {
         loading: t('Following {{count}} users...', { count: pubkeysToFollow.length }),
         success: t('Successfully followed {{count}} users!', { count: pubkeysToFollow.length }),
@@ -281,7 +284,9 @@ const ListsPage = forwardRef((_, ref) => {
   }
 
   const renderListCard = (list: TStarterPack, isOwned: boolean = false) => {
-    const memberCount = list.pubkeys?.length || 0
+    // Ensure we have a valid pubkeys array
+    const pubkeys = Array.isArray(list?.pubkeys) ? list.pubkeys : []
+    const memberCount = pubkeys.length
 
     return (
       <Card
@@ -350,9 +355,9 @@ const ListsPage = forwardRef((_, ref) => {
             {/* Profile avatars */}
             {memberCount > 0 && (
               <div className="flex items-center -space-x-2 overflow-hidden">
-                {list.pubkeys.slice(0, 5).map((pubkey, index) => (
+                {pubkeys.slice(0, 5).map((pubkey, index) => (
                   <div
-                    key={pubkey}
+                    key={pubkey || `avatar-${index}`}
                     className="ring-2 ring-background rounded-full"
                     style={{ zIndex: 5 - index }}
                   >
@@ -379,9 +384,10 @@ const ListsPage = forwardRef((_, ref) => {
 
   // Show selected list view
   if (selectedList) {
-    const isOwnList = selectedList.event.pubkey === pubkey
-    const memberCount = selectedList.pubkeys?.length || 0
-    const validPubkeys = selectedList.pubkeys?.filter(pk => pk && pk.length > 0) || []
+    const isOwnList = selectedList.event?.pubkey === pubkey
+    const pubkeys = Array.isArray(selectedList?.pubkeys) ? selectedList.pubkeys : []
+    const memberCount = pubkeys.length
+    const validPubkeys = pubkeys.filter(pk => pk && typeof pk === 'string' && pk.length > 0)
 
     content = (
       <div className="flex flex-col h-full">
