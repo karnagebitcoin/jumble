@@ -118,7 +118,7 @@ const ListsPage = forwardRef((_, ref) => {
     const title = event.tags.find((tag) => tag[0] === 'title')?.[1] || 'Untitled List'
     const description = event.tags.find((tag) => tag[0] === 'description')?.[1]
     const image = event.tags.find((tag) => tag[0] === 'image')?.[1]
-    const pubkeys = event.tags.filter((tag) => tag[0] === 'p').map((tag) => tag[1])
+    const pubkeys = event.tags?.filter((tag) => tag[0] === 'p').map((tag) => tag[1]) || []
 
     return {
       id: dTag,
@@ -211,102 +211,108 @@ const ListsPage = forwardRef((_, ref) => {
     setListToDelete(null)
   }
 
-  const renderListCard = (list: TStarterPack, isOwned: boolean = false) => (
-    <Card
-      key={`${list.event.pubkey}-${list.id}`}
-      className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
-      onClick={() => handleListClick(`${list.event.pubkey}:${list.id}`)}
-    >
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
-          {/* Header with image and title */}
-          <div className="flex items-start gap-3">
-            {list.image && (
-              <img
-                src={list.image}
-                alt={list.title}
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg line-clamp-2 mb-1">{list.title}</h3>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-muted-foreground">
-                  {list.pubkeys.length}{' '}
-                  {list.pubkeys.length === 1 ? t('member') : t('members')}
-                </span>
-                {!isOwned && (
-                  <>
-                    <span className="text-muted-foreground">•</span>
-                    <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
-                      <span>{t('by')}</span>
-                      <Username pubkey={list.event.pubkey} className="font-medium inline" />
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-            {isOwned && (
-              <div className="flex gap-1 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => handleEditList(e, list.id)}
-                  title={t('Edit')}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => handleDeleteList(e, list.id)}
-                  title={t('Delete')}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-          </div>
+  const renderListCard = (list: TStarterPack, isOwned: boolean = false) => {
+    const memberCount = list.pubkeys?.length || 0
 
-          {/* Description */}
-          {list.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {list.description}
-            </p>
-          )}
-
-          {/* Profile avatars */}
-          {list.pubkeys.length > 0 && (
-            <div className="flex items-center -space-x-2 overflow-hidden">
-              {list.pubkeys.slice(0, 5).map((pubkey, index) => (
-                <div
-                  key={pubkey}
-                  className="ring-2 ring-background rounded-full"
-                  style={{ zIndex: 5 - index }}
-                >
-                  <UserAvatar pubkey={pubkey} className="w-8 h-8" />
+    return (
+      <Card
+        key={`${list.event.pubkey}-${list.id}`}
+        className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
+        onClick={() => handleListClick(`${list.event.pubkey}:${list.id}`)}
+      >
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-3">
+            {/* Header with image and title */}
+            <div className="flex items-start gap-3">
+              {list.image && (
+                <img
+                  src={list.image}
+                  alt={list.title}
+                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg line-clamp-2 mb-1">{list.title}</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-muted-foreground">
+                    {memberCount}{' '}
+                    {memberCount === 1 ? t('member') : t('members')}
+                  </span>
+                  {!isOwned && (
+                    <>
+                      <span className="text-muted-foreground">•</span>
+                      <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
+                        <span>{t('by')}</span>
+                        <Username pubkey={list.event.pubkey} className="font-medium inline" />
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
-              {list.pubkeys.length > 5 && (
-                <div
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-muted ring-2 ring-background text-xs font-medium"
-                  style={{ zIndex: 0 }}
-                >
-                  +{list.pubkeys.length - 5}
+              </div>
+              {isOwned && (
+                <div className="flex gap-1 flex-shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => handleEditList(e, list.id)}
+                    title={t('Edit')}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => handleDeleteList(e, list.id)}
+                    title={t('Delete')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  )
+
+            {/* Description */}
+            {list.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {list.description}
+              </p>
+            )}
+
+            {/* Profile avatars */}
+            {memberCount > 0 && (
+              <div className="flex items-center -space-x-2 overflow-hidden">
+                {list.pubkeys.slice(0, 5).map((pubkey, index) => (
+                  <div
+                    key={pubkey}
+                    className="ring-2 ring-background rounded-full"
+                    style={{ zIndex: 5 - index }}
+                  >
+                    <UserAvatar pubkey={pubkey} className="w-8 h-8" />
+                  </div>
+                ))}
+                {memberCount > 5 && (
+                  <div
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-muted ring-2 ring-background text-xs font-medium"
+                    style={{ zIndex: 0 }}
+                  >
+                    +{memberCount - 5}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   let content: React.ReactNode = null
 
   // Show selected list view
   if (selectedList) {
     const isOwnList = selectedList.event.pubkey === pubkey
+    const memberCount = selectedList.pubkeys?.length || 0
+
     content = (
       <div className="flex flex-col h-full">
         {/* List Header */}
@@ -350,8 +356,8 @@ const ListsPage = forwardRef((_, ref) => {
                 </div>
               )}
               <div className="text-sm text-muted-foreground mb-3">
-                {selectedList.pubkeys.length}{' '}
-                {selectedList.pubkeys.length === 1 ? t('member') : t('members')}
+                {memberCount}{' '}
+                {memberCount === 1 ? t('member') : t('members')}
               </div>
               {selectedList.description && (
                 <p className="text-sm text-muted-foreground">{selectedList.description}</p>
@@ -362,7 +368,7 @@ const ListsPage = forwardRef((_, ref) => {
 
         {/* List Content */}
         <div className="flex-1 overflow-auto">
-          {selectedList.pubkeys.length === 0 ? (
+          {memberCount === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
               <Users className="w-16 h-16 text-muted-foreground opacity-50" />
               <div className="text-muted-foreground">{t('No members in this list')}</div>
