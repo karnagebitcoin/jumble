@@ -368,12 +368,24 @@ function ListsIndexTitlebar({ onClose }: { onClose: () => void }) {
 }
 
 function ListTitlebar({ listId, title, onClose }: { listId: string; title?: string; onClose: () => void }) {
+  const { lists } = useLists()
+
+  // If no title is provided, try to get it from the list
+  const displayTitle = (() => {
+    if (title) return title
+
+    // Parse listId to get the d-tag
+    const dTag = listId.includes(':') ? listId.split(':')[1] : listId
+    const list = lists.find((l) => l.id === dTag)
+    return list?.title || 'List'
+  })()
+
   return (
     <div className="flex items-center justify-between gap-2 px-3 h-full w-full">
       <div className="flex items-center gap-2 min-w-0">
         <Users className="shrink-0" />
         <div className="text-lg font-semibold truncate" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>
-          {title || 'List'}
+          {displayTitle}
         </div>
       </div>
       <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onClose}>
@@ -414,8 +426,76 @@ function ListsIndexContent() {
 
 function ListContent({ listId }: { listId: string }) {
   const { t } = useTranslation()
-  const { lists, isLoading } = useLists()
-  const list = lists.find((l) => l.id === listId)
+  const { pubkey } = useNostr()
+  const { lists, isLoading: isLoadingMyLists } = useLists()
+  const [externalList, setExternalList] = useState<any>(null)
+  const [isLoadingExternal, setIsLoadingExternal] = useState(false)
+
+  // Parse listId - could be "d-tag" or "pubkey:d-tag"
+  const { ownerPubkey, dTag } = (() => {
+    if (listId.includes(':')) {
+      const [pk, tag] = listId.split(':')
+      return { ownerPubkey: pk, dTag: tag }
+    }
+    return { ownerPubkey: pubkey, dTag: listId }
+  })()
+
+  const isOwnList = ownerPubkey === pubkey
+
+  // Try to find in own lists first
+  const ownList = lists.find((l) => l.id === dTag && l.event.pubkey === ownerPubkey)
+
+  // Fetch external list if not found in own lists
+  useEffect(() => {
+    const fetchExternalList = async () => {
+      if (isOwnList || ownList || !ownerPubkey || !dTag) {
+        setExternalList(null)
+        return
+      }
+
+      setIsLoadingExternal(true)
+      try {
+        const events = await client.fetchEvents(BIG_RELAY_URLS.slice(0, 5), {
+          kinds: [ExtendedKind.STARTER_PACK],
+          authors: [ownerPubkey],
+          '#d': [dTag],
+          limit: 1
+        })
+
+        if (events.length > 0) {
+          const event = events[0]
+          const parsedList = parseStarterPackEvent(event)
+          setExternalList(parsedList)
+        }
+      } catch (error) {
+        console.error('Failed to fetch external list:', error)
+      } finally {
+        setIsLoadingExternal(false)
+      }
+    }
+
+    fetchExternalList()
+  }, [ownerPubkey, dTag, isOwnList, ownList])
+
+  const parseStarterPackEvent = (event: any) => {
+    const dTag = event.tags.find((tag: any) => tag[0] === 'd')?.[1] || ''
+    const title = event.tags.find((tag: any) => tag[0] === 'title')?.[1] || 'Untitled List'
+    const description = event.tags.find((tag: any) => tag[0] === 'description')?.[1]
+    const image = event.tags.find((tag: any) => tag[0] === 'image')?.[1]
+    const pubkeys = event.tags.filter((tag: any) => tag[0] === 'p').map((tag: any) => tag[1])
+
+    return {
+      id: dTag,
+      title,
+      description,
+      image,
+      pubkeys,
+      event
+    }
+  }
+
+  const list = ownList || externalList
+  const isLoading = isLoadingMyLists || isLoadingExternal
 
   if (isLoading) {
     return (
@@ -434,7 +514,9 @@ function ListContent({ listId }: { listId: string }) {
     )
   }
 
-  if (list.pubkeys.length === 0) {
+  const validPubkeys = Array.isArray(list.pubkeys) ? list.pubkeys.filter((pk: string) => pk && typeof pk === 'string' && pk.length > 0) : []
+
+  if (validPubkeys.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <Users className="w-16 h-16 text-muted-foreground opacity-50" />
@@ -449,7 +531,7 @@ function ListContent({ listId }: { listId: string }) {
         {
           urls: BIG_RELAY_URLS,
           filter: {
-            authors: list.pubkeys,
+            authors: validPubkeys,
             kinds: [1, 6]
           }
         }

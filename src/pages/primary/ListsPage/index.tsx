@@ -8,7 +8,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { useLists } from '@/providers/ListsProvider'
 import { TPageRef } from '@/types'
-import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2, Star } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, Search, ArrowLeft, UserPlus, Share2, Loader2, Star, Pin } from 'lucide-react'
 import { toCreateList, toList, toEditList } from '@/lib/link'
 import UserAvatar from '@/components/UserAvatar'
 import Username from '@/components/Username'
@@ -34,6 +34,9 @@ import { createFollowListDraftEvent } from '@/lib/draft-event'
 import localStorageService from '@/services/local-storage.service'
 import ProfileList from '@/components/ProfileList'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { useDeckView } from '@/providers/DeckViewProvider'
+import { useLayoutMode } from '@/providers/LayoutModeProvider'
+import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
@@ -42,6 +45,8 @@ const ListsPage = forwardRef((_, ref) => {
   const { push } = useSecondaryPage()
   const { lists, isLoading: isLoadingMyLists, deleteList, fetchLists } = useLists()
   const { followings } = useFollowList()
+  const { deckViewMode, pinColumn, pinnedColumns } = useDeckView()
+  const { layoutMode } = useLayoutMode()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<TStarterPack[]>([])
@@ -340,6 +345,8 @@ const ListsPage = forwardRef((_, ref) => {
     const isFavorite = localStorageService.isFavoriteList(listKey)
     const isExpanded = expandedDescriptions.has(listKey)
     const descriptionNeedsTruncation = (list.description?.length || 0) > 240
+    const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
+    const isPinned = pinnedColumns.some((col) => col.type === 'list' && col.props?.listId === listKey)
 
     const handleFollowAllClick = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -398,6 +405,24 @@ const ListsPage = forwardRef((_, ref) => {
       await unwrap()
     }
 
+    const handlePinClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+
+      if (isPinned) {
+        toast.info(t('List already pinned'))
+        return
+      }
+
+      pinColumn({
+        type: 'list',
+        props: {
+          listId: listKey,
+          title: list.title
+        }
+      })
+      toast.success(t('List pinned to deck view'))
+    }
+
     return (
       <Card
         key={`${list.event.pubkey}-${list.id}`}
@@ -434,6 +459,17 @@ const ListsPage = forwardRef((_, ref) => {
                 </div>
               </div>
               <div className="flex gap-1 flex-shrink-0">
+                {isMultiColumn && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePinClick}
+                    title={isPinned ? t('List already pinned') : t('Pin list as column')}
+                    className={isPinned ? 'text-primary' : ''}
+                  >
+                    <Pin className="w-4 h-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
