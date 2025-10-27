@@ -407,8 +407,9 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
               ) : (
                 <div className={cn("grid grid-cols-2 gap-2 w-full px-2 py-2", layoutMode === LAYOUT_MODE.BOXED && "max-w-screen-xl")}>
                   <div className={cn(
-                    "rounded-lg shadow-lg bg-background overflow-hidden",
-                    pageTheme === 'pure-black' && "border border-neutral-900"
+                    "rounded-lg bg-background overflow-hidden",
+                    pageTheme === 'pure-black' && "border border-neutral-900",
+                    pageTheme === 'white' ? "border border-border" : "shadow-lg"
                   )}>
                     {primaryPages.map(({ name, element, props }) => (
                       <div
@@ -549,8 +550,12 @@ function HomePageWrapper({
       className={cn(
         'rounded-lg overflow-hidden',
         // Make the wrapper transparent when on home page or when dismissed
-        isHomePage || isDismissed ? 'bg-transparent shadow-none' : 'bg-background shadow-lg',
-        pageTheme === 'pure-black' && !isHomePage && !isDismissed && 'border border-neutral-900'
+        isHomePage || isDismissed ? 'bg-transparent shadow-none' : cn(
+          'bg-background',
+          pageTheme === 'white' ? '' : 'shadow-lg'
+        ),
+        pageTheme === 'pure-black' && !isHomePage && !isDismissed && 'border border-neutral-900',
+        pageTheme === 'white' && !isHomePage && !isDismissed && 'border border-border'
       )}
     >
       {children}
@@ -615,8 +620,9 @@ function DeckLayout({
       >
         {/* Main column */}
         <div className={cn(
-          "rounded-lg shadow-lg bg-background overflow-hidden w-full",
-          pageTheme === 'pure-black' && "border border-neutral-900"
+          "rounded-lg bg-background overflow-hidden w-full",
+          pageTheme === 'pure-black' && "border border-neutral-900",
+          pageTheme === 'white' ? "border border-border" : "shadow-lg"
         )}>
           {primaryPages.map(({ name, element, props }) => (
             <div
