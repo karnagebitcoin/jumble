@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useDeepBrowsing } from '@/providers/DeepBrowsingProvider'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '../ui/scroll-area'
@@ -25,6 +26,7 @@ export default function Tabs({
   isInDeckView?: boolean
 }) {
   const { t } = useTranslation()
+  const { isSmallScreen } = useScreenSize()
   const { deepBrowsing, lastScrollTop } = useDeepBrowsing()
   const tabRefs = useRef<(HTMLDivElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -89,7 +91,8 @@ export default function Tabs({
     <div
       ref={containerRef}
       className={cn(
-        'sticky flex justify-between bg-background z-30 px-1 w-full transition-transform border-b',
+        'sticky flex justify-between bg-background/80 backdrop-blur-xl z-30 px-1 w-full transition-transform',
+        !isSmallScreen && 'border-b',
         isInDeckView ? 'top-0' : 'top-12',
         deepBrowsing && lastScrollTop > threshold
           ? (isInDeckView ? '-translate-y-full' : '-translate-y-[calc(100%+12rem)]')
