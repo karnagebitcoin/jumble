@@ -69,7 +69,7 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
   }
 
   return (
-    <SecondaryPageLayout ref={ref} index={index} title={articleData.title} displayScrollToTopButton>
+    <SecondaryPageLayout ref={ref} index={index} title={t('Article')} displayScrollToTopButton>
       <article className="px-4 pt-3 pb-8 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold mb-6 select-text">{articleData.title}</h1>
 
