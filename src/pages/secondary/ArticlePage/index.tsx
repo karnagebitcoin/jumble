@@ -7,7 +7,7 @@ import NoteStats from '@/components/NoteStats'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchEvent } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -18,6 +18,7 @@ import { remarkNostrLinks, nostrSanitizeSchema } from '@/lib/markdown'
 const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, ref) => {
   const { t } = useTranslation()
   const { event, isFetching } = useFetchEvent(id)
+  const [shouldShowHeaderImage, setShouldShowHeaderImage] = useState(true)
 
   const articleData = useMemo(() => {
     if (!event) return null
@@ -35,6 +36,32 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
       content: event.content
     }
   }, [event])
+
+  // Check if the header image URL returns an error status
+  useEffect(() => {
+    if (!articleData?.image) {
+      setShouldShowHeaderImage(false)
+      return
+    }
+
+    // Make a HEAD request to check the status
+    fetch(articleData.image, { method: 'HEAD' })
+      .then((response) => {
+        // Check for x-status header or HTTP status
+        const xStatus = response.headers.get('x-status')
+        if (xStatus && parseInt(xStatus) >= 400) {
+          setShouldShowHeaderImage(false)
+        } else if (!response.ok) {
+          setShouldShowHeaderImage(false)
+        } else {
+          setShouldShowHeaderImage(true)
+        }
+      })
+      .catch(() => {
+        // If fetch fails, don't show the image
+        setShouldShowHeaderImage(false)
+      })
+  }, [articleData?.image])
 
   if (!event && isFetching) {
     return (
@@ -88,13 +115,14 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
           </p>
         )}
 
-        {articleData.image && (
+        {articleData.image && shouldShowHeaderImage && (
           <div className="mb-8 rounded-lg overflow-hidden">
             <img
               src={articleData.image}
               alt={articleData.title}
               className="w-full h-auto"
               loading="lazy"
+              onError={() => setShouldShowHeaderImage(false)}
             />
           </div>
         )}
@@ -116,17 +144,49 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
                   />
                 )
               },
-              img: ({ node, ...props }) => (
-                <img
-                  {...props}
-                  className="rounded-lg max-w-full h-auto my-4"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                  }}
-                />
-              ),
+              img: ({ node, src, alt, ...props }) => {
+                const MarkdownImage = () => {
+                  const [shouldShow, setShouldShow] = useState(true)
+
+                  useEffect(() => {
+                    if (!src) {
+                      setShouldShow(false)
+                      return
+                    }
+
+                    // Check image status
+                    fetch(src, { method: 'HEAD' })
+                      .then((response) => {
+                        const xStatus = response.headers.get('x-status')
+                        if (xStatus && parseInt(xStatus) >= 400) {
+                          setShouldShow(false)
+                        } else if (!response.ok) {
+                          setShouldShow(false)
+                        } else {
+                          setShouldShow(true)
+                        }
+                      })
+                      .catch(() => {
+                        setShouldShow(false)
+                      })
+                  }, [])
+
+                  if (!shouldShow) return null
+
+                  return (
+                    <img
+                      {...props}
+                      src={src}
+                      alt={alt}
+                      className="rounded-lg max-w-full h-auto my-4"
+                      loading="lazy"
+                      onError={() => setShouldShow(false)}
+                    />
+                  )
+                }
+
+                return <MarkdownImage />
+              },
               code: ({ node, inline, className, children, ...props }: any) => {
                 const match = /language-(\w+)/.exec(className || '')
                 return inline ? (
