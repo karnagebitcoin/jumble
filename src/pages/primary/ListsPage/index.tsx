@@ -334,6 +334,7 @@ const ListsPage = forwardRef((_, ref) => {
       toast.success(t('Added to favorites'))
     }
 
+    // Update the state immediately to reflect the change
     setFavoriteLists(localStorageService.getFavoriteLists())
   }
 
@@ -342,7 +343,7 @@ const ListsPage = forwardRef((_, ref) => {
     const pubkeys = Array.isArray(list?.pubkeys) ? list.pubkeys : []
     const memberCount = pubkeys.length
     const listKey = `${list.event.pubkey}:${list.id}`
-    const isFavorite = localStorageService.isFavoriteList(listKey)
+    const isFavorite = favoriteLists.includes(listKey)
     const isExpanded = expandedDescriptions.has(listKey)
     const descriptionNeedsTruncation = (list.description?.length || 0) > 140
     const isMultiColumn = layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN
@@ -462,12 +463,12 @@ const ListsPage = forwardRef((_, ref) => {
                 {!isOwned && (
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="sm"
                     onClick={handleFollowAllClick}
                     title={t('Follow all members')}
-                    className="text-xs px-2 h-8 w-auto"
+                    className="text-xs px-2 h-8 whitespace-nowrap"
                   >
-                    +all
+                    {t('Follow all')}
                   </Button>
                 )}
                 {isMultiColumn && (
@@ -572,9 +573,9 @@ const ListsPage = forwardRef((_, ref) => {
                     const listKey = `${selectedList.event.pubkey}:${selectedList.id}`
                     toggleFavorite(e, listKey)
                   }}
-                  title={localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? t('Remove from favorites') : t('Add to favorites')}
+                  title={favoriteLists.includes(`${selectedList.event.pubkey}:${selectedList.id}`) ? t('Remove from favorites') : t('Add to favorites')}
                 >
-                  <Star className={`w-4 h-4 ${localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} />
+                  <Star className={`w-4 h-4 ${favoriteLists.includes(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} />
                 </Button>
                 <Button
                   variant="outline"
