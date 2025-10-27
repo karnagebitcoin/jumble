@@ -461,7 +461,7 @@ const ListsPage = forwardRef((_, ref) => {
               <div className="flex gap-1 flex-shrink-0">
                 {!isOwned && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={handleFollowAllClick}
                     title={t('Follow all members')}
@@ -487,7 +487,7 @@ const ListsPage = forwardRef((_, ref) => {
                   onClick={(e) => toggleFavorite(e, listKey)}
                   title={isFavorite ? t('Remove from favorites') : t('Add to favorites')}
                 >
-                  <Star className={`w-4 h-4 ${isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                  <Star className={`w-4 h-4 ${isFavorite ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} />
                 </Button>
                 {isOwned && (
                   <>
@@ -574,7 +574,7 @@ const ListsPage = forwardRef((_, ref) => {
                   }}
                   title={localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? t('Remove from favorites') : t('Add to favorites')}
                 >
-                  <Star className={`w-4 h-4 ${localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : ''}`} />
+                  <Star className={`w-4 h-4 ${localStorageService.isFavoriteList(`${selectedList.event.pubkey}:${selectedList.id}`) ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} />
                 </Button>
                 <Button
                   variant="outline"
@@ -630,7 +630,31 @@ const ListsPage = forwardRef((_, ref) => {
                 {memberCount === 1 ? t('member') : t('members')}
               </div>
               {selectedList.description && (
-                <p className="text-sm text-muted-foreground">{selectedList.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedList.description.length > 140 ? (
+                    <>
+                      {expandedDescriptions.has(`${selectedList.event.pubkey}:${selectedList.id}`) ? (
+                        selectedList.description
+                      ) : (
+                        <>
+                          {selectedList.description.substring(0, 140)}...{' '}
+                          <button
+                            className="text-primary hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const listKey = `${selectedList.event.pubkey}:${selectedList.id}`
+                              setExpandedDescriptions(prev => new Set(prev).add(listKey))
+                            }}
+                          >
+                            {t('more')}
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    selectedList.description
+                  )}
+                </p>
               )}
             </div>
           </div>
