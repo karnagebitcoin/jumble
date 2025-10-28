@@ -42,7 +42,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const [activeTab, setActiveTab] = useState('notes')
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
-  const [hasOpenedPreview, setHasOpenedPreview] = useState(false)
 
   // Parse listId - could be "d-tag" or "pubkey:d-tag"
   const { ownerPubkey, dTag } = useMemo(() => {
@@ -111,34 +110,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     () => pinnedColumns.some((col) => col.type === 'list' && col.props?.listId === listId),
     [pinnedColumns, listId]
   )
-
-  // Check for preview mode in URL or if this is an external list
-  // This runs on mount to determine if we should show preview
-  useEffect(() => {
-    if (hasOpenedPreview) return // Only open once
-
-    const params = new URLSearchParams(window.location.search)
-    const hasPreviewParam = params.get('preview') === '1'
-
-    // Show preview dialog if:
-    // 1. preview=1 parameter is in URL (shared link), OR
-    // 2. This is an external list (not owned by current user) AND user is not logged in
-    const shouldShowPreview = hasPreviewParam || (!isOwnList && !myPubkey)
-
-    if (shouldShowPreview && displayList && ownerPubkey) {
-      // Use setTimeout to ensure the dialog opens after the component has fully mounted
-      setTimeout(() => {
-        setPreviewDialogOpen(true)
-        setHasOpenedPreview(true)
-        // Remove the preview parameter from URL after opening dialog
-        if (hasPreviewParam) {
-          params.delete('preview')
-          const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
-          window.history.replaceState({}, '', newUrl)
-        }
-      }, 100)
-    }
-  }, [displayList, ownerPubkey, isOwnList, myPubkey, hasOpenedPreview])
 
   // Calculate unfollowed users
   const unfollowedUsers = useMemo(() => {
@@ -224,18 +195,29 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
 
   const isLoading = isLoadingMyLists || isLoadingExternal
 
-  if (isLoading) {
+  // Check if we should show preview mode
+  const params = new URLSearchParams(window.location.search)
+  const hasPreviewParam = params.get('preview') === '1'
+  const shouldShowPreviewMode = hasPreviewParam || (!isOwnList && !myPubkey)
+
+  // If in preview mode and still loading, show minimal loading state with dialog
+  if (shouldShowPreviewMode && isLoading) {
     return (
       <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">{t('Loading list...')}</div>
         </div>
 
-        {/* Show preview dialog even while loading if we have the data */}
+        {/* Show preview dialog as soon as we have the data */}
         {displayList && ownerPubkey && (
           <ListPreviewDialog
-            open={previewDialogOpen}
-            onOpenChange={setPreviewDialogOpen}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPreviewDialogOpen(false)
+                // If user closes the dialog, they probably want to see the full page
+              }
+            }}
             listId={dTag}
             ownerPubkey={ownerPubkey}
             title={displayList.title}
@@ -248,6 +230,44 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     )
   }
 
+  // If in preview mode and list loaded, show the dialog directly
+  if (shouldShowPreviewMode && displayList && ownerPubkey) {
+    return (
+      <SecondaryPageLayout ref={ref} index={index} title={displayList.title}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">{t('Loading preview...')}</div>
+        </div>
+
+        <ListPreviewDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPreviewDialogOpen(false)
+            }
+          }}
+          listId={dTag}
+          ownerPubkey={ownerPubkey}
+          title={displayList.title}
+          description={displayList.description}
+          image={displayList.image}
+          pubkeys={displayList.pubkeys}
+        />
+      </SecondaryPageLayout>
+    )
+  }
+
+  // Regular loading state for non-preview mode
+  if (isLoading) {
+    return (
+      <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">{t('Loading list...')}</div>
+        </div>
+      </SecondaryPageLayout>
+    )
+  }
+
+  // List not found
   if (!displayList) {
     return (
       <SecondaryPageLayout ref={ref} index={index} title={t('List Not Found')}>

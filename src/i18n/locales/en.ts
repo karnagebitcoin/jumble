@@ -432,6 +432,7 @@ export default {
     Create: 'Create',
     'You can only edit your own lists': 'You can only edit your own lists',
     'Loading list...': 'Loading list...',
+    'Loading preview...': 'Loading preview...',
     'List not found': 'List not found',
     'No members in this list': 'No members in this list',
     'Pin to deck': 'Pin to deck',
