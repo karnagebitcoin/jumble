@@ -42,6 +42,7 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const [activeTab, setActiveTab] = useState('notes')
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
+  const [hasOpenedPreview, setHasOpenedPreview] = useState(false)
 
   // Parse listId - could be "d-tag" or "pubkey:d-tag"
   const { ownerPubkey, dTag } = useMemo(() => {
@@ -111,10 +112,8 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     [pinnedColumns, listId]
   )
 
-  // Track if we've already opened the preview dialog
-  const [hasOpenedPreview, setHasOpenedPreview] = useState(false)
-
   // Check for preview mode in URL or if this is an external list
+  // This runs on mount to determine if we should show preview
   useEffect(() => {
     if (hasOpenedPreview) return // Only open once
 
@@ -231,6 +230,20 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">{t('Loading list...')}</div>
         </div>
+
+        {/* Show preview dialog even while loading if we have the data */}
+        {displayList && ownerPubkey && (
+          <ListPreviewDialog
+            open={previewDialogOpen}
+            onOpenChange={setPreviewDialogOpen}
+            listId={dTag}
+            ownerPubkey={ownerPubkey}
+            title={displayList.title}
+            description={displayList.description}
+            image={displayList.image}
+            pubkeys={displayList.pubkeys}
+          />
+        )}
       </SecondaryPageLayout>
     )
   }
