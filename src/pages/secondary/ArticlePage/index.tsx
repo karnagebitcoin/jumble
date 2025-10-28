@@ -139,13 +139,13 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
                 if (href?.startsWith('#/note/')) {
                   const noteId = href.replace('#/note/', '')
 
-                  // Check if it's a note1 or nevent1 identifier
-                  if (noteId.startsWith('note1') || noteId.startsWith('nevent1')) {
+                  // Check if it's a note1, nevent1, or naddr1 identifier
+                  if (noteId.startsWith('note1') || noteId.startsWith('nevent1') || noteId.startsWith('naddr1')) {
                     try {
                       // Decode to validate it's a proper note identifier
                       const decoded = nip19.decode(noteId)
 
-                      if (decoded.type === 'note' || decoded.type === 'nevent') {
+                      if (decoded.type === 'note' || decoded.type === 'nevent' || decoded.type === 'naddr') {
                         // Render as embedded note
                         return (
                           <div className="my-6 not-prose">
