@@ -28,21 +28,27 @@ const ReadsPage = forwardRef((_, ref) => {
   useImperativeHandle(ref, () => layoutRef.current)
 
   useEffect(() => {
-    if (!pubkey || !followings.length) {
-      setSubRequests([])
-      return
-    }
-
     const init = async () => {
-      const relayList = await client.fetchRelayList(pubkey)
-      setSubRequests([
-        {
-          urls: relayList.read.concat(BIG_RELAY_URLS).slice(0, 8),
-          filter: {
-            authors: followings
+      // If logged in and has followings, show articles from people you follow
+      if (pubkey && followings.length > 0) {
+        const relayList = await client.fetchRelayList(pubkey)
+        setSubRequests([
+          {
+            urls: relayList.read.concat(BIG_RELAY_URLS).slice(0, 8),
+            filter: {
+              authors: followings
+            }
           }
-        }
-      ])
+        ])
+      } else {
+        // If not logged in or no followings, show public articles from big relays
+        setSubRequests([
+          {
+            urls: BIG_RELAY_URLS,
+            filter: {}
+          }
+        ])
+      }
     }
 
     init()
@@ -50,18 +56,10 @@ const ReadsPage = forwardRef((_, ref) => {
 
   let content: React.ReactNode = null
 
-  if (!pubkey) {
-    content = (
-      <div className="flex justify-center w-full pt-8">
-        <Button size="lg" onClick={() => checkLogin()}>
-          {t('Please login to view reads from people you follow')}
-        </Button>
-      </div>
-    )
-  } else if (!followings.length) {
+  if (subRequests.length === 0) {
     content = (
       <div className="text-center text-sm text-muted-foreground pt-8">
-        {t('Follow some people to see their long-form articles here')}
+        {t('Loading articles...')}
       </div>
     )
   } else {
@@ -72,7 +70,14 @@ const ReadsPage = forwardRef((_, ref) => {
     <PrimaryPageLayout
       pageName="reads"
       ref={layoutRef}
-      titlebar={<ReadsPageTitlebar articleListRef={articleListRef} supportTouch={supportTouch} />}
+      titlebar={
+        <ReadsPageTitlebar
+          articleListRef={articleListRef}
+          supportTouch={supportTouch}
+          isLoggedIn={!!pubkey}
+          hasFollowings={followings.length > 0}
+        />
+      }
       displayScrollToTopButton
     >
       {content}
@@ -85,16 +90,28 @@ export default ReadsPage
 
 function ReadsPageTitlebar({
   articleListRef,
-  supportTouch
+  supportTouch,
+  isLoggedIn,
+  hasFollowings
 }: {
   articleListRef: React.RefObject<TArticleListRef>
   supportTouch: boolean
+  isLoggedIn: boolean
+  hasFollowings: boolean
 }) {
   const { t } = useTranslation()
 
   return (
     <div className="flex gap-1 items-center h-full justify-between">
-      <div className="font-semibold text-lg flex-1 pl-4">{t('Reads')}</div>
+      <div className="flex-1 pl-4">
+        <div className="font-semibold text-lg">{t('Reads')}</div>
+        {isLoggedIn && hasFollowings && (
+          <div className="text-xs text-muted-foreground">{t('From people you follow')}</div>
+        )}
+        {!isLoggedIn && (
+          <div className="text-xs text-muted-foreground">{t('Public articles')}</div>
+        )}
+      </div>
       <div className="shrink-0 flex gap-1 items-center">
         <PinButton column={{ type: 'reads' }} size="titlebar-icon" />
         {!supportTouch && <RefreshButton onClick={() => articleListRef.current?.refresh()} />}
