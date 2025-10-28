@@ -155,6 +155,10 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   }
 
   const handleShare = () => {
+    console.log('ListPage handleShare called')
+    console.log('displayList:', displayList)
+    console.log('ownerPubkey:', ownerPubkey)
+    console.log('dTag:', dTag)
     setShareDialogOpen(true)
   }
 

@@ -37,6 +37,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useDeckView } from '@/providers/DeckViewProvider'
 import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { DECK_VIEW_MODE, LAYOUT_MODE } from '@/constants'
+import ShareListDialog from '@/components/ShareListDialog'
 
 const ListsPage = forwardRef((_, ref) => {
   const { t } = useTranslation()
@@ -60,6 +61,7 @@ const ListsPage = forwardRef((_, ref) => {
   const [activeTab, setActiveTab] = useState('notes')
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set())
   const [followedLists, setFollowedLists] = useState<Set<string>>(new Set())
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
 
   useImperativeHandle(ref, () => layoutRef.current)
 
@@ -293,39 +295,9 @@ const ListsPage = forwardRef((_, ref) => {
     await unwrap()
   }
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!selectedList) return
-
-    try {
-      // Create naddr (NIP-19 addressable event identifier)
-      const naddr = nip19.naddrEncode({
-        kind: ExtendedKind.STARTER_PACK,
-        pubkey: selectedList.event.pubkey,
-        identifier: selectedList.id,
-        relays: BIG_RELAY_URLS.slice(0, 3)
-      })
-
-      const shareUrl = `https://njump.me/${naddr}`
-
-      // Try to use Web Share API if available
-      if (navigator.share) {
-        await navigator.share({
-          title: selectedList.title,
-          text: selectedList.description || `Check out this starter pack: ${selectedList.title}`,
-          url: shareUrl
-        })
-        toast.success(t('Shared successfully!'))
-      } else {
-        // Fallback to clipboard
-        await navigator.clipboard.writeText(shareUrl)
-        toast.success(t('Link copied to clipboard!'))
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        console.error('Failed to share:', error)
-        toast.error(t('Failed to share'))
-      }
-    }
+    setShareDialogOpen(true)
   }
 
   const toggleFavorite = (e: React.MouseEvent, listKey: string) => {
@@ -915,6 +887,20 @@ const ListsPage = forwardRef((_, ref) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share List Dialog */}
+      {selectedList && (
+        <ShareListDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          listId={selectedList.id}
+          ownerPubkey={selectedList.event.pubkey}
+          title={selectedList.title}
+          description={selectedList.description}
+          image={selectedList.image}
+          memberCount={selectedList.pubkeys.length}
+        />
+      )}
     </PrimaryPageLayout>
   )
 })
