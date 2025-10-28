@@ -70,7 +70,7 @@ export default function ShareListDialog({
         )}
         <div className="p-4 space-y-3">
           <h3 className="font-semibold text-lg">{title}</h3>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">{t('By')}</span>
             <UserAvatar pubkey={ownerPubkey} size="small" />
@@ -98,7 +98,11 @@ export default function ShareListDialog({
             className="flex-1 px-3 py-2 text-sm border rounded-md bg-muted"
             onClick={(e) => e.currentTarget.select()}
           />
-          <Button onClick={handleCopyLink} size="sm" variant="outline">
+          <Button
+            onClick={handleCopyLink}
+            variant="outline"
+            className="h-[38px] w-[38px] p-0 flex-shrink-0"
+          >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           </Button>
         </div>
