@@ -6,7 +6,7 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { toEditList } from '@/lib/link'
-import { Edit, Pin, Users, Check, Copy, UserPlus, Loader } from 'lucide-react'
+import { Edit, Pin, Users, Check, Copy, UserPlus, Loader, Share2 } from 'lucide-react'
 import { forwardRef, useMemo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDeckView } from '@/providers/DeckViewProvider'
@@ -19,6 +19,8 @@ import UserAvatar from '@/components/UserAvatar'
 import client from '@/services/client.service'
 import { Event, nip19 } from 'nostr-tools'
 import { useFollowList } from '@/providers/FollowListProvider'
+import ShareListDialog from '@/components/ShareListDialog'
+import ListPreviewDialog from '@/components/ListPreviewDialog'
 
 type ListPageProps = {
   index?: number
@@ -38,6 +40,8 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const [linkCopied, setLinkCopied] = useState(false)
   const [isFollowingAll, setIsFollowingAll] = useState(false)
   const [activeTab, setActiveTab] = useState('notes')
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
 
   // Parse listId - could be "d-tag" or "pubkey:d-tag"
   const { ownerPubkey, dTag } = useMemo(() => {
@@ -107,6 +111,20 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     [pinnedColumns, listId]
   )
 
+  // Check for preview mode in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const isPreviewMode = params.get('preview') === '1'
+
+    if (isPreviewMode && displayList && ownerPubkey) {
+      setPreviewDialogOpen(true)
+      // Remove the preview parameter from URL after opening dialog
+      params.delete('preview')
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [displayList, ownerPubkey])
+
   // Calculate unfollowed users
   const unfollowedUsers = useMemo(() => {
     if (!displayList || !myPubkey) return []
@@ -136,17 +154,14 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     toast.success(t('List pinned to deck view'))
   }
 
+  const handleShare = () => {
+    setShareDialogOpen(true)
+  }
+
   const handleCopyLink = async () => {
     if (!displayList || !ownerPubkey) return
 
     try {
-      // Create naddr for the starter pack
-      const naddr = nip19.naddrEncode({
-        kind: ExtendedKind.STARTER_PACK,
-        pubkey: ownerPubkey,
-        identifier: dTag
-      })
-
       const shareUrl = `${window.location.origin}/lists/${ownerPubkey}:${dTag}`
       await navigator.clipboard.writeText(shareUrl)
 
@@ -221,10 +236,10 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
           <Button
             variant="ghost"
             size="titlebar-icon"
-            onClick={handleCopyLink}
-            title={t('Copy Link')}
+            onClick={handleShare}
+            title={t('Share List')}
           >
-            {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            <Share2 className="w-4 h-4" />
           </Button>
           {isMultiColumn && !isPinned && (
             <Button variant="ghost" size="titlebar-icon" onClick={handlePin} title={t('Pin to deck')}>
@@ -320,6 +335,33 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
             <ProfileList pubkeys={displayList.pubkeys} />
           </TabsContent>
         </Tabs>
+        </>
+      )}
+
+      {/* Share List Dialog */}
+      {displayList && ownerPubkey && (
+        <>
+          <ShareListDialog
+            open={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
+            listId={dTag}
+            ownerPubkey={ownerPubkey}
+            title={displayList.title}
+            description={displayList.description}
+            image={displayList.image}
+            memberCount={displayList.pubkeys.length}
+          />
+
+          <ListPreviewDialog
+            open={previewDialogOpen}
+            onOpenChange={setPreviewDialogOpen}
+            listId={dTag}
+            ownerPubkey={ownerPubkey}
+            title={displayList.title}
+            description={displayList.description}
+            image={displayList.image}
+            pubkeys={displayList.pubkeys}
+          />
         </>
       )}
     </SecondaryPageLayout>
