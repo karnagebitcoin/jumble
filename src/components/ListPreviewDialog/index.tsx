@@ -132,7 +132,7 @@ export default function ListPreviewDialog({
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">{t('By')}</span>
           <UserAvatar pubkey={ownerPubkey} size="small" />
-          <Username pubkey={ownerPubkey} className="text-sm font-medium" />
+          <Username userId={ownerPubkey} className="text-sm font-medium" />
         </div>
 
         {description && (
