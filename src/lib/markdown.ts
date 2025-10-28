@@ -2,10 +2,6 @@ import { visit } from 'unist-util-visit'
 import { nip19 } from 'nostr-tools'
 import type { Root, Text, Link } from 'mdast'
 
-// Nostr URI regex patterns
-const NOSTR_URI_REGEX = /nostr:(npub1|nprofile1|note1|nevent1|naddr1|nsec1)[a-z0-9]+/gi
-const NOSTR_MENTION_REGEX = /(npub1|nprofile1|note1|nevent1|naddr1)[a-z0-9]+/gi
-
 /**
  * Remark plugin to convert Nostr URIs and mentions into clickable links
  */
@@ -19,10 +15,8 @@ export function remarkNostrLinks() {
       let lastIndex = 0
 
       // Combined regex to match both nostr: URIs and bare mentions
-      const combinedRegex = new RegExp(
-        `(${NOSTR_URI_REGEX.source}|${NOSTR_MENTION_REGEX.source})`,
-        'gi'
-      )
+      // Matches patterns like: nostr:note1abc..., note1abc..., nostr:nevent1xyz..., etc.
+      const combinedRegex = /(?:nostr:)?(npub1[a-z0-9]{58}|nprofile1[a-z0-9]+|note1[a-z0-9]{58}|nevent1[a-z0-9]+|naddr1[a-z0-9]+|nsec1[a-z0-9]{58})/gi
 
       let match
       while ((match = combinedRegex.exec(text)) !== null) {
@@ -39,11 +33,12 @@ export function remarkNostrLinks() {
 
         // Extract the identifier (remove nostr: prefix if present)
         const identifier = matchedText.replace(/^nostr:/, '')
-        
+        const url = getNostrUrl(identifier)
+
         // Create a link node
         const link: Link = {
           type: 'link',
-          url: getNostrUrl(identifier),
+          url,
           children: [
             {
               type: 'text',
@@ -78,7 +73,7 @@ export function remarkNostrLinks() {
 function getNostrUrl(identifier: string): string {
   try {
     const prefix = identifier.slice(0, identifier.indexOf('1') + 1)
-    
+
     switch (prefix) {
       case 'npub1':
       case 'nprofile1':
@@ -111,7 +106,7 @@ function getNostrUrl(identifier: string): string {
 function formatNostrMention(identifier: string): string {
   try {
     const decoded = nip19.decode(identifier)
-    
+
     switch (decoded.type) {
       case 'npub':
         return `@${identifier.slice(0, 12)}...`
