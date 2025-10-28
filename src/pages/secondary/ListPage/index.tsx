@@ -111,22 +111,35 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     [pinnedColumns, listId]
   )
 
-  // Check for preview mode in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const isPreviewMode = params.get('preview') === '1'
+  // Track if we've already opened the preview dialog
+  const [hasOpenedPreview, setHasOpenedPreview] = useState(false)
 
-    if (isPreviewMode && displayList && ownerPubkey) {
+  // Check for preview mode in URL or if this is an external list
+  useEffect(() => {
+    if (hasOpenedPreview) return // Only open once
+
+    const params = new URLSearchParams(window.location.search)
+    const hasPreviewParam = params.get('preview') === '1'
+
+    // Show preview dialog if:
+    // 1. preview=1 parameter is in URL (shared link), OR
+    // 2. This is an external list (not owned by current user) AND user is not logged in
+    const shouldShowPreview = hasPreviewParam || (!isOwnList && !myPubkey)
+
+    if (shouldShowPreview && displayList && ownerPubkey) {
       // Use setTimeout to ensure the dialog opens after the component has fully mounted
       setTimeout(() => {
         setPreviewDialogOpen(true)
+        setHasOpenedPreview(true)
         // Remove the preview parameter from URL after opening dialog
-        params.delete('preview')
-        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
-        window.history.replaceState({}, '', newUrl)
+        if (hasPreviewParam) {
+          params.delete('preview')
+          const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+          window.history.replaceState({}, '', newUrl)
+        }
       }, 100)
     }
-  }, [displayList, ownerPubkey])
+  }, [displayList, ownerPubkey, isOwnList, myPubkey, hasOpenedPreview])
 
   // Calculate unfollowed users
   const unfollowedUsers = useMemo(() => {

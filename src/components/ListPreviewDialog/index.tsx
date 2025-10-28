@@ -58,6 +58,18 @@ export default function ListPreviewDialog({
     return pubkeys.filter((pubkey) => pubkey !== myPubkey && !followings.includes(pubkey))
   }, [pubkeys, followings, myPubkey])
 
+  const handleSignUp = () => {
+    // User not logged in, open login dialog for sign up
+    setPendingFollow(true)
+    setLoginDialogOpen(true)
+  }
+
+  const handleLogin = () => {
+    // User not logged in, open login dialog for login
+    setPendingFollow(true)
+    setLoginDialogOpen(true)
+  }
+
   const handleFollowAll = async () => {
     if (!myPubkey) {
       // User not logged in, open login dialog
@@ -134,38 +146,46 @@ export default function ListPreviewDialog({
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-2 pt-2">
-        <Button
-          onClick={handleFollowAll}
-          disabled={isFollowingAll || (myPubkey && unfollowedUsers.length === 0)}
-          className="w-full"
-          size="lg"
-        >
-          {isFollowingAll ? (
-            <>
-              <Loader className="w-5 h-5 mr-2 animate-spin" />
-              {t('Following...')}
-            </>
-          ) : !myPubkey ? (
-            <>
+        {!myPubkey ? (
+          <>
+            <Button onClick={handleSignUp} className="w-full" size="lg">
               <UserPlus className="w-5 h-5 mr-2" />
-              {t('Create Account to Follow')}
-            </>
-          ) : unfollowedUsers.length === 0 ? (
-            <>
-              <UserPlus className="w-5 h-5 mr-2" />
-              {t('Already Following All')}
-            </>
-          ) : (
-            <>
-              <UserPlus className="w-5 h-5 mr-2" />
-              {t('Follow All ({{count}})', { count: unfollowedUsers.length })}
-            </>
-          )}
-        </Button>
-
-        <Button onClick={handleViewList} variant="outline" className="w-full">
-          {t('View List')}
-        </Button>
+              {t('Sign up to Follow')}
+            </Button>
+            <Button onClick={handleLogin} variant="outline" className="w-full" size="lg">
+              {t('Log in to Follow')}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              onClick={handleFollowAll}
+              disabled={isFollowingAll || unfollowedUsers.length === 0}
+              className="w-full"
+              size="lg"
+            >
+              {isFollowingAll ? (
+                <>
+                  <Loader className="w-5 h-5 mr-2 animate-spin" />
+                  {t('Following...')}
+                </>
+              ) : unfollowedUsers.length === 0 ? (
+                <>
+                  <UserPlus className="w-5 h-5 mr-2" />
+                  {t('Already Following All')}
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-5 h-5 mr-2" />
+                  {t('Follow All ({{count}})', { count: unfollowedUsers.length })}
+                </>
+              )}
+            </Button>
+            <Button onClick={handleViewList} variant="outline" className="w-full">
+              {t('View List')}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

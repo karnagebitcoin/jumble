@@ -422,6 +422,8 @@ export default {
     'View List': 'View List',
     'Already Following All': 'Already Following All',
     'Create Account to Follow': 'Create Account to Follow',
+    'Sign up to Follow': 'Sign up to Follow',
+    'Log in to Follow': 'Log in to Follow',
     'My Lists': 'My Lists',
     by: 'by',
     'Discover Starter Packs': 'Discover Starter Packs',
