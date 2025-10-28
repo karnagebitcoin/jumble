@@ -117,11 +117,14 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     const isPreviewMode = params.get('preview') === '1'
 
     if (isPreviewMode && displayList && ownerPubkey) {
-      setPreviewDialogOpen(true)
-      // Remove the preview parameter from URL after opening dialog
-      params.delete('preview')
-      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
-      window.history.replaceState({}, '', newUrl)
+      // Use setTimeout to ensure the dialog opens after the component has fully mounted
+      setTimeout(() => {
+        setPreviewDialogOpen(true)
+        // Remove the preview parameter from URL after opening dialog
+        params.delete('preview')
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+        window.history.replaceState({}, '', newUrl)
+      }, 100)
     }
   }, [displayList, ownerPubkey])
 

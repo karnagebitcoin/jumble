@@ -421,6 +421,7 @@ export default {
     'Follow all members from this curated list': 'Follow all members from this curated list',
     'View List': 'View List',
     'Already Following All': 'Already Following All',
+    'Create Account to Follow': 'Create Account to Follow',
     'My Lists': 'My Lists',
     by: 'by',
     'Discover Starter Packs': 'Discover Starter Packs',
