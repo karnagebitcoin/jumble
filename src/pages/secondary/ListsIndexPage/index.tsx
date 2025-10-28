@@ -9,6 +9,7 @@ import { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/UserAvatar'
+import Username from '@/components/Username'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -103,6 +104,11 @@ const ListsIndexPage = forwardRef(({ index }: { index?: number }, ref) => {
                         {list.description}
                       </p>
                     )}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm text-muted-foreground">{t('By')}</span>
+                      <UserAvatar userId={list.event.pubkey} size="small" />
+                      <Username userId={list.event.pubkey} className="text-sm" />
+                    </div>
                     {list.pubkeys.length > 0 && (
                       <div className="flex -space-x-2">
                         {list.pubkeys.slice(0, 5).map((pubkey) => (
@@ -110,7 +116,7 @@ const ListsIndexPage = forwardRef(({ index }: { index?: number }, ref) => {
                             key={pubkey}
                             className="ring-2 ring-background rounded-full"
                           >
-                            <UserAvatar pubkey={pubkey} className="w-8 h-8" />
+                            <UserAvatar userId={pubkey} size="compact" />
                           </div>
                         ))}
                         {list.pubkeys.length > 5 && (

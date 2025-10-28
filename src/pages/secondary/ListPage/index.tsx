@@ -15,6 +15,7 @@ import { useLayoutMode } from '@/providers/LayoutModeProvider'
 import { toast } from 'sonner'
 import { useNostr } from '@/providers/NostrProvider'
 import Username from '@/components/Username'
+import UserAvatar from '@/components/UserAvatar'
 import client from '@/services/client.service'
 import { Event, nip19 } from 'nostr-tools'
 import { useFollowList } from '@/providers/FollowListProvider'
@@ -248,10 +249,11 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
             />
           </div>
         )}
-        {!isOwnList && ownerPubkey && (
-          <div className="text-sm text-muted-foreground mb-2">
-            <span>{t('By')}: </span>
-            <Username pubkey={ownerPubkey} className="font-medium inline" />
+        {ownerPubkey && (
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm text-muted-foreground">{t('By')}</span>
+            <UserAvatar pubkey={ownerPubkey} size="small" />
+            <Username pubkey={ownerPubkey} className="text-sm font-medium" />
           </div>
         )}
         <div className="text-sm text-muted-foreground mb-4">
