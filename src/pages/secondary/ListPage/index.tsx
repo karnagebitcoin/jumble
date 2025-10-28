@@ -6,7 +6,7 @@ import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useSecondaryPage } from '@/PageManager'
 import { toEditList } from '@/lib/link'
-import { Edit, Pin, Users, Check, Copy, UserPlus, Loader, Share2 } from 'lucide-react'
+import { Edit, Pin, Users, Check, UserPlus, Loader, Share2 } from 'lucide-react'
 import { forwardRef, useMemo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDeckView } from '@/providers/DeckViewProvider'
@@ -37,7 +37,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const { followings, follow } = useFollowList()
   const [externalList, setExternalList] = useState<TStarterPack | null>(null)
   const [isLoadingExternal, setIsLoadingExternal] = useState(false)
-  const [linkCopied, setLinkCopied] = useState(false)
   const [isFollowingAll, setIsFollowingAll] = useState(false)
   const [activeTab, setActiveTab] = useState('notes')
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
@@ -141,27 +140,7 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   }
 
   const handleShare = () => {
-    console.log('ListPage handleShare called')
-    console.log('displayList:', displayList)
-    console.log('ownerPubkey:', ownerPubkey)
-    console.log('dTag:', dTag)
     setShareDialogOpen(true)
-  }
-
-  const handleCopyLink = async () => {
-    if (!displayList || !ownerPubkey) return
-
-    try {
-      const shareUrl = `${window.location.origin}/lists/${ownerPubkey}:${dTag}`
-      await navigator.clipboard.writeText(shareUrl)
-
-      setLinkCopied(true)
-      toast.success(t('Link copied to clipboard'))
-      setTimeout(() => setLinkCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy link:', error)
-      toast.error(t('Failed to copy link'))
-    }
   }
 
   const handleFollowAll = async () => {
