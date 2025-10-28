@@ -4,6 +4,7 @@ import UserAvatar from '@/components/UserAvatar'
 import { FormattedTimestamp } from '@/components/FormattedTimestamp'
 import NoteInteractions from '@/components/NoteInteractions'
 import NoteStats from '@/components/NoteStats'
+import ArticleOptions from '@/components/ArticleOptions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetchEvent } from '@/hooks'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
@@ -97,7 +98,13 @@ const ArticlePage = forwardRef(({ id, index }: { id?: string; index?: number }, 
   }
 
   return (
-    <SecondaryPageLayout ref={ref} index={index} title={t('Article')} displayScrollToTopButton>
+    <SecondaryPageLayout
+      ref={ref}
+      index={index}
+      title={t('Article')}
+      displayScrollToTopButton
+      controls={<ArticleOptions event={event} />}
+    >
       <article className="px-4 pt-3 pb-8 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold mb-6 select-text">{articleData.title}</h1>
 
