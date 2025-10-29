@@ -68,6 +68,24 @@ When both types of keywords are detected in your prompt, the system automaticall
 - The `google/gemini-2.5-flash-image` model is now available in the model selection dropdown
 - You can use any configured model for regular `/ai` commands; the system will automatically switch to the image model only when needed
 
+## Troubleshooting
+
+If the image doesn't appear or you see "here you go" without an actual image:
+
+1. **Check Browser Console**: Open your browser's developer tools (F12) and check the console for debug logs
+   - Look for "Image generation response:" to see the raw API response
+   - Look for "Content is array:" or "Content is string:" to see what format was received
+   - Look for "Found image URL:" or "Extracted URL:" to see if a URL was detected
+
+2. **Response Format**: The model may return the image in different formats:
+   - As a URL in a structured `image_url` field
+   - As a URL embedded in text
+   - As a base64 data URL
+
+3. **Debug Mode**: If the image URL can't be extracted, you'll see a debug view showing the raw response. This helps identify parsing issues.
+
+4. **API Response**: The system logs the full API response to help diagnose any issues with the image generation service
+
 ## Benefits
 
 - **Automatic Detection**: No need to manually switch models or use special commands
