@@ -27,12 +27,14 @@ The GIF picker feature allows users to easily search for and insert GIFs into th
 - Primary source: NIP-94 events (kind: 1063) from `wss://relay.gifbuddy.lol`
 - Features:
   - **Persistent Caching**: Stores GIFs in IndexedDB for fast offline access
-  - **Progressive Loading**: Fetches up to 1000 GIFs initially, then loads more on demand
+  - **Instant Loading**: Shows cached GIFs immediately, no waiting
+  - **Progressive Background Fetching**: Continuously fetches GIFs in background (up to 20,000)
+  - **Batch Loading**: Fetches 2,000 GIFs per batch with 1-second delays between batches
   - **Smart Pagination**: Load more GIFs with "Load More" button
   - **Search Caching**: Caches search results for 5 minutes to improve performance
-  - **Background Refresh**: Automatically fetches more GIFs when cache is low
-  - **Client-side Filtering**: Fast search through cached GIFs by alt text and URL
+  - **Client-side Filtering**: Fast search through all cached GIFs by alt text and URL
   - **Cache Expiry**: 24-hour cache with automatic refresh
+  - **Mouse Wheel Scrolling**: Full scroll support for better UX
   - **Filters**: Only returns GIF files (checks MIME type)
 
 ### Integration Points
@@ -47,30 +49,35 @@ The GIF button is located in the composer toolbar, positioned between:
 
 1. **First Load**:
    - Service initializes by loading GIF cache from IndexedDB
-   - If cache is empty or has less than 100 GIFs, fetches initial batch from relay
-   - If cache exists and is fresh (< 24 hours), uses cached data immediately
+   - **Cached GIFs display IMMEDIATELY** (no waiting!)
+   - Background fetching starts automatically to grow cache
+   - Fetches up to 20,000 GIFs in batches of 2,000
+   - 1-second delay between batches to avoid overwhelming relay
 
 2. **User clicks GIF button**:
    - Component opens (Drawer/Popover based on screen size)
    - Displays first page of recent GIFs from cache (instant loading)
    - Shows cache size indicator
+   - Background fetching continues while user browses
 
 3. **Browsing**:
-   - User scrolls through GIFs
+   - User scrolls through GIFs with mouse wheel or scrollbar
    - Can click "Load More" to fetch next page
    - Pagination tracks offset automatically
+   - Smooth scrolling experience
 
 4. **Searching**:
    - User types search query
    - Search triggers after 300ms debounce
-   - Results filtered client-side from cached GIFs by alt text and URL
+   - Results filtered client-side from ALL cached GIFs by alt text and URL
    - Search results cached for 5 minutes for faster re-searches
-   - If few matches found, service fetches more GIFs in background
+   - Searches through entire cache (potentially thousands of GIFs)
 
 5. **Background Updates**:
-   - When cache is running low (< 500 GIFs), automatically fetches more
-   - When user is near end of cached GIFs, fetches additional batch
+   - Continuously fetches more GIFs in background (non-blocking)
+   - Stops when relay returns fewer GIFs than requested
    - All fetched GIFs are saved to IndexedDB for persistence
+   - Cache grows over time without user intervention
 
 6. **Selection**:
    - User clicks GIF to insert URL into note composer
@@ -120,12 +127,15 @@ Added to `src/i18n/locales/en.ts`:
 ## Recent Improvements (v2.0)
 
 - ✅ **Persistent Caching**: GIFs now cached in IndexedDB, surviving page refreshes
+- ✅ **Instant Display**: Cached GIFs show immediately, no loading delay
 - ✅ **Pagination**: "Load More" button to fetch additional GIFs beyond initial 24
-- ✅ **Progressive Loading**: Fetches up to 1000+ GIFs from relay instead of just 24
-- ✅ **Smart Background Fetching**: Automatically loads more when cache is low
+- ✅ **Massive Cache**: Fetches up to 20,000 GIFs from relay in background
+- ✅ **Smart Background Fetching**: Continuously grows cache without blocking UI
+- ✅ **Batch Loading**: Fetches 2,000 GIFs at a time with delays to not overwhelm relay
 - ✅ **Search Caching**: Search results cached for 5 minutes for instant re-searches
 - ✅ **Cache Indicator**: Shows total cached GIFs in UI
-- ✅ **Better Performance**: Instant loading from cache, no waiting for relay
+- ✅ **Mouse Wheel Scrolling**: Full scroll support for smooth browsing
+- ✅ **Better Performance**: Instant loading from cache, background fetching
 
 ## Future Enhancements
 

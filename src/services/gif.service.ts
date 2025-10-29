@@ -115,25 +115,67 @@ class GifService {
       console.log('[GifService] Initializing...')
       await this.loadCacheFromIndexedDB()
 
-      // If cache is empty or small, fetch initial batch
-      if (this.allGifsCache.size < 100) {
-        await this.fetchAndCacheGifs(1000)
-      }
-
       this.isInitialized = true
-      console.log('[GifService] Initialized with', this.allGifsCache.size, 'GIFs')
+      console.log('[GifService] Initialized with', this.allGifsCache.size, 'GIFs from cache')
+
+      // Start background fetching to grow the cache
+      // Don't await - let it run in background
+      this.backgroundFetchGifs()
     })()
 
     return this.initializationPromise
   }
 
-  private async fetchAndCacheGifs(limit: number = 1000): Promise<number> {
+  private async backgroundFetchGifs(): Promise<void> {
     try {
-      console.log('[GifService] Fetching up to', limit, 'GIFs from relay')
+      // Fetch in batches to continuously grow the cache
+      let batchNumber = 1
+      let fetchedCount = 0
+      const batchSize = 2000
 
+      console.log('[GifService] Starting background fetch...')
+
+      // Keep fetching until we stop getting new GIFs
+      while (batchNumber <= 10) { // Max 10 batches = 20,000 GIFs
+        const newGifs = await this.fetchAndCacheGifs(batchSize, batchNumber * batchSize)
+        fetchedCount += newGifs
+
+        if (newGifs < batchSize / 2) {
+          // If we got less than half the batch size, we're probably done
+          console.log('[GifService] Background fetch complete. Fetched', fetchedCount, 'new GIFs')
+          break
+        }
+
+        console.log('[GifService] Batch', batchNumber, 'complete. Total cache:', this.allGifsCache.size)
+        batchNumber++
+
+        // Small delay between batches to not overwhelm the relay
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    } catch (error) {
+      console.error('[GifService] Background fetch error:', error)
+    }
+  }
+
+  private async fetchAndCacheGifs(limit: number = 2000, offset: number = 0): Promise<number> {
+    try {
+      console.log('[GifService] Fetching up to', limit, 'GIFs from relay (offset:', offset, ')')
+
+      // Build filter with offset by using 'until' timestamp if we have cached GIFs
       const filter: Filter = {
         kinds: [1063],
         limit
+      }
+
+      // If we have cached GIFs and this isn't the first batch, fetch older ones
+      if (offset > 0 && this.allGifsCache.size > 0) {
+        const cachedGifs = Array.from(this.allGifsCache.values())
+        const oldestCached = cachedGifs.reduce((oldest, gif) =>
+          (gif.createdAt || 0) < (oldest.createdAt || 0) ? gif : oldest
+        )
+        if (oldestCached.createdAt) {
+          filter.until = oldestCached.createdAt - 1
+        }
       }
 
       const events = await client.pool.querySync([GIFBUDDY_RELAY], filter) as GifEvent[]
@@ -147,7 +189,7 @@ class GifService {
         }
       })
 
-      console.log('[GifService] Added', newGifsCount, 'new GIFs. Total:', this.allGifsCache.size)
+      console.log('[GifService] Added', newGifsCount, 'new GIFs. Total cache:', this.allGifsCache.size)
 
       // Save to IndexedDB periodically
       if (newGifsCount > 0) {
@@ -171,11 +213,6 @@ class GifService {
     const gifs = sortedGifs.slice(offset, offset + limit)
     const hasMore = offset + limit < sortedGifs.length
 
-    // If we're running low on cached GIFs or there might be more, fetch in background
-    if (this.allGifsCache.size < 500 || (offset + limit) > this.allGifsCache.size - 100) {
-      this.fetchAndCacheGifs(1000).catch(console.error)
-    }
-
     return {
       gifs,
       hasMore
@@ -192,7 +229,6 @@ class GifService {
     const lowerQuery = query.toLowerCase()
 
     // Check if we have a recent search cache
-    const cacheKey = `${query}:${offset}:${limit}`
     const cached = this.searchCache[query]
     if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) { // 5 minutes
       const gifs = cached.gifs.slice(offset, offset + limit)
@@ -219,11 +255,6 @@ class GifService {
 
     console.log('[GifService] Search for "' + query + '" found', matchingGifs.length, 'GIFs')
 
-    // If not many matches found, try to fetch more GIFs from relay
-    if (matchingGifs.length < 50 && this.allGifsCache.size < 2000) {
-      this.fetchAndCacheGifs(1000).catch(console.error)
-    }
-
     return {
       gifs,
       hasMore
@@ -232,7 +263,7 @@ class GifService {
 
   async refreshCache(): Promise<void> {
     console.log('[GifService] Refreshing cache...')
-    await this.fetchAndCacheGifs(1000)
+    await this.backgroundFetchGifs()
   }
 
   getCacheSize(): number {
@@ -244,7 +275,14 @@ class GifService {
     this.searchCache = {}
     await indexedDBService.delete(GIF_CACHE_STORE, 'all-gifs')
     this.isInitialized = false
+    this.initializationPromise = null
     console.log('[GifService] Cache cleared')
+  }
+
+  // Force fetch more GIFs manually
+  async fetchMoreGifs(): Promise<number> {
+    await this.initialize()
+    return this.fetchAndCacheGifs(2000, this.allGifsCache.size)
   }
 }
 

@@ -129,61 +129,63 @@ function GifPickerContent({
           {t('Cache: {{count}}', { count: gifService.getCacheSize() })}
         </span>
       </div>
-      <ScrollArea className={isSmallScreen ? 'h-80' : 'h-96'}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : gifs.length > 0 ? (
-          <div className="space-y-3 pr-3">
-            <div
-              className="grid gap-2"
-              style={{
-                gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
-              }}
-            >
-              {gifs.map((gif, index) => (
-                <button
-                  key={gif.eventId || `${gif.url}-${index}`}
-                  onClick={() => onGifClick(gif)}
-                  className="relative aspect-square overflow-hidden rounded-md border border-border hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  title={gif.alt}
-                >
-                  <img
-                    src={gif.previewUrl || gif.url}
-                    alt={gif.alt || 'GIF'}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </button>
-              ))}
+      <ScrollArea className={isSmallScreen ? 'h-80' : 'h-96'} type="always">
+        <div className="pr-3">
+          {isLoading ? (
+            <div className="flex items-center justify-center" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-            {hasMore && (
-              <div className="flex justify-center pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={loadMoreGifs}
-                  disabled={isLoadingMore}
-                  className="w-full"
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t('Loading...')}
-                    </>
-                  ) : (
-                    t('Load More')
-                  )}
-                </Button>
+          ) : gifs.length > 0 ? (
+            <div className="space-y-3">
+              <div
+                className="grid gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
+                }}
+              >
+                {gifs.map((gif, index) => (
+                  <button
+                    key={gif.eventId || `${gif.url}-${index}`}
+                    onClick={() => onGifClick(gif)}
+                    className="relative aspect-square overflow-hidden rounded-md border border-border hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    title={gif.alt}
+                  >
+                    <img
+                      src={gif.previewUrl || gif.url}
+                      alt={gif.alt || 'GIF'}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-            {searchQuery ? t('No GIFs found') : t('No recent GIFs')}
-          </div>
-        )}
+              {hasMore && (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadMoreGifs}
+                    disabled={isLoadingMore}
+                    className="w-full"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {t('Loading...')}
+                      </>
+                    ) : (
+                      t('Load More')
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center text-sm text-muted-foreground" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
+              {searchQuery ? t('No GIFs found') : t('No recent GIFs')}
+            </div>
+          )}
+        </div>
       </ScrollArea>
     </div>
   )
