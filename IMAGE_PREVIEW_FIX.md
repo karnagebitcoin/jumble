@@ -2,11 +2,45 @@
 
 ## Problem
 
-The `/image` command was generating images successfully, but the preview was not showing up before clicking "Insert Image". The images were being generated as base64 data URLs (e.g., `data:image/png;base64,iVBORw0KGgo...`), but they weren't being displayed in the preview pane.
+The `/image` command was generating images successfully, but the preview was not showing up before clicking "Insert Image". No image URL was being extracted from the API response, resulting in an empty string.
 
-## Root Cause
+## Root Cause #1: API Response Format
 
-The `ImageCommandList` component was using the generic `Image` component to display the generated image preview. However, the `Image` component is specifically designed to handle:
+The Google Gemini image generation model (`google/gemini-2.5-flash-image`) returns images in a different format than expected:
+
+**Expected format:**
+```json
+{
+  "choices": [{
+    "message": {
+      "content": "data:image/png;base64,..."
+    }
+  }]
+}
+```
+
+**Actual format:**
+```json
+{
+  "choices": [{
+    "message": {
+      "content": "",
+      "images": [{
+        "type": "image_url",
+        "image_url": {
+          "url": "data:image/png;base64,..."
+        }
+      }]
+    }
+  }]
+}
+```
+
+The code was checking `message.content` (which was empty) instead of `message.images[0].image_url.url`.
+
+## Root Cause #2: Image Component Compatibility
+
+Even after extracting the URL, the `ImageCommandList` component was using the generic `Image` component to display the generated image preview. However, the `Image` component is specifically designed to handle:
 
 1. **HTTP/HTTPS URLs** from standard web servers
 2. **Nostr Blossom server URLs** with fallback logic
@@ -19,7 +53,29 @@ When given a data URL (base64 encoded image), the `Image` component's error hand
 
 ## Solution
 
-### 1. Direct Data URL Rendering
+### 1. Support New API Response Format
+Added check for the `images` array in the API response before checking `content`:
+
+```tsx
+// First check if there's an images array (new format)
+if (message.images && Array.isArray(message.images) && message.images.length > 0) {
+  const firstImage = message.images[0]
+  if (firstImage.image_url?.url) {
+    return firstImage.image_url.url
+  }
+}
+
+// Fallback to old format (checking content)
+if (Array.isArray(message.content)) {
+  // ... existing logic
+}
+```
+
+This makes the code compatible with both:
+- **New format**: Google Gemini models that use `message.images[]`
+- **Old format**: Models that put the URL directly in `message.content`
+
+### 2. Direct Data URL Rendering
 For data URLs, we now use a native HTML `<img>` tag instead of the custom `Image` component:
 
 ```tsx
@@ -40,7 +96,7 @@ For data URLs, we now use a native HTML `<img>` tag instead of the custom `Image
 )}
 ```
 
-### 2. Improved Image Component Error Handling
+### 3. Improved Image Component Error Handling
 Added special handling for data URLs in the `Image` component to fail fast:
 
 ```tsx
@@ -56,7 +112,7 @@ const handleError = async () => {
 }
 ```
 
-### 3. Enhanced Debugging
+### 4. Enhanced Debugging
 Added comprehensive console logging to track:
 - Request/response details in `ai.service.ts`
 - URL type detection (data URL vs HTTP URL)
