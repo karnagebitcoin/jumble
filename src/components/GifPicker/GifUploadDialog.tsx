@@ -15,12 +15,13 @@ import mediaUploadService from '@/services/media-upload.service'
 import gifService from '@/services/gif.service'
 import client from '@/services/client.service'
 import { BIG_RELAY_URLS } from '@/constants'
-import { Loader2, Upload, X, CheckCircle } from 'lucide-react'
+import { Loader2, Upload, X, CheckCircle, Link } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sha256 } from '@noble/hashes/sha2'
 import { bytesToHex } from '@noble/hashes/utils'
 import AlertCard from '@/components/AlertCard'
+import Tabs from '@/components/Tabs'
 
 interface GifUploadDialogProps {
   open: boolean
@@ -28,10 +29,14 @@ interface GifUploadDialogProps {
   onSuccess?: () => void
 }
 
+type UploadMode = 'file' | 'url'
+
 export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUploadDialogProps) {
   const { t } = useTranslation()
   const { pubkey, signEvent } = useNostr()
+  const [mode, setMode] = useState<UploadMode>('file')
   const [file, setFile] = useState<File | null>(null)
+  const [imageUrl, setImageUrl] = useState<string>('')
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [description, setDescription] = useState('')
   const [isUploading, setIsUploading] = useState(false)
@@ -64,7 +69,7 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
   }
 
   const handleRemoveFile = () => {
-    if (previewUrl) {
+    if (previewUrl && file) {
       URL.revokeObjectURL(previewUrl)
     }
     setFile(null)
@@ -76,14 +81,37 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
     }
   }
 
-  const handleUpload = async () => {
+  const handleUrlChange = (url: string) => {
+    setImageUrl(url)
     setError('')
     setSuccess('')
 
-    if (!file) {
-      setError(t('Please select a file'))
-      return
+    // Set preview if valid URL
+    if (url.trim()) {
+      setPreviewUrl(url.trim())
+    } else {
+      setPreviewUrl('')
     }
+  }
+
+  const handleModeChange = (newMode: string) => {
+    setMode(newMode as UploadMode)
+    setError('')
+    setSuccess('')
+    // Clear file when switching to URL mode
+    if (newMode === 'url' && file) {
+      handleRemoveFile()
+    }
+    // Clear URL when switching to file mode
+    if (newMode === 'file') {
+      setImageUrl('')
+      setPreviewUrl('')
+    }
+  }
+
+  const handleUpload = async () => {
+    setError('')
+    setSuccess('')
 
     if (!pubkey) {
       setError(t('Please log in to upload GIFs'))
@@ -95,40 +123,96 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
       return
     }
 
+    if (mode === 'file' && !file) {
+      setError(t('Please select a file'))
+      return
+    }
+
+    if (mode === 'url' && !imageUrl.trim()) {
+      setError(t('Please enter a URL'))
+      return
+    }
+
     setIsUploading(true)
     setUploadProgress(0)
 
     try {
-      // Upload the file
-      const uploadResult = await mediaUploadService.upload(file, {
-        onProgress: (percent) => {
-          setUploadProgress(percent)
-        }
-      })
+      let finalUrl: string
+      let hash: string
+      let size: string
+      let mimeType: string
+      let additionalTags: string[][] = []
 
-      // Calculate hash
-      const arrayBuffer = await file.arrayBuffer()
-      const hashBytes = sha256(new Uint8Array(arrayBuffer))
-      const hash = bytesToHex(hashBytes)
+      if (mode === 'file' && file) {
+        // Upload the file
+        const uploadResult = await mediaUploadService.upload(file, {
+          onProgress: (percent) => {
+            setUploadProgress(percent)
+          }
+        })
+
+        // Calculate hash
+        const arrayBuffer = await file.arrayBuffer()
+        const hashBytes = sha256(new Uint8Array(arrayBuffer))
+        hash = bytesToHex(hashBytes)
+
+        finalUrl = uploadResult.url
+        size = String(file.size)
+        mimeType = file.type
+
+        // Add any additional tags from upload result
+        if (uploadResult.tags && uploadResult.tags.length > 0) {
+          additionalTags = uploadResult.tags.filter(tag =>
+            !['url', 'm', 'x', 'size', 'alt'].includes(tag[0])
+          )
+        }
+      } else {
+        // URL mode - fetch the image to calculate hash
+        setUploadProgress(50)
+
+        const url = imageUrl.trim()
+
+        // Validate URL
+        try {
+          new URL(url)
+        } catch {
+          throw new Error(t('Please enter a valid URL'))
+        }
+
+        // Fetch the image to get metadata
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(t('Failed to fetch the image from the URL'))
+        }
+
+        const blob = await response.blob()
+
+        // Validate it's a GIF
+        if (!blob.type.includes('gif') && !url.toLowerCase().endsWith('.gif')) {
+          throw new Error(t('The URL must point to a GIF image'))
+        }
+
+        // Calculate hash
+        const arrayBuffer = await blob.arrayBuffer()
+        const hashBytes = sha256(new Uint8Array(arrayBuffer))
+        hash = bytesToHex(hashBytes)
+
+        finalUrl = url
+        size = String(blob.size)
+        mimeType = blob.type || 'image/gif'
+
+        setUploadProgress(100)
+      }
 
       // Create kind 1063 event
       const tags: string[][] = [
-        ['url', uploadResult.url],
-        ['m', file.type],
+        ['url', finalUrl],
+        ['m', mimeType],
         ['x', hash],
-        ['size', String(file.size)],
-        ['alt', description.trim()]
+        ['size', size],
+        ['alt', description.trim()],
+        ...additionalTags
       ]
-
-      // Add any additional tags from upload result
-      if (uploadResult.tags && uploadResult.tags.length > 0) {
-        uploadResult.tags.forEach(tag => {
-          // Don't duplicate url, m, x, size, or alt tags
-          if (!['url', 'm', 'x', 'size', 'alt'].includes(tag[0])) {
-            tags.push(tag)
-          }
-        })
-      }
 
       const event = await signEvent({
         kind: 1063,
@@ -145,9 +229,9 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
 
       // Add to local cache
       await gifService.addUserGif({
-        url: uploadResult.url,
+        url: finalUrl,
         alt: description.trim(),
-        size: String(file.size),
+        size,
         hash,
         eventId: event.id,
         createdAt: event.created_at,
@@ -159,6 +243,7 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
       // Reset form and close after a short delay
       setTimeout(() => {
         handleRemoveFile()
+        setImageUrl('')
         setDescription('')
         onSuccess?.()
       }, 1500)
@@ -174,6 +259,7 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
   const handleClose = () => {
     if (!isUploading) {
       handleRemoveFile()
+      setImageUrl('')
       setDescription('')
       setError('')
       setSuccess('')
@@ -205,47 +291,92 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
             </div>
           )}
 
-          {!file ? (
-            <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 cursor-pointer hover:border-primary transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
-                {t('Click to select a GIF file')}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t('Max size: 10MB')}
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/gif"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </div>
+          <Tabs
+            tabs={[
+              { value: 'file', label: t('Upload File') },
+              { value: 'url', label: t('From URL') }
+            ]}
+            value={mode}
+            onTabChange={handleModeChange}
+            threshold={0}
+          />
+
+          {mode === 'file' ? (
+            !file ? (
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 cursor-pointer hover:border-primary transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  {t('Click to select a GIF file')}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t('Max size: 10MB')}
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/gif"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="w-full rounded-lg border border-border"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={handleRemoveFile}
+                    disabled={isUploading}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  {file.name} • {(file.size / 1024 / 1024).toFixed(2)} MB
+                </div>
+              </div>
+            )
           ) : (
             <div className="space-y-4">
-              <div className="relative">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full rounded-lg border border-border"
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={handleRemoveFile}
+              <div className="space-y-2">
+                <Label htmlFor="gif-url">
+                  {t('GIF URL')} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="gif-url"
+                  type="url"
+                  placeholder={t('https://example.com/image.gif')}
+                  value={imageUrl}
+                  onChange={(e) => handleUrlChange(e.target.value)}
                   disabled={isUploading}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('Enter the direct URL to a GIF image')}
+                </p>
               </div>
 
-              <div className="text-xs text-muted-foreground">
-                {file.name} • {(file.size / 1024 / 1024).toFixed(2)} MB
-              </div>
+              {previewUrl && (
+                <div className="relative">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="w-full rounded-lg border border-border"
+                    onError={() => {
+                      setError(t('Failed to load image from URL'))
+                      setPreviewUrl('')
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -286,16 +417,33 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
           <Button variant="outline" onClick={handleClose} disabled={isUploading}>
             {t('Cancel')}
           </Button>
-          <Button onClick={handleUpload} disabled={!file || !description.trim() || isUploading}>
+          <Button
+            onClick={handleUpload}
+            disabled={
+              !description.trim() ||
+              isUploading ||
+              (mode === 'file' && !file) ||
+              (mode === 'url' && !imageUrl.trim())
+            }
+          >
             {isUploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {t('Uploading...')}
+                {mode === 'file' ? t('Uploading...') : t('Adding...')}
               </>
             ) : (
               <>
-                <Upload className="h-4 w-4 mr-2" />
-                {t('Upload')}
+                {mode === 'file' ? (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t('Upload')}
+                  </>
+                ) : (
+                  <>
+                    <Link className="h-4 w-4 mr-2" />
+                    {t('Add GIF')}
+                  </>
+                )}
               </>
             )}
           </Button>

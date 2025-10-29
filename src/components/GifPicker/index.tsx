@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import gifService, { GifData } from '@/services/gif.service'
-import { ImagePlay, Loader2, X, Upload } from 'lucide-react'
+import { ImagePlay, Loader2, X, Upload, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Tabs from '@/components/Tabs'
@@ -183,6 +183,17 @@ function GifPickerContent({
           className="flex-1"
           autoFocus={!isSmallScreen}
         />
+        {pubkey && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsUploadDialogOpen(true)}
+            className="shrink-0"
+            title={t('Upload GIF')}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
         {onClose && (
           <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
             <X className="h-4 w-4" />
