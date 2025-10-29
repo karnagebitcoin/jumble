@@ -10,7 +10,7 @@ type TAIContext = {
   updateServiceConfig: (config: TAIServiceConfig) => void
   updateToolsConfig: (config: TAIToolsConfig) => void
   summarizeArticle: (title: string, description: string, url: string) => Promise<TArticleSummary>
-  chat: (messages: TAIMessage[]) => Promise<string>
+  chat: (messages: TAIMessage[], userPubkey?: string) => Promise<string>
   isConfigured: boolean
 }
 
@@ -62,8 +62,8 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     return await aiService.summarizeArticle(title, description, url)
   }
 
-  const chat = async (messages: TAIMessage[]): Promise<string> => {
-    return await aiService.chat(messages)
+  const chat = async (messages: TAIMessage[], userPubkey?: string): Promise<string> => {
+    return await aiService.chat(messages, userPubkey)
   }
 
   const isConfigured = !!(serviceConfig.apiKey && serviceConfig.model)

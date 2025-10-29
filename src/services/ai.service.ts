@@ -1,4 +1,6 @@
 import { TAIServiceConfig, TArticleSummary, TAIMessage } from '@/types'
+import nostrBandSearchService, { NostrBandSearchParams } from './nostr-band-search.service'
+import { nip19 } from 'nostr-tools'
 
 class AIService {
   private config: TAIServiceConfig = {
@@ -13,7 +15,10 @@ class AIService {
     return this.config
   }
 
-  async chat(messages: TAIMessage[]): Promise<string> {
+  /**
+   * Enhanced chat with support for Nostr search capabilities
+   */
+  async chat(messages: TAIMessage[], userPubkey?: string): Promise<string> {
     if (!this.config.apiKey) {
       throw new Error('API key not configured')
     }
@@ -23,6 +28,9 @@ class AIService {
     }
 
     try {
+      // Add system context about Nostr search capabilities
+      const enhancedMessages = this.enhanceMessagesWithSearchContext(messages, userPubkey)
+
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -33,7 +41,7 @@ class AIService {
         },
         body: JSON.stringify({
           model: this.config.model,
-          messages: messages,
+          messages: enhancedMessages,
           temperature: 0.7,
           max_tokens: 2000
         })
@@ -56,6 +64,74 @@ class AIService {
       console.error('AI Service Error:', error)
       throw error
     }
+  }
+
+  /**
+   * Enhance messages with Nostr search context and capabilities
+   */
+  private enhanceMessagesWithSearchContext(
+    messages: TAIMessage[],
+    userPubkey?: string
+  ): TAIMessage[] {
+    // Check if the conversation involves search-related requests
+    const hasSearchIntent = messages.some(
+      m =>
+        m.role === 'user' &&
+        (m.content.toLowerCase().includes('search') ||
+          m.content.toLowerCase().includes('find') ||
+          m.content.toLowerCase().includes('look for'))
+    )
+
+    if (!hasSearchIntent) {
+      return messages
+    }
+
+    // Create enhanced system message
+    const searchSystemMessage: TAIMessage = {
+      role: 'system',
+      content: `You are a helpful assistant with access to Nostr search capabilities via nostr.band.
+
+When users ask you to search for Nostr content, you can help them by:
+
+1. Understanding their search intent (searching for notes, profiles, specific topics, etc.)
+2. Providing them with a nostr.band search URL that matches their request
+
+To construct a nostr.band search URL, use this format:
+https://nostr.band/?q=YOUR_QUERY
+
+Query syntax supports:
+- Text search: Just include the search terms
+- Author filter: Add "by:npub..." (must use npub format, not hex)
+- Kind filter: Add "kind:1" (1=note, 3=contacts, 30023=article, etc.)
+- Date filters: Add "since:YYYY-MM-DD" or "until:YYYY-MM-DD"
+
+Examples:
+- Search for "nostr developers" by a specific user: https://nostr.band/?q=nostr+developers+by:npub1abc...
+- Search for articles about Bitcoin: https://nostr.band/?q=bitcoin+kind:30023
+- Search for recent notes since 2024-01-01: https://nostr.band/?q=nostr+since:2024-01-01
+
+${userPubkey ? `The current user's npub is: ${nip19.npubEncode(userPubkey)}` : ''}
+
+When a user asks to search for something, provide them with:
+1. A brief explanation of what you're searching for
+2. The nostr.band URL they can use
+3. Explain that they can click the URL to see the results on nostr.band
+
+Important: If the user mentions an author by name (not npub), let them know you need their npub to search by author.`
+    }
+
+    // Insert the search context before user messages, but after any existing system messages
+    const systemMessages = messages.filter(m => m.role === 'system')
+    const otherMessages = messages.filter(m => m.role !== 'system')
+
+    return [...systemMessages, searchSystemMessage, ...otherMessages]
+  }
+
+  /**
+   * Build a nostr.band search URL from parameters
+   */
+  buildSearchUrl(params: NostrBandSearchParams): string {
+    return nostrBandSearchService.buildSearchUrl(params)
   }
 
   async summarizeArticle(

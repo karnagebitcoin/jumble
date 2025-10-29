@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { getImetaInfosFromEvent } from '@/lib/event'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
+import { useNostr } from '@/providers/NostrProvider'
 
 interface AIPromptWidgetProps {
   widgetId: string
@@ -65,6 +66,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
   const { event, isFetching } = useFetchEvent(eventId)
   const { isSmallScreen } = useScreenSize()
   const { pageTheme } = usePageTheme()
+  const { pubkey } = useNostr()
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -117,7 +119,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
       ]
 
       // Get AI response
-      const response = await chat(conversationMessages)
+      const response = await chat(conversationMessages, pubkey)
 
       // Update messages
       const newMessages = [
