@@ -12,6 +12,7 @@ const GIF_RELAYS = [
 const GIF_CACHE_KEY = 'jumble-gif-cache'
 const CACHE_VERSION = 1
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000 // 24 hours
+const MAX_CACHE_SIZE = 10000 // Maximum number of GIFs to keep in localStorage
 
 export interface GifEvent extends Event {
   kind: 1063
@@ -59,8 +60,25 @@ class GifService {
     const url = urlTag[1]
     const mimeType = event.tags.find((tag) => tag[0] === 'm')?.[1]
 
-    // Only return GIFs
-    if (mimeType && !mimeType.includes('gif')) return null
+    // Accept GIFs, WebP, and animated images
+    // If no MIME type, check URL extension
+    if (mimeType) {
+      const isAnimatedImage =
+        mimeType.includes('gif') ||
+        mimeType.includes('webp') ||
+        mimeType.includes('apng')
+
+      if (!isAnimatedImage) return null
+    } else {
+      // No MIME type - check URL extension
+      const urlLower = url.toLowerCase()
+      const hasAnimatedExtension =
+        urlLower.endsWith('.gif') ||
+        urlLower.endsWith('.webp') ||
+        urlLower.endsWith('.apng')
+
+      if (!hasAnimatedExtension) return null
+    }
 
     const thumbTag = event.tags.find((tag) => tag[0] === 'thumb')
     const imageTag = event.tags.find((tag) => tag[0] === 'image')
@@ -107,20 +125,46 @@ class GifService {
 
   private saveCacheToStorage(): void {
     try {
+      // Get all GIFs and limit to MAX_CACHE_SIZE most recent ones
+      let gifsToSave = Array.from(this.allGifsCache.values())
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+
+      if (gifsToSave.length > MAX_CACHE_SIZE) {
+        console.log('[GifService] Trimming cache from', gifsToSave.length, 'to', MAX_CACHE_SIZE, 'GIFs')
+        gifsToSave = gifsToSave.slice(0, MAX_CACHE_SIZE)
+      }
+
       const cache: GifCache = {
-        gifs: Array.from(this.allGifsCache.values()),
+        gifs: gifsToSave,
         timestamp: Date.now(),
         version: CACHE_VERSION
       }
+
       localStorage.setItem(GIF_CACHE_KEY, JSON.stringify(cache))
       console.log('[GifService] Saved', cache.gifs.length, 'GIFs to cache')
     } catch (error) {
       console.error('[GifService] Error saving cache:', error)
-      // If localStorage is full, try to clear old cache
+      // If localStorage is full, try with a smaller cache
       try {
-        localStorage.removeItem(GIF_CACHE_KEY)
+        const reducedGifs = Array.from(this.allGifsCache.values())
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          .slice(0, 5000) // Try with 5000 GIFs
+
+        const cache: GifCache = {
+          gifs: reducedGifs,
+          timestamp: Date.now(),
+          version: CACHE_VERSION
+        }
+
+        localStorage.setItem(GIF_CACHE_KEY, JSON.stringify(cache))
+        console.log('[GifService] Saved reduced cache of', reducedGifs.length, 'GIFs')
       } catch (e) {
-        console.error('[GifService] Could not clear cache:', e)
+        console.error('[GifService] Could not save even reduced cache, clearing:', e)
+        try {
+          localStorage.removeItem(GIF_CACHE_KEY)
+        } catch (clearError) {
+          console.error('[GifService] Could not clear cache:', clearError)
+        }
       }
     }
   }
@@ -151,31 +195,39 @@ class GifService {
       console.log('[GifService] Starting background fetch...')
 
       // First fetch - get a good initial batch immediately
-      let fetchedCount = await this.fetchAndCacheGifs(2000)
-      console.log('[GifService] Initial batch fetched:', fetchedCount, 'GIFs')
+      let result = await this.fetchAndCacheGifs(2000)
+      console.log('[GifService] Initial batch fetched:', result.newGifs, 'GIFs from', result.totalEvents, 'events')
 
-      // Continue fetching more batches if we got a full batch
+      // Continue fetching more batches
+      // Keep fetching as long as we're getting events from the relay (even if filtered out)
+      // or until we've done enough batches
       let batchNumber = 2
       const batchSize = 2000
+      const maxBatches = 20
 
-      while (batchNumber <= 10 && fetchedCount >= batchSize / 2) {
+      while (batchNumber <= maxBatches && result.totalEvents >= 100) {
         // Small delay between batches to not overwhelm the relay
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await new Promise(resolve => setTimeout(resolve, 1500))
 
-        const newGifs = await this.fetchAndCacheGifs(batchSize)
-        fetchedCount = newGifs
+        result = await this.fetchAndCacheGifs(batchSize)
 
-        console.log('[GifService] Batch', batchNumber, 'complete. New GIFs:', newGifs, 'Total cache:', this.allGifsCache.size)
+        console.log('[GifService] Batch', batchNumber, 'complete. New GIFs:', result.newGifs, 'from', result.totalEvents, 'events. Total cache:', this.allGifsCache.size)
         batchNumber++
+
+        // If we got very few events, we've probably reached the end
+        if (result.totalEvents < 100) {
+          console.log('[GifService] Received fewer than 100 events, stopping.')
+          break
+        }
       }
 
-      console.log('[GifService] Background fetch complete. Total cache:', this.allGifsCache.size, 'GIFs')
+      console.log('[GifService] Background fetch complete. Total cache:', this.allGifsCache.size, 'GIFs across', batchNumber, 'batches')
     } catch (error) {
       console.error('[GifService] Background fetch error:', error)
     }
   }
 
-  private async fetchAndCacheGifs(limit: number = 2000): Promise<number> {
+  private async fetchAndCacheGifs(limit: number = 2000): Promise<{ newGifs: number; totalEvents: number }> {
     try {
       console.log('[GifService] Fetching up to', limit, 'GIFs from', GIF_RELAYS.length, 'relays')
 
@@ -196,8 +248,6 @@ class GifService {
           console.log('[GifService] Fetching GIFs older than', new Date(oldestCached.createdAt * 1000))
         }
       }
-
-      console.log('[GifService] Query filter:', JSON.stringify(filter))
 
       const events = await client.pool.querySync(GIF_RELAYS, filter) as GifEvent[]
 
@@ -229,10 +279,13 @@ class GifService {
         this.notifyCacheUpdate()
       }
 
-      return newGifsCount
+      return {
+        newGifs: newGifsCount,
+        totalEvents: events.length
+      }
     } catch (error) {
       console.error('[GifService] Error fetching GIFs:', error)
-      return 0
+      return { newGifs: 0, totalEvents: 0 }
     }
   }
 
@@ -315,7 +368,8 @@ class GifService {
   // Force fetch more GIFs manually
   async fetchMoreGifs(): Promise<number> {
     await this.initialize()
-    return this.fetchAndCacheGifs(2000)
+    const result = await this.fetchAndCacheGifs(2000)
+    return result.newGifs
   }
 
   // Subscribe to cache updates
