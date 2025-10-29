@@ -131,11 +131,14 @@ Auto-translation works with the following note kinds:
 
 ## Performance Considerations
 
-- **Caching**: Translations are cached to avoid redundant API calls
+- **Persistent Storage**: Translations are saved to IndexedDB and persist across browser sessions
+- **Memory Caching**: In-memory cache for instant access to translated content
 - **Background Processing**: Auto-translation doesn't block UI rendering
 - **Silent Failures**: Auto-translation failures don't show error messages (logged to console)
 - **Language Detection**: Happens instantly using built-in detection algorithm
 - **Selective Translation**: Only translates when source language differs from target
+- **Automatic Cleanup**: Translations older than 30 days are automatically removed from IndexedDB
+- **No Redundant API Calls**: Once translated, content is retrieved from local storage
 
 ## Settings UI
 
@@ -164,6 +167,26 @@ Auto-translate notes: [Toggle switch]
   "Automatically translate notes in foreign languages to English"
 ```
 
+## Storage Architecture
+
+### IndexedDB Storage
+Translations are stored in the `translatedEvents` object store with the following schema:
+- **Key**: `{targetLanguage}_{eventId}` (e.g., "en_abc123...")
+- **Value**: Translated Event object
+- **Index**: `addedAt` timestamp for cleanup operations
+
+### Caching Strategy
+1. **IndexedDB (Persistent)**: Long-term storage that survives page refreshes
+2. **Memory Cache (Temporary)**: Fast in-memory Map for active session
+3. **Cache Initialization**: Memory cache populated from IndexedDB on app startup
+4. **Write-Through**: New translations written to both memory and IndexedDB
+
+### Storage Lifecycle
+- **Write**: Translation saved immediately to IndexedDB after generation
+- **Read**: Check memory cache first, fall back to IndexedDB if needed
+- **Cleanup**: Automatic removal of translations older than 30 days
+- **Initialization**: All cached translations loaded into memory on startup
+
 ## Future Enhancements
 
 Potential improvements for future versions:
@@ -173,3 +196,5 @@ Potential improvements for future versions:
 - Batch translation for better performance
 - Translation history/statistics
 - Per-user auto-translate preferences
+- Manual cache management UI (view size, clear cache, etc.)
+- Export/import translation cache
