@@ -24,7 +24,8 @@ const StoreNames = {
   RELAY_SETS: 'relaySets',
   FOLLOWING_FAVORITE_RELAYS: 'followingFavoriteRelays',
   RELAY_INFOS: 'relayInfos',
-  RELAY_INFO_EVENTS: 'relayInfoEvents' // deprecated
+  RELAY_INFO_EVENTS: 'relayInfoEvents', // deprecated
+  GIF_CACHE: 'gifCache'
 }
 
 class IndexedDbService {
@@ -43,7 +44,7 @@ class IndexedDbService {
   init(): Promise<void> {
     if (!this.initPromise) {
       this.initPromise = new Promise((resolve, reject) => {
-        const request = window.indexedDB.open('jumble', 9)
+        const request = window.indexedDB.open('jumble', 10)
 
         request.onerror = (event) => {
           reject(event)
@@ -97,6 +98,10 @@ class IndexedDbService {
           }
           if (!db.objectStoreNames.contains(StoreNames.PIN_LIST_EVENTS)) {
             db.createObjectStore(StoreNames.PIN_LIST_EVENTS, { keyPath: 'key' })
+          }
+          if (!db.objectStoreNames.contains(StoreNames.GIF_CACHE)) {
+            const gifStore = db.createObjectStore(StoreNames.GIF_CACHE, { keyPath: 'eventId' })
+            gifStore.createIndex('createdAt', 'createdAt', { unique: false })
           }
           if (db.objectStoreNames.contains(StoreNames.RELAY_INFO_EVENTS)) {
             db.deleteObjectStore(StoreNames.RELAY_INFO_EVENTS)
@@ -476,6 +481,128 @@ class IndexedDbService {
       value,
       addedAt: Date.now()
     }
+  }
+
+  // GIF cache methods
+  async putGif(gif: any): Promise<void> {
+    await this.initPromise
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        return reject('database not initialized')
+      }
+      const transaction = this.db.transaction(StoreNames.GIF_CACHE, 'readwrite')
+      const store = transaction.objectStore(StoreNames.GIF_CACHE)
+
+      const putRequest = store.put(gif)
+      putRequest.onsuccess = () => {
+        transaction.commit()
+        resolve()
+      }
+
+      putRequest.onerror = (event) => {
+        transaction.commit()
+        reject(event)
+      }
+    })
+  }
+
+  async putManyGifs(gifs: any[]): Promise<void> {
+    if (gifs.length === 0) return
+    await this.initPromise
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        return reject('database not initialized')
+      }
+      const transaction = this.db.transaction(StoreNames.GIF_CACHE, 'readwrite')
+      const store = transaction.objectStore(StoreNames.GIF_CACHE)
+
+      let completed = 0
+      let hasError = false
+
+      gifs.forEach((gif) => {
+        const putRequest = store.put(gif)
+        putRequest.onsuccess = () => {
+          completed++
+          if (completed === gifs.length) {
+            transaction.commit()
+            resolve()
+          }
+        }
+        putRequest.onerror = () => {
+          if (!hasError) {
+            hasError = true
+            transaction.abort()
+            reject('Error putting GIF')
+          }
+        }
+      })
+    })
+  }
+
+  async getAllGifs(): Promise<any[]> {
+    await this.initPromise
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        return reject('database not initialized')
+      }
+      const transaction = this.db.transaction(StoreNames.GIF_CACHE, 'readonly')
+      const store = transaction.objectStore(StoreNames.GIF_CACHE)
+      const request = store.getAll()
+
+      request.onsuccess = () => {
+        transaction.commit()
+        resolve(request.result || [])
+      }
+
+      request.onerror = (event) => {
+        transaction.commit()
+        reject(event)
+      }
+    })
+  }
+
+  async getGifCount(): Promise<number> {
+    await this.initPromise
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        return reject('database not initialized')
+      }
+      const transaction = this.db.transaction(StoreNames.GIF_CACHE, 'readonly')
+      const store = transaction.objectStore(StoreNames.GIF_CACHE)
+      const request = store.count()
+
+      request.onsuccess = () => {
+        transaction.commit()
+        resolve(request.result)
+      }
+
+      request.onerror = (event) => {
+        transaction.commit()
+        reject(event)
+      }
+    })
+  }
+
+  async clearGifCache(): Promise<void> {
+    await this.initPromise
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        return reject('database not initialized')
+      }
+      const transaction = this.db.transaction(StoreNames.GIF_CACHE, 'readwrite')
+      const store = transaction.objectStore(StoreNames.GIF_CACHE)
+      const request = store.clear()
+
+      request.onsuccess = () => {
+        transaction.commit()
+        resolve()
+      }
+
+      request.onerror = (event) => {
+        transaction.commit()
+        reject(event)
+      }
+    })
   }
 
   private async cleanUp() {

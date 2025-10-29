@@ -1,4 +1,5 @@
 import client from './client.service'
+import indexedDbService from './indexed-db.service'
 import { Event, Filter } from 'nostr-tools'
 
 // Relays that may have GIF/file metadata events
@@ -9,10 +10,7 @@ const GIF_RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol'
 ]
-const GIF_CACHE_KEY = 'jumble-gif-cache'
-const CACHE_VERSION = 1
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000 // 24 hours
-const MAX_CACHE_SIZE = 10000 // Maximum number of GIFs to keep in localStorage
+const BATCH_SIZE = 100 // Batch size for IndexedDB operations
 
 export interface GifEvent extends Event {
   kind: 1063
@@ -31,12 +29,6 @@ export interface GifData {
 export interface GifSearchResult {
   gifs: GifData[]
   hasMore: boolean
-}
-
-interface GifCache {
-  gifs: GifData[]
-  timestamp: number
-  version: number
 }
 
 interface GifSearchCache {
@@ -97,75 +89,36 @@ class GifService {
     }
   }
 
-  private loadCacheFromStorage(): void {
+  private async loadCacheFromStorage(): Promise<void> {
     try {
-      const cachedString = localStorage.getItem(GIF_CACHE_KEY)
-      if (!cachedString) return
-
-      const cached = JSON.parse(cachedString) as GifCache
-      if (cached && cached.version === CACHE_VERSION) {
-        const age = Date.now() - cached.timestamp
-        if (age < CACHE_EXPIRY) {
-          console.log('[GifService] Loading', cached.gifs.length, 'GIFs from cache')
-          cached.gifs.forEach((gif) => {
-            if (gif.eventId) {
-              this.allGifsCache.set(gif.eventId, gif)
-            }
-          })
-        } else {
-          console.log('[GifService] Cache expired, will fetch fresh data')
-          localStorage.removeItem(GIF_CACHE_KEY)
+      const gifs = await indexedDbService.getAllGifs()
+      console.log('[GifService] Loading', gifs.length, 'GIFs from IndexedDB')
+      gifs.forEach((gif) => {
+        if (gif.eventId) {
+          this.allGifsCache.set(gif.eventId, gif)
         }
-      }
+      })
     } catch (error) {
-      console.error('[GifService] Error loading cache:', error)
-      localStorage.removeItem(GIF_CACHE_KEY)
+      console.error('[GifService] Error loading cache from IndexedDB:', error)
     }
   }
 
-  private saveCacheToStorage(): void {
+  private async saveCacheToStorage(): Promise<void> {
     try {
-      // Get all GIFs and limit to MAX_CACHE_SIZE most recent ones
-      let gifsToSave = Array.from(this.allGifsCache.values())
-        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      // Get all new GIFs that need to be saved
+      const gifsToSave = Array.from(this.allGifsCache.values())
 
-      if (gifsToSave.length > MAX_CACHE_SIZE) {
-        console.log('[GifService] Trimming cache from', gifsToSave.length, 'to', MAX_CACHE_SIZE, 'GIFs')
-        gifsToSave = gifsToSave.slice(0, MAX_CACHE_SIZE)
+      if (gifsToSave.length === 0) return
+
+      // Save in batches to avoid blocking
+      for (let i = 0; i < gifsToSave.length; i += BATCH_SIZE) {
+        const batch = gifsToSave.slice(i, i + BATCH_SIZE)
+        await indexedDbService.putManyGifs(batch)
       }
 
-      const cache: GifCache = {
-        gifs: gifsToSave,
-        timestamp: Date.now(),
-        version: CACHE_VERSION
-      }
-
-      localStorage.setItem(GIF_CACHE_KEY, JSON.stringify(cache))
-      console.log('[GifService] Saved', cache.gifs.length, 'GIFs to cache')
+      console.log('[GifService] Saved', gifsToSave.length, 'GIFs to IndexedDB')
     } catch (error) {
-      console.error('[GifService] Error saving cache:', error)
-      // If localStorage is full, try with a smaller cache
-      try {
-        const reducedGifs = Array.from(this.allGifsCache.values())
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-          .slice(0, 5000) // Try with 5000 GIFs
-
-        const cache: GifCache = {
-          gifs: reducedGifs,
-          timestamp: Date.now(),
-          version: CACHE_VERSION
-        }
-
-        localStorage.setItem(GIF_CACHE_KEY, JSON.stringify(cache))
-        console.log('[GifService] Saved reduced cache of', reducedGifs.length, 'GIFs')
-      } catch (e) {
-        console.error('[GifService] Could not save even reduced cache, clearing:', e)
-        try {
-          localStorage.removeItem(GIF_CACHE_KEY)
-        } catch (clearError) {
-          console.error('[GifService] Could not clear cache:', clearError)
-        }
-      }
+      console.error('[GifService] Error saving cache to IndexedDB:', error)
     }
   }
 
@@ -176,8 +129,8 @@ class GifService {
     this.initializationPromise = (async () => {
       console.log('[GifService] Initializing...')
 
-      // Load cache synchronously from localStorage
-      this.loadCacheFromStorage()
+      // Load cache from IndexedDB
+      await this.loadCacheFromStorage()
 
       this.isInitialized = true
       console.log('[GifService] Initialized with', this.allGifsCache.size, 'GIFs from cache')
@@ -356,13 +309,22 @@ class GifService {
     return this.allGifsCache.size
   }
 
+  async getCacheSizeFromDB(): Promise<number> {
+    try {
+      return await indexedDbService.getGifCount()
+    } catch (error) {
+      console.error('[GifService] Error getting cache size from DB:', error)
+      return 0
+    }
+  }
+
   async clearCache(): Promise<void> {
     this.allGifsCache.clear()
     this.searchCache = {}
-    localStorage.removeItem(GIF_CACHE_KEY)
+    await indexedDbService.clearGifCache()
     this.isInitialized = false
     this.initializationPromise = null
-    console.log('[GifService] Cache cleared')
+    console.log('[GifService] Cache cleared from memory and IndexedDB')
   }
 
   // Force fetch more GIFs manually
