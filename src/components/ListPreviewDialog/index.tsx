@@ -12,11 +12,10 @@ import {
   DrawerHeader,
   DrawerTitle
 } from '@/components/ui/drawer'
-import { Progress } from '@/components/ui/progress'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useFollowList } from '@/providers/FollowListProvider'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Loader2 } from 'lucide-react'
 import { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -145,12 +144,6 @@ export default function ListPreviewDialog({
     }
   }, [pendingFollow, myPubkey, unfollowedUsers.length])
 
-  const currentProgress = autoFollowProgress?.isFollowing
-    ? autoFollowProgress.current
-    : followProgress
-  const totalProgress = autoFollowProgress?.isFollowing
-    ? autoFollowProgress.total
-    : unfollowedUsers.length
   const isCurrentlyFollowing = isFollowingAll || autoFollowProgress?.isFollowing
 
   const content = (
@@ -202,27 +195,19 @@ export default function ListPreviewDialog({
           <>
             {isCurrentlyFollowing ? (
               <div className="space-y-2">
-                {/* Progress label and count */}
-                <div className="flex items-center justify-between text-sm font-mono">
-                  <span className="text-muted-foreground">Following</span>
-                  <span className="text-muted-foreground">
-                    {currentProgress}/{totalProgress}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <Progress
-                  value={(currentProgress / totalProgress) * 100}
-                  className="h-2"
-                />
-                {/* Skip button */}
+                {/* Following button with spinner */}
                 <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  className="w-full mt-2"
+                  disabled
+                  className="w-full"
                   size="lg"
                 >
-                  {t('Skip for now')}
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  {t('Following...')}
                 </Button>
+                {/* Helper text */}
+                <p className="text-xs text-center text-muted-foreground">
+                  {t('This may take a minute. If it feels unresponsive, you can safely close this window.')}
+                </p>
               </div>
             ) : (
               <Button
