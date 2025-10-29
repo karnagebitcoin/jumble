@@ -24,11 +24,13 @@ const UserAvatarSizeCnMap = {
 export default function UserAvatar({
   userId,
   className,
-  size = 'normal'
+  size = 'normal',
+  noLink = false
 }: {
   userId: string
   className?: string
   size?: 'large' | 'big' | 'semiBig' | 'normal' | 'medium' | 'compact' | 'small' | 'xSmall' | 'tiny'
+  noLink?: boolean
 }) {
   const { profile } = useFetchProfile(userId)
   const defaultAvatar = useMemo(
@@ -43,16 +45,33 @@ export default function UserAvatar({
   }
   const { avatar, pubkey } = profile
 
+  const avatarElement = (
+    <Avatar className={cn('shrink-0', UserAvatarSizeCnMap[size], className)}>
+      <AvatarImage src={avatar} className="object-cover object-center" />
+      <AvatarFallback>
+        <img src={defaultAvatar} alt={pubkey} />
+      </AvatarFallback>
+    </Avatar>
+  )
+
+  if (noLink) {
+    return (
+      <HoverCard>
+        <HoverCardTrigger>
+          {avatarElement}
+        </HoverCardTrigger>
+        <HoverCardContent className="w-72">
+          <ProfileCard pubkey={pubkey} />
+        </HoverCardContent>
+      </HoverCard>
+    )
+  }
+
   return (
     <HoverCard>
       <HoverCardTrigger>
         <SecondaryPageLink to={toProfile(pubkey)} onClick={(e) => e.stopPropagation()}>
-          <Avatar className={cn('shrink-0', UserAvatarSizeCnMap[size], className)}>
-            <AvatarImage src={avatar} className="object-cover object-center" />
-            <AvatarFallback>
-              <img src={defaultAvatar} alt={pubkey} />
-            </AvatarFallback>
-          </Avatar>
+          {avatarElement}
         </SecondaryPageLink>
       </HoverCardTrigger>
       <HoverCardContent className="w-72">

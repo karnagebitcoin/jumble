@@ -118,52 +118,38 @@ export function AppWithListPreview() {
   }
 
   const handleClosePreview = () => {
-    setListPreview({
-      isOpen: false,
-      listData: null,
-      ownerPubkey: null,
-      dTag: null
-    })
-
     // Restore the original URL without the preview parameter
     if (originalUrlRef.current) {
       const url = new URL(originalUrlRef.current)
       url.searchParams.delete('preview')
-      window.history.replaceState(null, '', url.pathname + url.search + url.hash)
-      originalUrlRef.current = null
-
-      // Reload the page to properly load the list
-      window.location.reload()
+      window.location.href = url.pathname + url.search + url.hash
     }
   }
 
-  return (
-    <>
-      <PageManager />
+  // If preview mode is active, DON'T render PageManager at all
+  // Just show the dialog
+  if (listPreview.isOpen && listPreview.listData && listPreview.ownerPubkey && listPreview.dTag) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        {/* List Preview Dialog - standalone, no PageManager */}
+        <ListPreviewDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              handleClosePreview()
+            }
+          }}
+          listId={listPreview.dTag}
+          ownerPubkey={listPreview.ownerPubkey}
+          title={listPreview.listData.title}
+          description={listPreview.listData.description}
+          image={listPreview.listData.image}
+          pubkeys={listPreview.listData.pubkeys}
+        />
+      </div>
+    )
+  }
 
-      {/* List Preview Dialog - shows on top when preview mode is active */}
-      {listPreview.isOpen && listPreview.listData && listPreview.ownerPubkey && listPreview.dTag && (
-        <>
-          {/* Blank screen behind the dialog to hide the home page */}
-          <div className="fixed inset-0 bg-background z-[9998]" />
-
-          {/* List Preview Dialog */}
-          <ListPreviewDialog
-            open={true}
-            onOpenChange={(open) => {
-              if (!open) {
-                handleClosePreview()
-              }
-            }}
-            listId={listPreview.dTag}
-            ownerPubkey={listPreview.ownerPubkey}
-            title={listPreview.listData.title}
-            description={listPreview.listData.description}
-            image={listPreview.listData.image}
-            pubkeys={listPreview.listData.pubkeys}
-          />
-        </>
-      )}
-    </>
-  )
+  // Normal mode - render the full app
+  return <PageManager />
 }
