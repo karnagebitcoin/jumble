@@ -21,6 +21,7 @@ export interface GifData {
   hash?: string
   eventId?: string
   createdAt?: number
+  pubkey?: string
 }
 
 export interface GifSearchResult {
@@ -71,7 +72,8 @@ class GifService {
       size: sizeTag?.[1],
       hash: hashTag?.[1],
       eventId: event.id,
-      createdAt: event.created_at
+      createdAt: event.created_at,
+      pubkey: event.pubkey
     }
   }
 
@@ -254,17 +256,20 @@ class GifService {
     }
   }
 
-  async searchGifs(query: string, limit: number = 24, offset: number = 0): Promise<GifSearchResult> {
+  async searchGifs(query: string, limit: number = 24, offset: number = 0, filterByPubkey?: string): Promise<GifSearchResult> {
     if (!query.trim()) {
-      return this.fetchRecentGifs(limit, offset)
+      return filterByPubkey
+        ? this.fetchMyGifs(filterByPubkey, limit, offset)
+        : this.fetchRecentGifs(limit, offset)
     }
 
     await this.initialize()
 
     const lowerQuery = query.toLowerCase()
+    const cacheKey = filterByPubkey ? `${query}:${filterByPubkey}` : query
 
     // Check if we have a recent search cache
-    const cached = this.searchCache[query]
+    const cached = this.searchCache[cacheKey]
     if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) { // 5 minutes
       const gifs = cached.gifs.slice(offset, offset + limit)
       const hasMore = offset + limit < cached.gifs.length
@@ -273,14 +278,16 @@ class GifService {
 
     // Filter all cached GIFs
     const matchingGifs = Array.from(this.allGifsCache.values())
-      .filter((gif) =>
-        gif.alt?.toLowerCase().includes(lowerQuery) ||
-        gif.url.toLowerCase().includes(lowerQuery)
-      )
+      .filter((gif) => {
+        const matchesQuery = gif.alt?.toLowerCase().includes(lowerQuery) ||
+          gif.url.toLowerCase().includes(lowerQuery)
+        const matchesPubkey = !filterByPubkey || gif.pubkey === filterByPubkey
+        return matchesQuery && matchesPubkey
+      })
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
 
     // Cache the search results
-    this.searchCache[query] = {
+    this.searchCache[cacheKey] = {
       gifs: matchingGifs,
       timestamp: Date.now()
     }
@@ -293,6 +300,31 @@ class GifService {
     return {
       gifs,
       hasMore
+    }
+  }
+
+  async fetchMyGifs(pubkey: string, limit: number = 24, offset: number = 0): Promise<GifSearchResult> {
+    await this.initialize()
+
+    // Filter GIFs by pubkey and sort by created_at (most recent first)
+    const myGifs = Array.from(this.allGifsCache.values())
+      .filter((gif) => gif.pubkey === pubkey)
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+
+    const gifs = myGifs.slice(offset, offset + limit)
+    const hasMore = offset + limit < myGifs.length
+
+    return {
+      gifs,
+      hasMore
+    }
+  }
+
+  async addUserGif(gifData: GifData): Promise<void> {
+    if (gifData.eventId) {
+      this.allGifsCache.set(gifData.eventId, gifData)
+      await this.saveCacheToStorage()
+      this.notifyCacheUpdate()
     }
   }
 

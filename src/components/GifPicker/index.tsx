@@ -4,14 +4,19 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import gifService, { GifData } from '@/services/gif.service'
-import { ImagePlay, Loader2, X } from 'lucide-react'
+import { ImagePlay, Loader2, X, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import Tabs from '@/components/Tabs'
+import { useNostr } from '@/providers/NostrProvider'
+import GifUploadDialog from './GifUploadDialog'
 
 export interface GifPickerProps {
   onGifSelect: (url: string) => void
   children?: React.ReactNode
 }
+
+type TabValue = 'all' | 'my'
 
 function GifPickerContent({
   onGifClick,
@@ -23,11 +28,14 @@ function GifPickerContent({
   onClose?: () => void
 }) {
   const { t } = useTranslation()
+  const { pubkey } = useNostr()
+  const [activeTab, setActiveTab] = useState<TabValue>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [gifs, setGifs] = useState<GifData[]>([])
   const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
   const offsetRef = useRef(0)
 
@@ -35,23 +43,29 @@ function GifPickerContent({
   const gridCols = isSmallScreen ? 2 : 3
   const gifsPerPage = isSmallScreen ? 12 : 24
 
-  // Load recent GIFs on mount
+  // Load GIFs when tab or search changes
   useEffect(() => {
-    loadRecentGifs()
+    if (activeTab === 'all') {
+      loadRecentGifs()
+    } else {
+      loadMyGifs()
+    }
 
     // Subscribe to cache updates
     const unsubscribe = gifService.onCacheUpdate(() => {
       console.log('[GifPicker] Cache updated, reloading GIFs...')
-      // If we're not searching and showing recent GIFs, reload to show new ones
-      if (!searchQuery && gifs.length < gifService.getCacheSize()) {
+      // Reload when cache is updated
+      if (activeTab === 'all' && !searchQuery) {
         loadRecentGifs()
+      } else if (activeTab === 'my') {
+        loadMyGifs()
       }
     })
 
     return () => {
       unsubscribe()
     }
-  }, [searchQuery])
+  }, [searchQuery, activeTab])
 
   const loadRecentGifs = async () => {
     setIsLoading(true)
@@ -68,18 +82,46 @@ function GifPickerContent({
     }
   }
 
+  const loadMyGifs = async () => {
+    if (!pubkey) {
+      setGifs([])
+      setHasMore(false)
+      setIsLoading(false)
+      return
+    }
+
+    setIsLoading(true)
+    offsetRef.current = 0
+    try {
+      const { gifs: myGifs, hasMore: more } = await gifService.fetchMyGifs(pubkey, gifsPerPage, 0)
+      setGifs(myGifs)
+      setHasMore(more)
+      offsetRef.current = myGifs.length
+    } catch (error) {
+      console.error('Error loading my GIFs:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const loadMoreGifs = async () => {
     if (isLoadingMore) return
 
     setIsLoadingMore(true)
     try {
-      const { gifs: moreGifs, hasMore: more } = searchQuery
-        ? await gifService.searchGifs(searchQuery, gifsPerPage, offsetRef.current)
-        : await gifService.fetchRecentGifs(gifsPerPage, offsetRef.current)
+      let result
+      if (searchQuery) {
+        // Search works across both tabs
+        result = await gifService.searchGifs(searchQuery, gifsPerPage, offsetRef.current, activeTab === 'my' ? pubkey : undefined)
+      } else if (activeTab === 'my' && pubkey) {
+        result = await gifService.fetchMyGifs(pubkey, gifsPerPage, offsetRef.current)
+      } else {
+        result = await gifService.fetchRecentGifs(gifsPerPage, offsetRef.current)
+      }
 
-      setGifs((prev) => [...prev, ...moreGifs])
-      setHasMore(more)
-      offsetRef.current += moreGifs.length
+      setGifs((prev) => [...prev, ...result.gifs])
+      setHasMore(result.hasMore)
+      offsetRef.current += result.gifs.length
     } catch (error) {
       console.error('Error loading more GIFs:', error)
     } finally {
@@ -100,7 +142,13 @@ function GifPickerContent({
       setIsLoading(true)
       offsetRef.current = 0
       try {
-        const { gifs: results, hasMore: more } = await gifService.searchGifs(query, gifsPerPage, 0)
+        // Search works across both tabs, filtering by pubkey for "my" tab
+        const { gifs: results, hasMore: more } = await gifService.searchGifs(
+          query,
+          gifsPerPage,
+          0,
+          activeTab === 'my' ? pubkey : undefined
+        )
         setGifs(results)
         setHasMore(more)
         offsetRef.current = results.length
@@ -111,6 +159,19 @@ function GifPickerContent({
       }
     }, 300)
   }
+
+  const handleUploadSuccess = () => {
+    setIsUploadDialogOpen(false)
+    // Reload my GIFs
+    if (activeTab === 'my') {
+      loadMyGifs()
+    }
+  }
+
+  const tabs = [
+    { value: 'all', label: 'All Gifs' },
+    { value: 'my', label: 'My Gifs' }
+  ]
 
   return (
     <div className="space-y-3 p-3">
@@ -128,6 +189,14 @@ function GifPickerContent({
           </Button>
         )}
       </div>
+
+      <Tabs
+        tabs={tabs}
+        value={activeTab}
+        onTabChange={(tab) => setActiveTab(tab as TabValue)}
+        threshold={0}
+      />
+
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
           {gifs.length > 0 && (
@@ -138,7 +207,10 @@ function GifPickerContent({
           )}
         </span>
         <span className="text-xs">
-          {t('Cache: {{count}}', { count: gifService.getCacheSize() })}
+          {activeTab === 'all'
+            ? t('Cache: {{count}}', { count: gifService.getCacheSize() })
+            : pubkey && t('My GIFs')
+          }
         </span>
       </div>
       <div
@@ -197,12 +269,41 @@ function GifPickerContent({
               </div>
             )}
           </div>
+        ) : activeTab === 'my' && !pubkey ? (
+          <div className="flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
+            <p>{t('Please log in to view and upload your GIFs')}</p>
+          </div>
+        ) : activeTab === 'my' && pubkey ? (
+          <div className="flex flex-col items-center justify-center gap-3" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
+            <p className="text-sm text-muted-foreground">{searchQuery ? t('No GIFs found') : t('You haven\'t uploaded any GIFs yet')}</p>
+            <Button onClick={() => setIsUploadDialogOpen(true)} size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              {t('Upload GIF')}
+            </Button>
+          </div>
         ) : (
           <div className="flex items-center justify-center text-sm text-muted-foreground" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
             {searchQuery ? t('No GIFs found') : t('No recent GIFs')}
           </div>
         )}
       </div>
+
+      {activeTab === 'my' && pubkey && gifs.length > 0 && (
+        <div className="flex justify-center pt-2">
+          <Button onClick={() => setIsUploadDialogOpen(true)} size="sm" variant="outline" className="w-full">
+            <Upload className="h-4 w-4 mr-2" />
+            {t('Upload GIF')}
+          </Button>
+        </div>
+      )}
+
+      {pubkey && (
+        <GifUploadDialog
+          open={isUploadDialogOpen}
+          onOpenChange={setIsUploadDialogOpen}
+          onSuccess={handleUploadSuccess}
+        />
+      )}
     </div>
   )
 }

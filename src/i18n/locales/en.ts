@@ -603,6 +603,26 @@ export default {
     'Search GIFs...': 'Search GIFs...',
     'No GIFs found': 'No GIFs found',
     'No recent GIFs': 'No recent GIFs',
-    'Found {{count}} GIFs': 'Found {{count}} GIFs'
+    'Found {{count}} GIFs': 'Found {{count}} GIFs',
+    'All Gifs': 'All Gifs',
+    'My Gifs': 'My Gifs',
+    'My GIFs': 'My GIFs',
+    'Upload GIF': 'Upload GIF',
+    'Please log in to view and upload your GIFs': 'Please log in to view and upload your GIFs',
+    "You haven't uploaded any GIFs yet": "You haven't uploaded any GIFs yet",
+    'Upload a GIF to share with the Nostr community. It will be published as a kind 1063 event.': 'Upload a GIF to share with the Nostr community. It will be published as a kind 1063 event.',
+    'Click to select a GIF file': 'Click to select a GIF file',
+    'Max size: 10MB': 'Max size: 10MB',
+    'Please select a GIF file': 'Please select a GIF file',
+    'Please select a GIF smaller than 10MB': 'Please select a GIF smaller than 10MB',
+    'Description': 'Description',
+    'Describe your GIF to help others find it (e.g., "happy cat dancing")': 'Describe your GIF to help others find it (e.g., "happy cat dancing")',
+    'This description will be used for searching and accessibility': 'This description will be used for searching and accessibility',
+    'Please log in and select a file': 'Please log in and select a file',
+    'Please add a description to help others find your GIF': 'Please add a description to help others find your GIF',
+    'Your GIF has been uploaded successfully and is now available in "My Gifs"': 'Your GIF has been uploaded successfully and is now available in "My Gifs"',
+    'Failed to upload GIF': 'Failed to upload GIF',
+    'Uploading...': 'Uploading...',
+    'Error': 'Error'
   }
 }
