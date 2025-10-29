@@ -433,6 +433,7 @@ const ListsPage = forwardRef((_, ref) => {
                     <>
                       <span className="text-muted-foreground">•</span>
                       <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
+                        <span>By</span>
                         <UserAvatar userId={list.event.pubkey} size="xSmall" className="inline-block" />
                         <Username pubkey={list.event.pubkey} className="font-medium inline" />
                       </div>
@@ -620,7 +621,8 @@ const ListsPage = forwardRef((_, ref) => {
               </div>
               {!isOwnList && (
                 <div className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                  <span>{t('by')}</span>
+                  <span>{t('By')}</span>
+                  <UserAvatar userId={selectedList.event.pubkey} size="small" />
                   <Username pubkey={selectedList.event.pubkey} className="font-medium" />
                 </div>
               )}
