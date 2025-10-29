@@ -34,7 +34,7 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const { deckViewMode, pinColumn, pinnedColumns } = useDeckView()
   const { layoutMode } = useLayoutMode()
   const { pubkey: myPubkey, checkLogin } = useNostr()
-  const { followings, follow } = useFollowList()
+  const { followings, followMultiple } = useFollowList()
   const [externalList, setExternalList] = useState<TStarterPack | null>(null)
   const [isLoadingExternal, setIsLoadingExternal] = useState(false)
   const [isFollowingAll, setIsFollowingAll] = useState(false)
@@ -151,17 +151,12 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
 
       setIsFollowingAll(true)
       try {
-        let successCount = 0
-        for (const pubkey of unfollowedUsers) {
-          try {
-            await follow(pubkey)
-            successCount++
-          } catch (error) {
-            console.error(`Failed to follow ${pubkey}:`, error)
-          }
-        }
-        const word = successCount === 1 ? t('user') : t('users')
-        toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
+        // Follow all users in a single operation
+        await followMultiple(unfollowedUsers)
+
+        const count = unfollowedUsers.length
+        const word = count === 1 ? t('user') : t('users')
+        toast.success(t('Followed {{count}} {{word}}', { count, word }))
       } catch (error) {
         console.error('Failed to follow all:', error)
         toast.error(t('Failed to follow all users'))

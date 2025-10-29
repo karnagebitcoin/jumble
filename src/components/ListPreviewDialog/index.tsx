@@ -55,9 +55,8 @@ export default function ListPreviewDialog({
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
   const { pubkey: myPubkey } = useNostr()
-  const { followings, follow } = useFollowList()
+  const { followings, followMultiple } = useFollowList()
   const [isFollowingAll, setIsFollowingAll] = useState(false)
-  const [followProgress, setFollowProgress] = useState(0)
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [pendingFollow, setPendingFollow] = useState(false)
 
@@ -108,31 +107,19 @@ export default function ListPreviewDialog({
     }
 
     setIsFollowingAll(true)
-    setFollowProgress(0)
 
     try {
-      let successCount = 0
-      const total = unfollowedUsers.length
+      // Follow all users in a single operation
+      await followMultiple(unfollowedUsers)
 
-      for (let i = 0; i < unfollowedUsers.length; i++) {
-        const pubkey = unfollowedUsers[i]
-        try {
-          await follow(pubkey)
-          successCount++
-          setFollowProgress(successCount)
-        } catch (error) {
-          console.error(`Failed to follow ${pubkey}:`, error)
-        }
-      }
-
-      const word = successCount === 1 ? t('user') : t('users')
-      toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
+      const count = unfollowedUsers.length
+      const word = count === 1 ? t('user') : t('users')
+      toast.success(t('Followed {{count}} {{word}}', { count, word }))
     } catch (error) {
       console.error('Failed to follow all:', error)
       toast.error(t('Failed to follow all users'))
     } finally {
       setIsFollowingAll(false)
-      setFollowProgress(0)
     }
   }
 

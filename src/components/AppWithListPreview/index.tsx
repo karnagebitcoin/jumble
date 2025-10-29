@@ -30,7 +30,7 @@ export function AppWithListPreview() {
   const { t } = useTranslation()
   const { pubkey: myPubkey } = useNostr()
   const { lists } = useLists()
-  const { follow, followings } = useFollowList()
+  const { followMultiple, followings } = useFollowList()
   const { switchFeed } = useFeed()
   const [listPreview, setListPreview] = useState<{
     isOpen: boolean
@@ -159,30 +159,19 @@ export function AppWithListPreview() {
           dTag: listId
         })
 
-        // Start following all users with progress tracking
+        // Start following all users
         setFollowProgress({
           isFollowing: true,
           current: 0,
           total: unfollowedUsers.length
         })
 
-        let successCount = 0
-        for (const pubkey of unfollowedUsers) {
-          try {
-            await follow(pubkey)
-            successCount++
-            setFollowProgress({
-              isFollowing: true,
-              current: successCount,
-              total: unfollowedUsers.length
-            })
-          } catch (error) {
-            console.error(`Failed to follow ${pubkey}:`, error)
-          }
-        }
+        // Follow all users in a single operation
+        await followMultiple(unfollowedUsers)
 
-        const word = successCount === 1 ? t('user') : t('users')
-        toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
+        const count = unfollowedUsers.length
+        const word = count === 1 ? t('user') : t('users')
+        toast.success(t('Followed {{count}} {{word}}', { count, word }))
 
         // Clear the pending follow and hide progress
         sessionStorage.removeItem('pendingListFollow')
@@ -206,7 +195,7 @@ export function AppWithListPreview() {
     }
 
     autoFollowFromPending()
-  }, [myPubkey, followings, follow, t])
+  }, [myPubkey, followings, followMultiple, t])
 
   const parseStarterPackEvent = (event: Event): TStarterPack => {
     const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
