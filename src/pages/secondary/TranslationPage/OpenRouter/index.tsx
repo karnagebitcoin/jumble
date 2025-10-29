@@ -1,5 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import storage from '@/services/local-storage.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { useTranslationService } from '@/providers/TranslationServiceProvider'
@@ -17,6 +18,9 @@ export default function OpenRouter() {
   )
   const [model, setModel] = useState(
     config.service === 'openrouter' ? (config.model ?? '') : ''
+  )
+  const [autoTranslate, setAutoTranslate] = useState(
+    config.service === 'openrouter' ? (config.auto_translate ?? false) : false
   )
   const initialized = useRef(false)
 
@@ -46,9 +50,10 @@ export default function OpenRouter() {
     updateConfig({
       service: 'openrouter',
       api_key: apiKey,
-      model: model
+      model: model,
+      auto_translate: autoTranslate
     })
-  }, [apiKey, model])
+  }, [apiKey, model, autoTranslate])
 
   const hasAIConfig = !!(aiServiceConfig.apiKey && aiServiceConfig.model)
 
@@ -98,6 +103,21 @@ export default function OpenRouter() {
             Default model is {DEFAULT_MODEL}. You can change it here or configure in AI Tools settings.
           </p>
         )}
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="auto-translate" className="text-base">
+            Auto-translate notes
+          </Label>
+          <Switch
+            id="auto-translate"
+            checked={autoTranslate}
+            onCheckedChange={setAutoTranslate}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Automatically translate notes in foreign languages to English
+        </p>
       </div>
     </div>
   )

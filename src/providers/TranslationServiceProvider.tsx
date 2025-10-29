@@ -18,11 +18,13 @@ type TTranslationServiceContext = {
   translatedEventIdSet: Set<string>
   translateText: (text: string) => Promise<string>
   translateEvent: (event: Event) => Promise<Event | void>
+  autoTranslateEvent: (event: Event) => Promise<Event | void>
   getTranslatedEvent: (eventId: string) => Event | null
   showOriginalEvent: (eventId: string) => void
   getAccount: () => Promise<TTranslationAccount | void>
   regenerateApiKey: () => Promise<string | undefined>
   updateConfig: (newConfig: TTranslationServiceConfig) => void
+  shouldAutoTranslate: () => boolean
 }
 
 const TranslationServiceContext = createContext<TTranslationServiceContext | undefined>(undefined)
@@ -193,6 +195,38 @@ export function TranslationServiceProvider({ children }: { children: React.React
     })
   }
 
+  const shouldAutoTranslate = () => {
+    if (config.service === 'jumble') {
+      return config.auto_translate ?? false
+    } else if (config.service === 'libre_translate') {
+      return config.auto_translate ?? false
+    } else if (config.service === 'openrouter') {
+      return config.auto_translate ?? false
+    }
+    return false
+  }
+
+  const autoTranslateEvent = async (event: Event): Promise<Event | void> => {
+    if (!shouldAutoTranslate()) {
+      return
+    }
+
+    // Check if already translated
+    const target = i18n.language
+    const cacheKey = target + '_' + event.id
+    if (translatedEventCache.has(cacheKey) || translatedEventIdSet.has(event.id)) {
+      return
+    }
+
+    // Silently translate in background
+    try {
+      await translateEvent(event)
+    } catch (error) {
+      // Silently fail for auto-translation
+      console.debug('Auto-translation failed:', error)
+    }
+  }
+
   const updateConfig = (newConfig: TTranslationServiceConfig) => {
     setConfig(newConfig)
     storage.setTranslationServiceConfig(newConfig, pubkey)
@@ -207,9 +241,11 @@ export function TranslationServiceProvider({ children }: { children: React.React
         regenerateApiKey,
         translateText,
         translateEvent,
+        autoTranslateEvent,
         getTranslatedEvent,
         showOriginalEvent,
-        updateConfig
+        updateConfig,
+        shouldAutoTranslate
       }}
     >
       {children}

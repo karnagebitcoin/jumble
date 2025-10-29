@@ -175,16 +175,19 @@ export type TTranslationAccount = {
 export type TTranslationServiceConfig =
   | {
       service: 'jumble'
+      auto_translate?: boolean
     }
   | {
       service: 'libre_translate'
       server?: string
       api_key?: string
+      auto_translate?: boolean
     }
   | {
       service: 'openrouter'
       api_key?: string
       model?: string
+      auto_translate?: boolean
     }
 
 export type TMediaUploadServiceConfig =
