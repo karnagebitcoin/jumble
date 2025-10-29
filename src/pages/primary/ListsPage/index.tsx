@@ -743,7 +743,7 @@ const ListsPage = forwardRef((_, ref) => {
               />
             </div>
             <Button onClick={handleCreateList} size="default">
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 mr-1" />
               {t('Create')}
             </Button>
           </div>
