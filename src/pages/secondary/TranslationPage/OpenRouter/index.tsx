@@ -1,6 +1,13 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import storage from '@/services/local-storage.service'
 import { useNostr } from '@/providers/NostrProvider'
 import { useTranslationService } from '@/providers/TranslationServiceProvider'
@@ -8,6 +15,44 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const DEFAULT_MODEL = 'google/gemini-2.0-flash-001'
+
+const TRANSLATION_MODELS = [
+  {
+    id: 'google/gemma-3-12b-it',
+    label: 'google/gemma-3-12b-it',
+    price: '$0.03/M input tokens'
+  },
+  {
+    id: 'google/gemini-2.0-flash-001',
+    label: 'google/gemini-2.0-flash-001',
+    price: '$0.10/M input tokens'
+  },
+  {
+    id: 'google/gemini-2.5-flash',
+    label: 'google/gemini-2.5-flash',
+    price: '$0.30/M input tokens'
+  },
+  {
+    id: 'openai/gpt-5-mini',
+    label: 'openai/gpt-5-mini',
+    price: '$0.25/M input tokens'
+  },
+  {
+    id: 'google/gemini-2.5-flash-lite',
+    label: 'google/gemini-2.5-flash-lite',
+    price: '$0.10/M input tokens'
+  },
+  {
+    id: 'google/gemini-flash-1.5-8b',
+    label: 'google/gemini-flash-1.5-8b',
+    price: ''
+  },
+  {
+    id: 'mistralai/mistral-small-3.1-24b-instruct',
+    label: 'mistralai/mistral-small-3.1-24b-instruct',
+    price: '$0.05/M input tokens'
+  }
+]
 
 export default function OpenRouter() {
   const { t } = useTranslation()
@@ -83,24 +128,29 @@ export default function OpenRouter() {
       <div className="space-y-2">
         <Label htmlFor="openrouter-model" className="text-base">
           Model {usingAIModel && <span className="text-muted-foreground text-sm">(Using AI Tools model)</span>}
-          {usingDefaultModel && <span className="text-muted-foreground text-sm">(Default: {DEFAULT_MODEL})</span>}
         </Label>
-        <Input
-          id="openrouter-model"
-          type="text"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          placeholder={
-            usingAIModel
-              ? `Using AI Tools model: ${aiServiceConfig.model}`
-              : usingDefaultModel
-              ? `Default: ${DEFAULT_MODEL}`
-              : 'e.g., anthropic/claude-3.5-sonnet'
-          }
-        />
-        {!hasAIConfig && (
+        <Select value={model || DEFAULT_MODEL} onValueChange={setModel}>
+          <SelectTrigger id="openrouter-model">
+            <SelectValue placeholder="Select a model" />
+          </SelectTrigger>
+          <SelectContent>
+            {TRANSLATION_MODELS.map((modelOption) => (
+              <SelectItem key={modelOption.id} value={modelOption.id}>
+                <div className="flex flex-col items-start">
+                  <span>{modelOption.label}</span>
+                  {modelOption.price && (
+                    <span className="text-xs text-muted-foreground">
+                      {modelOption.price}
+                    </span>
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {usingAIModel && (
           <p className="text-sm text-muted-foreground">
-            Default model is {DEFAULT_MODEL}. You can change it here or configure in AI Tools settings.
+            Using model from AI Tools: {aiServiceConfig.model}
           </p>
         )}
       </div>
