@@ -175,17 +175,31 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
 
   // Show result with insert options
   if (imageUrl) {
+    console.log('=== Rendering image preview ===')
+    console.log('Image URL length:', imageUrl.length)
+    console.log('Is data URL:', imageUrl.startsWith('data:'))
+
     return (
       <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-md space-y-2">
         <div className="text-xs text-muted-foreground mb-2">{t('Generated Image:')}</div>
 
-        {/* Image Preview */}
+        {/* Image Preview - use native img for data URLs */}
         <div className="w-full border rounded-lg overflow-hidden bg-muted">
-          <Image
-            image={{ url: imageUrl }}
-            className="w-full h-auto max-h-96 object-contain"
-            hideIfError
-          />
+          {imageUrl.startsWith('data:') ? (
+            <img
+              src={imageUrl}
+              alt="Generated"
+              className="w-full h-auto max-h-96 object-contain"
+              onLoad={() => console.log('✓ Data URL image loaded successfully')}
+              onError={(e) => console.error('✗ Data URL image failed to load:', e)}
+            />
+          ) : (
+            <Image
+              image={{ url: imageUrl }}
+              className="w-full h-auto max-h-96 object-contain"
+              hideIfError={false}
+            />
+          )}
         </div>
 
         <div className="flex gap-2">
