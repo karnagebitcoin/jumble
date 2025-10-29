@@ -598,6 +598,10 @@ export default {
     'Followed {{count}} {{word}}': 'Followed {{count}} {{word}}',
     'user': 'user',
     'users': 'users',
-    'Failed to follow all users': 'Failed to follow all users'
+    'Failed to follow all users': 'Failed to follow all users',
+    'Add GIF': 'Add GIF',
+    'Search GIFs...': 'Search GIFs...',
+    'No GIFs found': 'No GIFs found',
+    'No recent GIFs': 'No recent GIFs'
   }
 }

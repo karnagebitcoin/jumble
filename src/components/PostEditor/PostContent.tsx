@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import EmojiPickerDialog from '../EmojiPickerDialog'
+import GifPicker from '../GifPicker'
 import Mentions from './Mentions'
 import PollEditor from './PollEditor'
 import PostOptions from './PostOptions'
@@ -263,6 +264,11 @@ export default function PostContent({
               <ImageUp />
             </Button>
           </Uploader>
+          <GifPicker
+            onGifSelect={(url) => {
+              textareaRef.current?.appendText(url, true)
+            }}
+          />
           {/* I'm not sure why, but after triggering the virtual keyboard,
               opening the emoji picker drawer causes an issue,
               the emoji I tap isn't the one that gets inserted. */}
