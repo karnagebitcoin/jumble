@@ -324,10 +324,25 @@ Format your response as JSON with this exact structure:
         throw new Error('No response from AI')
       }
 
+      // First check if there's an images array (new format)
+      if (message.images && Array.isArray(message.images) && message.images.length > 0) {
+        console.log('Found images array with', message.images.length, 'images')
+        const firstImage = message.images[0]
+        console.log('First image:', firstImage)
+
+        if (firstImage.image_url?.url) {
+          console.log('✓ Found image URL in images array:', firstImage.image_url.url.substring(0, 100))
+          return firstImage.image_url.url
+        } else if (firstImage.url) {
+          console.log('✓ Found URL in images array:', firstImage.url.substring(0, 100))
+          return firstImage.url
+        }
+      }
+
       console.log('Message content type:', typeof message.content)
       console.log('Message content is array:', Array.isArray(message.content))
 
-      // Parse the response to extract image URL
+      // Parse the response to extract image URL from content
       if (Array.isArray(message.content)) {
         console.log('Processing array content...')
         console.log('Content array length:', message.content.length)
