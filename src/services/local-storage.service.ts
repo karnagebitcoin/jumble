@@ -910,7 +910,7 @@ class LocalStorageService {
   getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {
     return this.aiServiceConfigMap[pubkey ?? '_'] ?? {
       provider: 'openrouter',
-      model: 'meta-llama/llama-3.3-8b-instruct:free'
+      model: 'x-ai/grok-4-fast'
     }
   }
 
