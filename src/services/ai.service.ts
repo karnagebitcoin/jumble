@@ -156,31 +156,17 @@ Format your response as JSON with this exact structure:
   }
 
   async getAvailableModels(): Promise<Array<{ id: string; name: string }>> {
-    if (!this.config.apiKey) {
-      return []
-    }
+    // Handpicked models for better UX
+    const handpickedModels = [
+      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Meta Llama 3.3 70B (Free)' },
+      { id: 'google/gemini-2.0-flash-exp:free', name: 'Google Gemini 2.0 Flash (Free)' },
+      { id: 'x-ai/grok-beta', name: 'xAI Grok Beta' },
+      { id: 'openai/gpt-4o-mini', name: 'OpenAI GPT-4o Mini' },
+      { id: 'openai/o1-mini', name: 'OpenAI o1 Mini' },
+      { id: 'mistralai/mistral-large-2411', name: 'Mistral Large 2411' }
+    ]
 
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`
-        }
-      })
-
-      if (!response.ok) {
-        return []
-      }
-
-      const data = await response.json()
-      return (
-        data.data?.map((model: any) => ({
-          id: model.id,
-          name: model.name || model.id
-        })) || []
-      )
-    } catch {
-      return []
-    }
+    return handpickedModels
   }
 }
 

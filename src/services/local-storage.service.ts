@@ -908,7 +908,10 @@ class LocalStorageService {
   }
 
   getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {
-    return this.aiServiceConfigMap[pubkey ?? '_'] ?? { provider: 'openrouter' }
+    return this.aiServiceConfigMap[pubkey ?? '_'] ?? {
+      provider: 'openrouter',
+      model: 'meta-llama/llama-3.3-70b-instruct'
+    }
   }
 
   setAIServiceConfig(config: TAIServiceConfig, pubkey?: string | null) {

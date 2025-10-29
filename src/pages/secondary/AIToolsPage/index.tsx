@@ -23,12 +23,13 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [apiKey, setApiKey] = useState(serviceConfig.apiKey || '')
   const [selectedModel, setSelectedModel] = useState(serviceConfig.model || '')
   const [availableModels, setAvailableModels] = useState<Array<{ id: string; name: string }>>([])
-  const [isLoadingModels, setIsLoadingModels] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
 
   useEffect(() => {
     setApiKey(serviceConfig.apiKey || '')
     setSelectedModel(serviceConfig.model || '')
+    // Load the handpicked models
+    loadModels()
   }, [serviceConfig])
 
   const handleSaveApiKey = async () => {
@@ -49,20 +50,14 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
 
     updateServiceConfig(tempConfig)
     toast.success(t('API key saved successfully'))
-
-    // Load available models
-    loadModels()
   }
 
   const loadModels = async () => {
-    setIsLoadingModels(true)
     try {
       const models = await aiService.getAvailableModels()
       setAvailableModels(models)
     } catch (error) {
       console.error('Failed to load models:', error)
-    } finally {
-      setIsLoadingModels(false)
     }
   }
 
@@ -75,12 +70,6 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const handleToggleSummary = (enabled: boolean) => {
     updateToolsConfig({ ...toolsConfig, enableSummary: enabled })
   }
-
-  useEffect(() => {
-    if (serviceConfig.apiKey) {
-      loadModels()
-    }
-  }, [serviceConfig.apiKey])
 
   return (
     <SecondaryPageLayout ref={ref} index={index} title={t('AI Tools')}>
@@ -131,40 +120,36 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
           </div>
 
           {/* Model Selection */}
-          {serviceConfig.apiKey && (
-            <div className="space-y-2">
-              <Label htmlFor="model-select">{t('Default Model')}</Label>
-              <Select
-                value={selectedModel}
-                onValueChange={handleModelSelect}
-                disabled={isLoadingModels || availableModels.length === 0}
-              >
-                <SelectTrigger id="model-select">
-                  <SelectValue
-                    placeholder={
-                      isLoadingModels
-                        ? t('Loading models...')
-                        : availableModels.length === 0
-                          ? t('No models available')
-                          : t('Select a model')
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {availableModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {availableModels.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {t('Select the AI model to use for all AI features')}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="model-select">{t('Default Model')}</Label>
+            <Select
+              value={selectedModel}
+              onValueChange={handleModelSelect}
+              disabled={availableModels.length === 0}
+            >
+              <SelectTrigger id="model-select">
+                <SelectValue
+                  placeholder={
+                    availableModels.length === 0
+                      ? t('No models available')
+                      : t('Select a model')
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {availableModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {availableModels.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('Select the AI model to use for all AI features')}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Divider */}
