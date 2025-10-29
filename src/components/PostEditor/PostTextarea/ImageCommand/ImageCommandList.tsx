@@ -42,14 +42,34 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
     setError('')
     setImageUrl('')
 
+    console.log('=== ImageCommandList: Generating image ===')
+    console.log('Query:', props.query)
+
     try {
       const url = await generateImage(props.query)
+      console.log('=== ImageCommandList: Result ===')
+      console.log('URL type:', typeof url)
+      console.log('URL value:', url)
+      console.log('URL length:', url?.length)
+
+      // Check if it's a data URL
+      if (url.startsWith('data:')) {
+        console.log('✓ Result is a data URL (base64 encoded image)')
+      } else if (url.startsWith('http')) {
+        console.log('✓ Result is an HTTP URL')
+      } else {
+        console.log('⚠ Result is neither data URL nor HTTP URL')
+      }
+
       setImageUrl(url)
     } catch (err: any) {
-      console.error('Image Generation Error:', err)
+      console.error('=== ImageCommandList: Error ===')
+      console.error('Error:', err)
+      console.error('Error message:', err.message)
       setError(err.message || t('Failed to generate image'))
     } finally {
       setLoading(false)
+      console.log('=== ImageCommandList: Complete ===')
     }
   }
 
