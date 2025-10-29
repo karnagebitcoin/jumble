@@ -22,6 +22,8 @@ import Mention from './Mention'
 import mentionSuggestion from './Mention/suggestion'
 import Gif from './Gif'
 import gifSuggestion from './Gif/suggestion'
+import AICommand from './AICommand'
+import aiCommandSuggestion from './AICommand/suggestion'
 import Preview from './Preview'
 
 export type TPostTextareaHandle = {
@@ -79,6 +81,9 @@ const PostTextarea = forwardRef<
         }),
         Gif.configure({
           suggestion: gifSuggestion
+        }),
+        AICommand.configure({
+          suggestion: aiCommandSuggestion
         }),
         ClipboardAndDropHandler.configure({
           onUploadStart: (file, cancel) => {
