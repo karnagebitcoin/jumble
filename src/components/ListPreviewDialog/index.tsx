@@ -32,6 +32,7 @@ interface ListPreviewDialogProps {
   description?: string
   image?: string
   pubkeys: string[]
+  isStandalone?: boolean // When true, this is shown from a shared link (no view list button)
 }
 
 export default function ListPreviewDialog({
@@ -42,7 +43,8 @@ export default function ListPreviewDialog({
   title,
   description,
   image,
-  pubkeys
+  pubkeys,
+  isStandalone = false
 }: ListPreviewDialogProps) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
@@ -58,14 +60,27 @@ export default function ListPreviewDialog({
     return pubkeys.filter((pubkey) => pubkey !== myPubkey && !followings.includes(pubkey))
   }, [pubkeys, followings, myPubkey])
 
-  const handleSignUp = () => {
-    // User not logged in, open login dialog for sign up
+  // Store list info in sessionStorage for auto-follow after login/signup
+  useEffect(() => {
+    if (isStandalone && !myPubkey) {
+      // Store the list data so we can auto-follow after authentication
+      sessionStorage.setItem('pendingListFollow', JSON.stringify({
+        listId,
+        ownerPubkey,
+        title,
+        pubkeys
+      }))
+    }
+  }, [isStandalone, myPubkey, listId, ownerPubkey, title, pubkeys])
+
+  const handleSignInAndFollow = () => {
+    // Mark that we want to follow after login
     setPendingFollow(true)
     setLoginDialogOpen(true)
   }
 
-  const handleLogin = () => {
-    // User not logged in, open login dialog for login
+  const handleCreateProfileAndFollow = () => {
+    // Mark that we want to follow after signup
     setPendingFollow(true)
     setLoginDialogOpen(true)
   }
@@ -150,13 +165,19 @@ export default function ListPreviewDialog({
       <div className="flex flex-col gap-2 pt-2">
         {!myPubkey ? (
           <>
-            <Button onClick={handleSignUp} className="w-full" size="lg">
+            <Button onClick={handleSignInAndFollow} className="w-full" size="lg">
               <UserPlus className="w-5 h-5 mr-2" />
-              {t('Sign up to Follow')}
+              {t('Sign in and follow all')}
             </Button>
-            <Button onClick={handleLogin} variant="outline" className="w-full" size="lg">
-              {t('Log in to Follow')}
-            </Button>
+            <div className="text-center text-sm text-muted-foreground">
+              {t("Don't have a profile?")}{' '}
+              <button
+                onClick={handleCreateProfileAndFollow}
+                className="text-primary hover:underline font-medium"
+              >
+                {t('Create one')}
+              </button>
+            </div>
           </>
         ) : (
           <>
@@ -183,9 +204,11 @@ export default function ListPreviewDialog({
                 </>
               )}
             </Button>
-            <Button onClick={handleViewList} variant="outline" className="w-full">
-              {t('View List')}
-            </Button>
+            {!isStandalone && (
+              <Button onClick={handleViewList} variant="outline" className="w-full">
+                {t('View List')}
+              </Button>
+            )}
           </>
         )}
       </div>

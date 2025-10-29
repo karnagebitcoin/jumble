@@ -3,9 +3,12 @@ import { PageManager } from '@/PageManager'
 import ListPreviewDialog from '@/components/ListPreviewDialog'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useFollowList } from '@/providers/FollowListProvider'
 import client from '@/services/client.service'
 import { Event } from 'nostr-tools'
 import { BIG_RELAY_URLS, ExtendedKind } from '@/constants'
+import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 /**
  * AppWithListPreview
@@ -23,8 +26,10 @@ import { BIG_RELAY_URLS, ExtendedKind } from '@/constants'
  * 4. Only navigates to the list if user closes dialog or clicks "View List"
  */
 export function AppWithListPreview() {
+  const { t } = useTranslation()
   const { pubkey: myPubkey } = useNostr()
   const { lists } = useLists()
+  const { follow, followings } = useFollowList()
   const [listPreview, setListPreview] = useState<{
     isOpen: boolean
     listData: TStarterPack | null
@@ -37,6 +42,7 @@ export function AppWithListPreview() {
     dTag: null
   })
   const originalUrlRef = useRef<string | null>(null)
+  const hasAutoFollowedRef = useRef(false)
 
   // Check URL on mount for shared list preview
   useEffect(() => {
@@ -100,6 +106,57 @@ export function AppWithListPreview() {
     checkForListPreview()
   }, [lists, myPubkey])
 
+  // Auto-follow users after login/signup
+  useEffect(() => {
+    const autoFollowFromPending = async () => {
+      // Only run once and only if user just logged in
+      if (!myPubkey || hasAutoFollowedRef.current) return
+
+      // Check for pending list follow in sessionStorage
+      const pendingData = sessionStorage.getItem('pendingListFollow')
+      if (!pendingData) return
+
+      try {
+        const { pubkeys } = JSON.parse(pendingData)
+
+        // Filter out already followed users
+        const unfollowedUsers = pubkeys.filter(
+          (pubkey: string) => pubkey !== myPubkey && !followings.includes(pubkey)
+        )
+
+        if (unfollowedUsers.length === 0) {
+          toast.info(t('You are already following everyone in this list'))
+          sessionStorage.removeItem('pendingListFollow')
+          hasAutoFollowedRef.current = true
+          return
+        }
+
+        // Follow all users
+        let successCount = 0
+        for (const pubkey of unfollowedUsers) {
+          try {
+            await follow(pubkey)
+            successCount++
+          } catch (error) {
+            console.error(`Failed to follow ${pubkey}:`, error)
+          }
+        }
+
+        const word = successCount === 1 ? t('user') : t('users')
+        toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
+
+        // Clear the pending follow
+        sessionStorage.removeItem('pendingListFollow')
+        hasAutoFollowedRef.current = true
+      } catch (error) {
+        console.error('Failed to auto-follow from pending list:', error)
+        sessionStorage.removeItem('pendingListFollow')
+      }
+    }
+
+    autoFollowFromPending()
+  }, [myPubkey, followings, follow, t])
+
   const parseStarterPackEvent = (event: Event): TStarterPack => {
     const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
     const title = event.tags.find((tag) => tag[0] === 'title')?.[1] || 'Untitled List'
@@ -145,6 +202,7 @@ export function AppWithListPreview() {
           description={listPreview.listData.description}
           image={listPreview.listData.image}
           pubkeys={listPreview.listData.pubkeys}
+          isStandalone={true}
         />
       </div>
     )
