@@ -27,7 +27,18 @@ export default function Tabs({
 }) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
-  const { deepBrowsing, lastScrollTop } = useDeepBrowsing()
+
+  // Make useDeepBrowsing optional - use default values if not available
+  let deepBrowsing = false
+  let lastScrollTop = 0
+  try {
+    const deepBrowsingContext = useDeepBrowsing()
+    deepBrowsing = deepBrowsingContext.deepBrowsing
+    lastScrollTop = deepBrowsingContext.lastScrollTop
+  } catch (error) {
+    // DeepBrowsingProvider not available, use default values
+  }
+
   const tabRefs = useRef<(HTMLDivElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 })
