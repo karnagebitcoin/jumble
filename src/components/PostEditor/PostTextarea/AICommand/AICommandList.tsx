@@ -5,10 +5,12 @@ import Image from '@/components/Image'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Event } from 'nostr-tools'
 
 export type AICommandListProps = {
   command: (props: { text: string }) => void
   query: string
+  parentEvent?: Event
 }
 
 export type AICommandListHandle = {
@@ -73,9 +75,20 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       let systemPrompt = 'Be concise and direct. Provide only the essential information without extra wording, explanations, or formatting.'
       let userPrompt = props.query
 
+      // If we have a parent event (replying to a note), include its content as context
+      if (props.parentEvent) {
+        const parentContent = props.parentEvent.content
+        userPrompt = `Context (the note I'm replying to): "${parentContent}"\n\nMy question: ${props.query}`
+        systemPrompt += ' Use the provided context to give a more relevant and informed response.'
+      }
+
       if (isLinkQuery) {
         // For link queries, be extra strict about returning only the URL
         systemPrompt = 'Return ONLY the URL/link without any additional text, explanation, markdown formatting, or commentary. Just the plain URL.'
+        if (props.parentEvent) {
+          const parentContent = props.parentEvent.content
+          systemPrompt += ` Use the context from the note being replied to if relevant: "${parentContent}"`
+        }
       }
 
       const response = await chat([

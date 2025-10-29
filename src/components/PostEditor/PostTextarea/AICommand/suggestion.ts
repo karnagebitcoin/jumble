@@ -37,10 +37,15 @@ const suggestion = {
         postEditor.addEventListener('closeSuggestionPopup', closePopup)
       },
       onStart: (props: { editor: Editor; clientRect?: (() => DOMRect | null) | null; query?: string }) => {
+        const parentEvent = props.editor.extensionManager.extensions.find(
+          (ext) => ext.name === 'aiCommand'
+        )?.options.parentEvent
+
         component = new ReactRenderer(AICommandList, {
           props: {
             ...props,
-            query: props.query || ''
+            query: props.query || '',
+            parentEvent
           },
           editor: props.editor
         })
@@ -70,10 +75,15 @@ const suggestion = {
         })
       },
 
-      onUpdate(props: { clientRect?: (() => DOMRect | null) | null | undefined; query?: string }) {
+      onUpdate(props: { editor: Editor; clientRect?: (() => DOMRect | null) | null | undefined; query?: string }) {
+        const parentEvent = props.editor.extensionManager.extensions.find(
+          (ext) => ext.name === 'aiCommand'
+        )?.options.parentEvent
+
         component?.updateProps({
           ...props,
-          query: props.query || ''
+          query: props.query || '',
+          parentEvent
         })
 
         if (!props.clientRect) {

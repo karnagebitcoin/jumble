@@ -1,12 +1,14 @@
 import { Node } from '@tiptap/core'
 import Suggestion from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
+import { Event } from 'nostr-tools'
 
 export const AICommandPluginKey = new PluginKey('aiCommand')
 
 export interface AICommandOptions {
   HTMLAttributes: Record<string, any>
   suggestion: any
+  parentEvent?: Event
 }
 
 declare module '@tiptap/core' {
@@ -23,6 +25,7 @@ const AICommand = Node.create<AICommandOptions>({
   addOptions() {
     return {
       HTMLAttributes: {},
+      parentEvent: undefined,
       suggestion: {
         char: '/ai',
         pluginKey: AICommandPluginKey,

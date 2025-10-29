@@ -83,7 +83,8 @@ const PostTextarea = forwardRef<
           suggestion: gifSuggestion
         }),
         AICommand.configure({
-          suggestion: aiCommandSuggestion
+          suggestion: aiCommandSuggestion,
+          parentEvent
         }),
         ClipboardAndDropHandler.configure({
           onUploadStart: (file, cancel) => {
