@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { useAI } from '@/providers/AIProvider'
+import { useFetchWebMetadata } from '@/hooks/useFetchWebMetadata'
+import Image from '@/components/Image'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export type AICommandListProps = {
@@ -21,6 +23,34 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   const [error, setError] = useState<string>('')
   const [submitted, setSubmitted] = useState(false)
 
+  // Extract URL from result if present
+  const extractedUrl = useMemo(() => {
+    if (!result) return null
+
+    // Look for URLs in the result
+    const urlRegex = /(https?:\/\/[^\s]+)/gi
+    const matches = result.match(urlRegex)
+
+    if (matches && matches.length > 0) {
+      // Return the first URL found
+      return matches[0].replace(/[.,;!?)]$/, '') // Remove trailing punctuation
+    }
+
+    return null
+  }, [result])
+
+  // Fetch metadata if we have a URL
+  const { title, description, image } = useFetchWebMetadata(extractedUrl || '')
+
+  const hostname = useMemo(() => {
+    if (!extractedUrl) return ''
+    try {
+      return new URL(extractedUrl).hostname
+    } catch {
+      return ''
+    }
+  }, [extractedUrl])
+
   const handleSubmit = async () => {
     if (!props.query || props.query.trim().length === 0) {
       return
@@ -37,13 +67,22 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
     setResult('')
 
     try {
+      // Check if the query is asking for a link/URL
+      const isLinkQuery = /\b(link|url|website|page|find|search|get|fetch)\b/i.test(props.query)
+
+      let prompt = props.query
+      if (isLinkQuery) {
+        // Instruct AI to return only the URL without additional context
+        prompt = `${props.query}\n\nIMPORTANT: Return ONLY the URL/link without any additional text, explanation, or formatting. Just the plain URL.`
+      }
+
       const response = await chat([
         {
           role: 'user',
-          content: props.query
+          content: prompt
         }
       ])
-      setResult(response)
+      setResult(response.trim())
     } catch (err: any) {
       console.error('AI Command Error:', err)
       setError(err.message || t('Failed to get AI response'))
@@ -64,8 +103,9 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       if (event.key === 'Enter') {
         event.preventDefault()
         if (result && !loading) {
-          // Insert the result if we have one
-          props.command({ text: result })
+          // Insert the URL if we extracted one, otherwise insert the full result
+          const textToInsert = extractedUrl || result
+          props.command({ text: textToInsert })
         } else if (props.query && !loading && !submitted) {
           // Submit the query if we haven't submitted yet
           handleSubmit()
@@ -142,6 +182,62 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
   // Show result with insert options
   if (result) {
+    // If we have a URL and metadata, show link preview card
+    if (extractedUrl && title) {
+      return (
+        <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-md space-y-2">
+          <div className="text-xs text-muted-foreground mb-2">{t('AI Result:')}</div>
+
+          {/* Link Preview Card */}
+          <div
+            className="p-2 flex gap-2 w-full border rounded-lg overflow-hidden cursor-pointer hover:bg-accent transition-colors"
+            onClick={(e) => {
+              e.stopPropagation()
+              window.open(extractedUrl, '_blank')
+            }}
+          >
+            {image && (
+              <Image image={{ url: image }} className="w-10 h-10 rounded flex-shrink-0" hideIfError />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold line-clamp-1 text-sm">{title}</div>
+              {description && (
+                <div className="text-xs text-muted-foreground line-clamp-2">{description}</div>
+              )}
+              <div className="text-xs text-muted-foreground mt-0.5">{hostname}</div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                props.command({ text: extractedUrl })
+              }}
+              className="flex-1"
+            >
+              {t('Insert Link')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigator.clipboard.writeText(extractedUrl)
+              }}
+            >
+              {t('Copy')}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t('Press Enter to insert link')}
+          </p>
+        </div>
+      )
+    }
+
+    // Otherwise show text result
     return (
       <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-2xl space-y-2">
         <div className="text-sm">

@@ -40,14 +40,24 @@ This feature adds an `/ai` command to the note composer that allows users to lev
 - **Keyboard shortcuts**: Press Enter to submit/insert, Escape to close
 - **Safe workflow**: Your prompt is never added to the note itself, preventing accidental posts
 
+## Features
+
+- **Link Detection & Preview**: When AI returns a URL, it automatically shows a preview card with thumbnail, title, and description
+- **Smart URL Extraction**: If AI returns text with a URL, it extracts and uses just the URL
+- **Clean Link Results**: When asking for links, AI is instructed to return only the URL without explanation
+- **Interactive Preview**: Click the preview card to verify the link before inserting
+- **Flexible Queries**: Ask for anything - links, jokes, translations, facts, etc.
+
 ## Examples
 
 ### Finding Links
-1. Type `/ai` in the note composer
-2. In the input field that appears, type: `find me the link to madonna die another day`
-3. Click the arrow or press Enter
-4. Review the YouTube link the AI provides
-5. Click "Insert" to add it to your note
+1. Type `/ai find me the link to madonna die another day` in the note composer
+2. Click the circular arrow button or press Enter
+3. AI fetches the link and shows a **preview card** with thumbnail, title, and description
+4. Click anywhere on the preview card to open the link in a new tab (to verify it's correct)
+5. Click "Insert Link" or press Enter to add just the URL to your note
+
+**Special Feature for Links**: When you ask for a link/URL, the AI is instructed to return only the plain URL without additional text. The app then automatically fetches metadata and displays a rich preview card, just like when you paste a link into a note.
 
 ### Generating Content
 1. Type `/ai` in the note composer
