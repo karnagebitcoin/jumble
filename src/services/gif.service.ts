@@ -48,20 +48,37 @@ class GifService {
 
   async fetchRecentGifs(limit: number = 12): Promise<GifData[]> {
     try {
-      const events = (await client.pool.querySync([GIFBUDDY_RELAY], {
+      console.log('[GifService] Fetching recent GIFs from relay:', GIFBUDDY_RELAY)
+
+      // Add a timeout promise
+      const timeoutPromise = new Promise<GifEvent[]>((_, reject) => {
+        setTimeout(() => reject(new Error('Relay query timeout')), 5000)
+      })
+
+      const queryPromise = client.pool.querySync([GIFBUDDY_RELAY], {
         kinds: [1063],
-        limit
-      })) as GifEvent[]
+        limit: limit * 2 // Fetch more in case some are filtered out
+      }) as Promise<GifEvent[]>
+
+      const events = await Promise.race([queryPromise, timeoutPromise])
+
+      console.log('[GifService] Received events:', events.length)
 
       const gifs = events
         .map((event) => this.gifEventToData(event))
         .filter((gif): gif is GifData => gif !== null)
+        .slice(0, limit)
 
-      this.recentGifsCache = gifs
+      console.log('[GifService] Processed GIFs:', gifs.length)
+
+      if (gifs.length > 0) {
+        this.recentGifsCache = gifs
+      }
+
       return gifs
     } catch (error) {
-      console.error('Error fetching recent GIFs:', error)
-      return this.recentGifsCache
+      console.error('[GifService] Error fetching recent GIFs:', error)
+      return this.recentGifsCache.length > 0 ? this.recentGifsCache : []
     }
   }
 
@@ -71,12 +88,23 @@ class GifService {
     }
 
     try {
+      console.log('[GifService] Searching GIFs for query:', query)
+
+      // Add a timeout promise
+      const timeoutPromise = new Promise<GifEvent[]>((_, reject) => {
+        setTimeout(() => reject(new Error('Relay query timeout')), 5000)
+      })
+
       // First try to search NIP-94 events on gifbuddy.lol relay
       // We'll fetch recent GIFs and filter client-side as search may not be supported
-      const events = (await client.pool.querySync([GIFBUDDY_RELAY], {
+      const queryPromise = client.pool.querySync([GIFBUDDY_RELAY], {
         kinds: [1063],
-        limit: 50 // Fetch more to filter
-      })) as GifEvent[]
+        limit: 200 // Fetch more to filter
+      }) as Promise<GifEvent[]>
+
+      const events = await Promise.race([queryPromise, timeoutPromise])
+
+      console.log('[GifService] Received events for search:', events.length)
 
       const gifs = events
         .map((event) => this.gifEventToData(event))
@@ -88,15 +116,18 @@ class GifService {
         )
         .slice(0, limit)
 
+      console.log('[GifService] Filtered GIFs:', gifs.length)
+
       // If we got results, return them
       if (gifs.length > 0) {
         return gifs
       }
 
       // Otherwise, fall back to GIFBuddy API
+      console.log('[GifService] No results from relay, trying API fallback')
       return this.searchGifsViaApi(query, limit)
     } catch (error) {
-      console.error('Error searching GIFs:', error)
+      console.error('[GifService] Error searching GIFs:', error)
       // Fall back to API on error
       return this.searchGifsViaApi(query, limit)
     }
@@ -104,12 +135,19 @@ class GifService {
 
   private async searchGifsViaApi(query: string, limit: number = 12): Promise<GifData[]> {
     try {
+      // Try the GIFBuddy API endpoint with proper headers
       const response = await fetch(
-        `${GIFBUDDY_API_URL}/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+        `${GIFBUDDY_API_URL}/api/search_gifs`,
         {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${GIFBUDDY_API_KEY}`
-          }
+            'Content-Type': 'application/json',
+            'x-api-key': GIFBUDDY_API_KEY
+          },
+          body: JSON.stringify({
+            search: query,
+            limit
+          })
         }
       )
 
@@ -131,7 +169,8 @@ class GifService {
 
       return []
     } catch (error) {
-      console.error('Error fetching GIFs from API:', error)
+      console.error('[GifService] Error fetching GIFs from API:', error)
+      // API appears to be down, return empty array
       return []
     }
   }
