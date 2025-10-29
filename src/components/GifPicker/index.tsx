@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import gifService, { GifData } from '@/services/gif.service'
-import { ImagePlay, Loader2 } from 'lucide-react'
+import { ImagePlay, Loader2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -16,14 +16,17 @@ export interface GifPickerProps {
 
 function GifPickerContent({
   onGifClick,
-  isSmallScreen
+  isSmallScreen,
+  onClose
 }: {
   onGifClick: (gif: GifData) => void
   isSmallScreen: boolean
+  onClose?: () => void
 }) {
   const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [gifs, setGifs] = useState<GifData[]>([])
+  const [totalGifCount, setTotalGifCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(false)
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
 
@@ -39,8 +42,9 @@ function GifPickerContent({
   const loadRecentGifs = async () => {
     setIsLoading(true)
     try {
-      const recentGifs = await gifService.fetchRecentGifs(gifsToShow)
+      const { gifs: recentGifs, total } = await gifService.fetchRecentGifs(gifsToShow)
       setGifs(recentGifs)
+      setTotalGifCount(total)
     } catch (error) {
       console.error('Error loading recent GIFs:', error)
     } finally {
@@ -60,8 +64,9 @@ function GifPickerContent({
     searchTimeoutRef.current = setTimeout(async () => {
       setIsLoading(true)
       try {
-        const results = await gifService.searchGifs(query, gifsToShow)
+        const { gifs: results, total } = await gifService.searchGifs(query, gifsToShow)
         setGifs(results)
+        setTotalGifCount(total)
       } catch (error) {
         console.error('Error searching GIFs:', error)
       } finally {
@@ -72,13 +77,25 @@ function GifPickerContent({
 
   return (
     <div className="space-y-3 p-3">
-      <Input
-        placeholder={t('Search GIFs...')}
-        value={searchQuery}
-        onChange={(e) => handleSearch(e.target.value)}
-        className="w-full"
-        autoFocus={!isSmallScreen}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <Input
+          placeholder={t('Search GIFs...')}
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="flex-1"
+          autoFocus={!isSmallScreen}
+        />
+        {onClose && (
+          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      {totalGifCount > 0 && (
+        <div className="text-xs text-muted-foreground">
+          {t('Found {{count}} GIFs', { count: totalGifCount })}
+        </div>
+      )}
       <ScrollArea className={isSmallScreen ? 'h-80' : 'h-64'}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -127,6 +144,10 @@ export default function GifPicker({ onGifSelect, children }: GifPickerProps) {
     setOpen(false)
   }
 
+  const handleClose = () => {
+    setOpen(false)
+  }
+
   if (isSmallScreen) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
@@ -138,7 +159,11 @@ export default function GifPicker({ onGifSelect, children }: GifPickerProps) {
           )}
         </DrawerTrigger>
         <DrawerContent>
-          <GifPickerContent onGifClick={handleGifClick} isSmallScreen={isSmallScreen} />
+          <GifPickerContent
+            onGifClick={handleGifClick}
+            isSmallScreen={isSmallScreen}
+            onClose={handleClose}
+          />
         </DrawerContent>
       </Drawer>
     )
@@ -154,7 +179,11 @@ export default function GifPicker({ onGifSelect, children }: GifPickerProps) {
         )}
       </PopoverTrigger>
       <PopoverContent className="w-[560px] p-0" align="start" side="top">
-        <GifPickerContent onGifClick={handleGifClick} isSmallScreen={isSmallScreen} />
+        <GifPickerContent
+          onGifClick={handleGifClick}
+          isSmallScreen={isSmallScreen}
+          onClose={handleClose}
+        />
       </PopoverContent>
     </Popover>
   )

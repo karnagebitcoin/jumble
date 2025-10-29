@@ -602,6 +602,7 @@ export default {
     'Add GIF': 'Add GIF',
     'Search GIFs...': 'Search GIFs...',
     'No GIFs found': 'No GIFs found',
-    'No recent GIFs': 'No recent GIFs'
+    'No recent GIFs': 'No recent GIFs',
+    'Found {{count}} GIFs': 'Found {{count}} GIFs'
   }
 }
