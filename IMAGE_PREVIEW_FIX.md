@@ -75,7 +75,33 @@ This makes the code compatible with both:
 - **New format**: Google Gemini models that use `message.images[]`
 - **Old format**: Models that put the URL directly in `message.content`
 
-### 2. Direct Data URL Rendering
+### 2. Auto-Upload to Media Server
+
+Instead of inserting the raw base64 data URL (which can be 50,000+ characters), we now:
+
+```tsx
+const handleUploadAndInsert = async () => {
+  // Convert data URL to File
+  const file = await dataUrlToFile(imageUrl, 'generated-image.png')
+
+  // Upload to user's configured media server (Blossom or NIP-96)
+  const result = await mediaUploadService.upload(file, {
+    onProgress: (percent) => setUploadProgress(percent)
+  })
+
+  // Insert the uploaded URL
+  props.command({ text: result.url })
+}
+```
+
+Benefits:
+- ✅ **Shorter posts**: URL instead of 50KB+ of base64
+- ✅ **Better performance**: Images cached on media servers
+- ✅ **WebP conversion**: Automatically optimized via media upload service
+- ✅ **Progress indicator**: Shows upload progress to user
+- ✅ **Uses existing config**: Works with user's media upload settings
+
+### 3. Direct Data URL Rendering
 For data URLs, we now use a native HTML `<img>` tag instead of the custom `Image` component:
 
 ```tsx
@@ -96,7 +122,7 @@ For data URLs, we now use a native HTML `<img>` tag instead of the custom `Image
 )}
 ```
 
-### 3. Improved Image Component Error Handling
+### 4. Improved Image Component Error Handling
 Added special handling for data URLs in the `Image` component to fail fast:
 
 ```tsx
@@ -112,7 +138,7 @@ const handleError = async () => {
 }
 ```
 
-### 4. Enhanced Debugging
+### 5. Enhanced Debugging
 Added comprehensive console logging to track:
 - Request/response details in `ai.service.ts`
 - URL type detection (data URL vs HTTP URL)
@@ -124,10 +150,12 @@ Added comprehensive console logging to track:
 Now when users type `/image a sunset`:
 
 1. ✅ The API generates the image as a base64 data URL
-2. ✅ The ImageCommandList receives the data URL
+2. ✅ The ImageCommandList receives the data URL from `message.images[]`
 3. ✅ The preview is rendered using a native `<img>` tag
 4. ✅ The image displays correctly before insertion
-5. ✅ Users can see the image, then click "Insert Image" or press Enter
+5. ✅ Users can see the image and click "Insert Image" or press Enter
+6. ✅ The base64 image is converted to a File and uploaded to their media server
+7. ✅ The uploaded URL (not the base64) is inserted into the post
 
 ## Image Format Support
 
@@ -158,9 +186,20 @@ The fix supports multiple image formats:
 To test the fix:
 
 1. Configure AI settings with an OpenRouter API key
-2. Select an image generation model
-3. Type `/image ` in the post editor
-4. Enter a prompt like "a sunset over mountains"
-5. Press Enter or click the generate button
-6. ✅ Preview should now display the generated image
-7. ✅ Click "Insert Image" or press Enter to insert into post
+2. Select an image generation model (e.g., `google/gemini-2.5-flash-image`)
+3. Configure a media upload service (Blossom or NIP-96)
+4. Type `/image ` in the post editor
+5. Enter a prompt like "a sunset over mountains"
+6. Press Enter or click the generate button
+7. ✅ Preview should display the generated image
+8. ✅ Click "Insert Image" or press Enter
+9. ✅ Image uploads to media server with progress bar
+10. ✅ Uploaded URL (not base64) is inserted into post
+
+## Important Notes
+
+- **Media Upload Required**: You must have a media upload service configured
+- **Auto WebP Conversion**: Images are automatically converted to WebP format
+- **Blossom/NIP-96**: Works with either upload method
+- **File Size**: Original base64 images are typically 50KB-500KB
+- **Upload Time**: Usually 1-5 seconds depending on image size and server
