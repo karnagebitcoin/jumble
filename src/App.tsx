@@ -38,6 +38,7 @@ import { WidgetsProvider } from '@/providers/WidgetsProvider'
 import { WidgetSidebarDismissedProvider } from '@/providers/WidgetSidebarDismissedProvider'
 import { ZapProvider } from '@/providers/ZapProvider'
 import { PageManager } from './PageManager'
+import { AppWithListPreview } from './components/AppWithListPreview'
 
 export default function App(): JSX.Element {
   return (
@@ -76,7 +77,7 @@ export default function App(): JSX.Element {
                                                                 <TrendingNotesDismissedProvider>
                                                                   <WidgetsProvider>
                                                                     <WidgetSidebarDismissedProvider>
-                                                                      <PageManager />
+                                                                      <AppWithListPreview />
                                                                       <Toaster />
                                                                     </WidgetSidebarDismissedProvider>
                                                                   </WidgetsProvider>

@@ -40,7 +40,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const [isFollowingAll, setIsFollowingAll] = useState(false)
   const [activeTab, setActiveTab] = useState('notes')
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
 
   // Parse listId - could be "d-tag" or "pubkey:d-tag"
   const { ownerPubkey, dTag } = useMemo(() => {
@@ -174,73 +173,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
 
   const isLoading = isLoadingMyLists || isLoadingExternal
 
-  // Check if we should show preview mode
-  // Preview mode should be shown when:
-  // 1. URL has ?preview=1 parameter (from shared links)
-  // 2. It's not the user's own list AND user is not logged in
-  const params = new URLSearchParams(window.location.search)
-  const hasPreviewParam = params.get('preview') === '1'
-  const shouldShowPreviewMode = hasPreviewParam || (!isOwnList && !myPubkey)
-
-  // Track whether the preview dialog should be open
-  useEffect(() => {
-    if (shouldShowPreviewMode && displayList && ownerPubkey) {
-      setPreviewDialogOpen(true)
-    }
-  }, [shouldShowPreviewMode, displayList, ownerPubkey])
-
-  // PREVIEW MODE: Show only the dialog, not the full list
-  if (shouldShowPreviewMode) {
-    if (isLoading) {
-      return (
-        <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-muted-foreground">{t('Loading list...')}</div>
-          </div>
-        </SecondaryPageLayout>
-      )
-    }
-
-    if (!displayList || !ownerPubkey) {
-      return (
-        <SecondaryPageLayout ref={ref} index={index} title={t('List Not Found')}>
-          <div className="flex flex-col items-center justify-center h-screen gap-4">
-            <Users className="w-16 h-16 text-muted-foreground opacity-50" />
-            <div className="text-muted-foreground">{t('List not found')}</div>
-          </div>
-        </SecondaryPageLayout>
-      )
-    }
-
-    // In preview mode, render a minimal page with just the dialog
-    return (
-      <SecondaryPageLayout ref={ref} index={index} title={displayList.title}>
-        {/* Blank background - the dialog will be the main content */}
-        <div className="flex items-center justify-center h-screen" />
-
-        {/* Preview Dialog is the main UI in preview mode */}
-        <ListPreviewDialog
-          open={previewDialogOpen}
-          onOpenChange={(open) => {
-            setPreviewDialogOpen(open)
-            if (!open) {
-              // If closing preview mode, remove the preview parameter from URL
-              const newUrl = window.location.pathname
-              window.history.replaceState(null, '', newUrl)
-            }
-          }}
-          listId={dTag}
-          ownerPubkey={ownerPubkey}
-          title={displayList.title}
-          description={displayList.description}
-          image={displayList.image}
-          pubkeys={displayList.pubkeys}
-        />
-      </SecondaryPageLayout>
-    )
-  }
-
-  // NORMAL MODE: Regular loading and display logic
   if (isLoading) {
     return (
       <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
@@ -251,7 +183,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     )
   }
 
-  // List not found
   if (!displayList) {
     return (
       <SecondaryPageLayout ref={ref} index={index} title={t('List Not Found')}>
