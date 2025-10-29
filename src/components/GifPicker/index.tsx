@@ -40,8 +40,8 @@ function GifPickerContent({
   const offsetRef = useRef(0)
 
   // Determine how many GIFs to show based on screen size
-  const gridCols = isSmallScreen ? 2 : 3
-  const gifsPerPage = isSmallScreen ? 12 : 24
+  const gridCols = isSmallScreen ? 2 : 4
+  const gifsPerPage = isSmallScreen ? 12 : 32
 
   // Load GIFs when tab or search changes
   useEffect(() => {
