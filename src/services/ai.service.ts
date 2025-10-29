@@ -236,6 +236,7 @@ Format your response as JSON with this exact structure:
     const handpickedModels = [
       { id: 'meta-llama/llama-3.3-8b-instruct:free', name: 'Meta Llama 3.3 8B (Free)' },
       { id: 'google/gemini-2.5-flash', name: 'Google Gemini 2.5 Flash' },
+      { id: 'google/gemini-2.5-flash-image', name: 'Google Gemini 2.5 Flash Image' },
       { id: 'x-ai/grok-4-fast', name: 'xAI Grok 4 Fast' },
       { id: 'openai/gpt-5-mini', name: 'OpenAI GPT-5 Mini' },
       { id: 'openai/o4-mini', name: 'OpenAI o4 Mini' },
