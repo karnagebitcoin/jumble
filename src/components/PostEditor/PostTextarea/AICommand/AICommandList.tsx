@@ -1,14 +1,12 @@
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { useAI } from '@/providers/AIProvider'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export type AICommandListProps = {
   command: (props: { text: string }) => void
-  clientRect?: (() => DOMRect | null) | null
+  query: string
 }
 
 export type AICommandListHandle = {
@@ -18,17 +16,13 @@ export type AICommandListHandle = {
 const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props, ref) => {
   const { t } = useTranslation()
   const { chat, isConfigured } = useAI()
-  const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  // Calculate width from clientRect
-  const editorWidth = props.clientRect ? props.clientRect()?.width : undefined
+  const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = async () => {
-    if (!prompt || prompt.trim().length === 0) {
+    if (!props.query || props.query.trim().length === 0) {
       return
     }
 
@@ -37,6 +31,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       return
     }
 
+    setSubmitted(true)
     setLoading(true)
     setError('')
     setResult('')
@@ -45,7 +40,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       const response = await chat([
         {
           role: 'user',
-          content: prompt
+          content: props.query
         }
       ])
       setResult(response)
@@ -57,139 +52,134 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Stop propagation to prevent editor from handling these keys
-    e.stopPropagation()
-
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      if (result && !loading) {
-        // Insert the result if we already have one
-        props.command({ text: result })
-      } else if (prompt && !loading) {
-        // Submit the prompt if we don't have a result yet
-        handleSubmit()
-      }
-    }
-  }
+  // Reset submitted state when query changes
+  useEffect(() => {
+    setSubmitted(false)
+    setResult('')
+    setError('')
+  }, [props.query])
 
   useImperativeHandle(ref, () => ({
     onKeyDown: ({ event }: { event: KeyboardEvent }) => {
-      // Always capture Enter key in this component
       if (event.key === 'Enter') {
         event.preventDefault()
-        event.stopPropagation()
+        if (result && !loading) {
+          // Insert the result if we have one
+          props.command({ text: result })
+        } else if (props.query && !loading && !submitted) {
+          // Submit the query if we haven't submitted yet
+          handleSubmit()
+        }
         return true
       }
       return false
     }
   }))
 
+  // Show prompt input helper if no query yet
+  if (!props.query || props.query.trim().length === 0) {
+    return (
+      <div className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+        {t('Type your prompt...')}
+      </div>
+    )
+  }
+
   if (!isConfigured) {
     return (
-      <div
-        className="border rounded-lg bg-background z-50 pointer-events-auto p-3"
-        style={{ width: editorWidth ? `${editorWidth}px` : '100%' }}
-      >
-        <p className="text-sm text-destructive">
+      <div className="border rounded-lg bg-background z-50 pointer-events-auto p-2 max-w-md">
+        <p className="text-xs text-destructive">
           {t('AI is not configured. Please configure it in settings.')}
         </p>
       </div>
     )
   }
 
-  return (
-    <div
-      className="border rounded-lg bg-background z-50 pointer-events-auto p-3 space-y-3"
-      style={{ width: editorWidth ? `${editorWidth}px` : '100%' }}
-    >
-      {/* Input Section */}
-      <div
-        className="flex gap-2"
-        onClick={(e) => {
-          e.stopPropagation()
-          inputRef.current?.focus()
-        }}
-      >
-        <Input
-          ref={inputRef}
-          type="text"
-          placeholder={t('Ask AI anything...')}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onClick={(e) => e.stopPropagation()}
-          onFocus={(e) => e.stopPropagation()}
-          disabled={loading}
-          className="flex-1"
-          autoFocus
-        />
+  // Show submit button if not yet submitted
+  if (!submitted) {
+    return (
+      <div className="inline-flex items-center gap-2 z-50 pointer-events-auto">
         <Button
           size="sm"
           onClick={(e) => {
             e.stopPropagation()
             handleSubmit()
           }}
-          disabled={!prompt || loading}
+          disabled={loading}
+          className="h-7 w-7 rounded-full p-0"
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-3.5 w-3.5" />
           )}
         </Button>
+        <span className="text-xs text-muted-foreground">
+          {t('Press Enter or click to submit')}
+        </span>
       </div>
+    )
+  }
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center gap-2 p-2 bg-muted rounded">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm text-muted-foreground">{t('Thinking...')}</span>
-        </div>
-      )}
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="inline-flex items-center gap-2 bg-muted px-3 py-1.5 rounded-full z-50 pointer-events-auto">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <span className="text-xs text-muted-foreground">{t('Thinking...')}</span>
+      </div>
+    )
+  }
 
-      {/* Error State */}
-      {error && (
-        <div className="p-2 bg-destructive/10 text-destructive rounded text-sm">
-          {error}
-        </div>
-      )}
+  // Show error state
+  if (error) {
+    return (
+      <div className="border rounded-lg bg-background z-50 pointer-events-auto p-2 max-w-md">
+        <p className="text-xs text-destructive">{error}</p>
+      </div>
+    )
+  }
 
-      {/* Result Section */}
-      {result && !loading && (
-        <div className="space-y-2">
-          <div className="text-sm">
-            <div className="font-medium mb-1">{t('AI Result:')}</div>
-            <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
-              {result}
-            </div>
+  // Show result with insert options
+  if (result) {
+    return (
+      <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-2xl space-y-2">
+        <div className="text-sm">
+          <div className="font-medium mb-1 text-xs text-muted-foreground">{t('AI Result:')}</div>
+          <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words text-sm">
+            {result}
           </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={() => props.command({ text: result })}
-              className="flex-1"
-            >
-              {t('Insert')}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                // Copy to clipboard
-                navigator.clipboard.writeText(result)
-              }}
-            >
-              {t('Copy')}
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {t('Press Enter to insert')}
-          </p>
         </div>
-      )}
-    </div>
-  )
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              props.command({ text: result })
+            }}
+            className="flex-1"
+          >
+            {t('Insert')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigator.clipboard.writeText(result)
+            }}
+          >
+            {t('Copy')}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('Press Enter to insert')}
+        </p>
+      </div>
+    )
+  }
+
+  return null
 })
 
 AICommandList.displayName = 'AICommandList'

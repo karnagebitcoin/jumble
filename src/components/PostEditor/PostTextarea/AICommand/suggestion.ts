@@ -36,9 +36,12 @@ const suggestion = {
         }
         postEditor.addEventListener('closeSuggestionPopup', closePopup)
       },
-      onStart: (props: { editor: Editor; clientRect?: (() => DOMRect | null) | null }) => {
+      onStart: (props: { editor: Editor; clientRect?: (() => DOMRect | null) | null; query?: string }) => {
         component = new ReactRenderer(AICommandList, {
-          props,
+          props: {
+            ...props,
+            query: props.query || ''
+          },
           editor: props.editor
         })
 
@@ -60,13 +63,6 @@ const suggestion = {
           zIndex: 9999,
           onShow() {
             postEditor.isSuggestionPopupOpen = true
-            // Focus the input after popup is shown
-            setTimeout(() => {
-              const input = component?.element?.querySelector('input')
-              if (input) {
-                input.focus()
-              }
-            }, 50)
           },
           onHide() {
             postEditor.isSuggestionPopupOpen = false
@@ -74,8 +70,11 @@ const suggestion = {
         })
       },
 
-      onUpdate(props: { clientRect?: (() => DOMRect | null) | null | undefined }) {
-        component?.updateProps(props)
+      onUpdate(props: { clientRect?: (() => DOMRect | null) | null | undefined; query?: string }) {
+        component?.updateProps({
+          ...props,
+          query: props.query || ''
+        })
 
         if (!props.clientRect) {
           return
