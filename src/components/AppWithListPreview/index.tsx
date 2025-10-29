@@ -4,6 +4,7 @@ import ListPreviewDialog from '@/components/ListPreviewDialog'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useFollowList } from '@/providers/FollowListProvider'
+import { useFeed } from '@/providers/FeedProvider'
 import client from '@/services/client.service'
 import { Event } from 'nostr-tools'
 import { BIG_RELAY_URLS, ExtendedKind } from '@/constants'
@@ -30,6 +31,7 @@ export function AppWithListPreview() {
   const { pubkey: myPubkey } = useNostr()
   const { lists } = useLists()
   const { follow, followings } = useFollowList()
+  const { switchFeed } = useFeed()
   const [listPreview, setListPreview] = useState<{
     isOpen: boolean
     listData: TStarterPack | null
@@ -223,8 +225,13 @@ export function AppWithListPreview() {
     }
   }
 
-  const handleClosePreview = () => {
-    // Navigate to home instead of showing the list
+  const handleClosePreview = async () => {
+    // Switch to Following feed if user just followed people
+    if (myPubkey && followings.length > 0) {
+      await switchFeed('following', { pubkey: myPubkey })
+    }
+
+    // Navigate to home
     window.location.href = '/'
   }
 
