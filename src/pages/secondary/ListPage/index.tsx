@@ -298,9 +298,9 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
         )}
         {ownerPubkey && (
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-muted-foreground">{t('By')}</span>
-            <UserAvatar pubkey={ownerPubkey} size="small" />
-            <Username pubkey={ownerPubkey} className="text-sm font-medium" />
+            <span className="text-sm text-muted-foreground">{t('by')}</span>
+            <UserAvatar userId={ownerPubkey} size="small" />
+            <Username userId={ownerPubkey} className="text-sm font-medium" />
           </div>
         )}
         <div className="text-sm text-muted-foreground mb-4">
