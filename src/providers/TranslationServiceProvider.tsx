@@ -4,6 +4,7 @@ import libreTranslate from '@/services/libre-translate.service'
 import openrouterTranslate from '@/services/openrouter-translate.service'
 import storage from '@/services/local-storage.service'
 import translation from '@/services/translation.service'
+import indexedDb from '@/services/indexed-db.service'
 import { TTranslationAccount, TTranslationServiceConfig } from '@/types'
 import { Event, kinds } from 'nostr-tools'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -12,6 +13,7 @@ import { useNostr } from './NostrProvider'
 
 const translatedEventCache: Map<string, Event> = new Map()
 const translatedTextCache: Map<string, string> = new Map()
+let cacheInitialized = false
 
 type TTranslationServiceContext = {
   config: TTranslationServiceConfig
@@ -42,6 +44,34 @@ export function TranslationServiceProvider({ children }: { children: React.React
   const [config, setConfig] = useState<TTranslationServiceConfig>({ service: 'jumble' })
   const { pubkey, startLogin } = useNostr()
   const [translatedEventIdSet, setTranslatedEventIdSet] = useState<Set<string>>(new Set())
+
+  // Initialize cache from IndexedDB on mount
+  useEffect(() => {
+    if (!cacheInitialized) {
+      cacheInitialized = true
+      indexedDb.getAllTranslatedEvents().then((events) => {
+        events.forEach((event, key) => {
+          translatedEventCache.set(key, event)
+        })
+        // Update the translated event ID set
+        const eventIds = new Set<string>()
+        events.forEach((_, key) => {
+          const eventId = key.split('_')[1] // Extract eventId from "lang_eventId" format
+          if (eventId) {
+            eventIds.add(eventId)
+          }
+        })
+        setTranslatedEventIdSet(eventIds)
+      }).catch((error) => {
+        console.error('Failed to load translated events from IndexedDB:', error)
+      })
+
+      // Clean up old translations (older than 30 days)
+      indexedDb.clearOldTranslatedEvents().catch((error) => {
+        console.error('Failed to clear old translations:', error)
+      })
+    }
+  }, [])
 
   useEffect(() => {
     translation.changeCurrentPubkey(pubkey)
@@ -184,6 +214,12 @@ export function TranslationServiceProvider({ children }: { children: React.React
 
     translatedEventCache.set(cacheKey, translatedEvent)
     setTranslatedEventIdSet((prev) => new Set(prev.add(event.id)))
+
+    // Save to IndexedDB for persistence
+    indexedDb.putTranslatedEvent(event.id, target, translatedEvent).catch((error) => {
+      console.error('Failed to save translation to IndexedDB:', error)
+    })
+
     return translatedEvent
   }
 

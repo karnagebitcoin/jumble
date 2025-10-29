@@ -25,7 +25,8 @@ const StoreNames = {
   FOLLOWING_FAVORITE_RELAYS: 'followingFavoriteRelays',
   RELAY_INFOS: 'relayInfos',
   RELAY_INFO_EVENTS: 'relayInfoEvents', // deprecated
-  GIF_CACHE: 'gifCache'
+  GIF_CACHE: 'gifCache',
+  TRANSLATED_EVENTS: 'translatedEvents'
 }
 
 class IndexedDbService {
@@ -44,7 +45,7 @@ class IndexedDbService {
   init(): Promise<void> {
     if (!this.initPromise) {
       this.initPromise = new Promise((resolve, reject) => {
-        const request = window.indexedDB.open('jumble', 10)
+        const request = window.indexedDB.open('jumble', 11)
 
         request.onerror = (event) => {
           reject(event)
@@ -102,6 +103,10 @@ class IndexedDbService {
           if (!db.objectStoreNames.contains(StoreNames.GIF_CACHE)) {
             const gifStore = db.createObjectStore(StoreNames.GIF_CACHE, { keyPath: 'eventId' })
             gifStore.createIndex('createdAt', 'createdAt', { unique: false })
+          }
+          if (!db.objectStoreNames.contains(StoreNames.TRANSLATED_EVENTS)) {
+            const translatedStore = db.createObjectStore(StoreNames.TRANSLATED_EVENTS, { keyPath: 'key' })
+            translatedStore.createIndex('addedAt', 'addedAt', { unique: false })
           }
           if (db.objectStoreNames.contains(StoreNames.RELAY_INFO_EVENTS)) {
             db.deleteObjectStore(StoreNames.RELAY_INFO_EVENTS)
@@ -662,6 +667,98 @@ class IndexedDbService {
         })
       })
     )
+  }
+
+  async putTranslatedEvent(eventId: string, targetLanguage: string, translatedEvent: Event) {
+    await this.init()
+    if (!this.db) return
+
+    const key = `${targetLanguage}_${eventId}`
+    const value: TValue<Event> = {
+      key,
+      value: translatedEvent,
+      addedAt: Date.now()
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction([StoreNames.TRANSLATED_EVENTS], 'readwrite')
+      const store = transaction.objectStore(StoreNames.TRANSLATED_EVENTS)
+      const request = store.put(value)
+
+      request.onsuccess = () => resolve()
+      request.onerror = (event) => reject(event)
+    })
+  }
+
+  async getTranslatedEvent(eventId: string, targetLanguage: string): Promise<Event | null> {
+    await this.init()
+    if (!this.db) return null
+
+    const key = `${targetLanguage}_${eventId}`
+
+    return new Promise<Event | null>((resolve, reject) => {
+      const transaction = this.db!.transaction([StoreNames.TRANSLATED_EVENTS], 'readonly')
+      const store = transaction.objectStore(StoreNames.TRANSLATED_EVENTS)
+      const request = store.get(key)
+
+      request.onsuccess = () => {
+        const result: TValue<Event> | undefined = request.result
+        resolve(result?.value ?? null)
+      }
+      request.onerror = (event) => reject(event)
+    })
+  }
+
+  async getAllTranslatedEvents(): Promise<Map<string, Event>> {
+    await this.init()
+    if (!this.db) return new Map()
+
+    return new Promise<Map<string, Event>>((resolve, reject) => {
+      const transaction = this.db!.transaction([StoreNames.TRANSLATED_EVENTS], 'readonly')
+      const store = transaction.objectStore(StoreNames.TRANSLATED_EVENTS)
+      const request = store.getAll()
+
+      request.onsuccess = () => {
+        const results: TValue<Event>[] = request.result
+        const map = new Map<string, Event>()
+        results.forEach((item) => {
+          if (item.value) {
+            map.set(item.key, item.value)
+          }
+        })
+        resolve(map)
+      }
+      request.onerror = (event) => reject(event)
+    })
+  }
+
+  async clearOldTranslatedEvents(maxAgeMs: number = 30 * 24 * 60 * 60 * 1000) {
+    await this.init()
+    if (!this.db) return
+
+    const expirationTimestamp = Date.now() - maxAgeMs
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction([StoreNames.TRANSLATED_EVENTS], 'readwrite')
+      const store = transaction.objectStore(StoreNames.TRANSLATED_EVENTS)
+      const index = store.index('addedAt')
+      const range = IDBKeyRange.upperBound(expirationTimestamp)
+      const request = index.openCursor(range)
+
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result
+        if (cursor) {
+          cursor.delete()
+          cursor.continue()
+        } else {
+          resolve()
+        }
+      }
+
+      request.onerror = (event) => {
+        reject(event)
+      }
+    })
   }
 }
 
