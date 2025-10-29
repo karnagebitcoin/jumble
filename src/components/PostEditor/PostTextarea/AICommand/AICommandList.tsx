@@ -25,10 +25,13 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
   // Auto-focus the input when the component mounts
   useEffect(() => {
-    // Small delay to ensure the popup is rendered
+    // Small delay to ensure the popup is rendered and input is ready
     const timer = setTimeout(() => {
-      inputRef.current?.focus()
-    }, 50)
+      if (inputRef.current) {
+        inputRef.current.focus()
+        inputRef.current.click() // Ensure it's focused
+      }
+    }, 100)
     return () => clearTimeout(timer)
   }, [])
 
@@ -63,6 +66,9 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Stop propagation to prevent editor from handling these keys
+    e.stopPropagation()
+
     if (e.key === 'Enter') {
       e.preventDefault()
       if (result && !loading) {
@@ -100,41 +106,40 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   return (
     <Card className="p-3 max-w-md space-y-3">
       {/* Input Section */}
-      <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">
-          {t('What would you like AI to help with?')}
-        </p>
-        <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={t('e.g., find me a link to a bitcoin song')}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-            className="flex-1"
-          />
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={!prompt || loading}
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <ArrowRight className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p className="font-medium">{t('Examples:')}</p>
-          <ul className="list-disc list-inside space-y-0.5">
-            <li>{t('find me the link to madonna die another day')}</li>
-            <li>{t('write a joke about bitcoin')}</li>
-            <li>{t('translate "hello world" to japanese')}</li>
-          </ul>
-        </div>
+      <div
+        className="flex gap-2"
+        onClick={(e) => {
+          e.stopPropagation()
+          inputRef.current?.focus()
+        }}
+      >
+        <Input
+          ref={inputRef}
+          type="text"
+          placeholder={t('Ask AI anything...')}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.stopPropagation()}
+          disabled={loading}
+          className="flex-1"
+          autoFocus
+        />
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleSubmit()
+          }}
+          disabled={!prompt || loading}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowRight className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       {/* Loading State */}
