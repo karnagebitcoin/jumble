@@ -35,10 +35,16 @@ Users can upload their own GIFs to share with the Nostr community:
    - Progress indicator during upload
    - Success/error feedback
 
-2. **NIP-94 Event Creation**
+2. **Media Upload**
+   - Uses user's configured media upload service from preferences
+   - Supports both Blossom and NIP-96 upload methods
+   - Respects user's media host settings
+   - Automatic WebP conversion for PNG/JPEG (preserves GIF format)
+
+3. **NIP-94 Event Creation**
    - Creates kind 1063 events (File Metadata)
    - Includes required tags:
-     - `url`: The uploaded GIF URL
+     - `url`: The uploaded GIF URL from media host
      - `m`: MIME type (image/gif)
      - `x`: SHA-256 hash of the file
      - `size`: File size in bytes
@@ -46,13 +52,13 @@ Users can upload their own GIFs to share with the Nostr community:
    - Additional tags from upload service (if any)
    - Content field contains the description
 
-3. **Publishing**
+4. **Publishing**
    - Events are published to:
      - `wss://relay.gifbuddy.lol` (primary GIF relay)
      - All configured big relays (relay.damus.io, nos.lol, etc.)
    - Ensures GIFs are discoverable across the network
 
-4. **Local Caching**
+5. **Local Caching**
    - Uploaded GIFs are immediately added to local cache
    - Available in "My Gifs" tab without page reload
    - Persisted in IndexedDB for future sessions
@@ -62,7 +68,7 @@ Users can upload their own GIFs to share with the Nostr community:
 
 - **Cross-Tab Search**: Works across both tabs
 - **Instant Results**: Debounced search with 300ms delay
-- **Smart Filtering**: 
+- **Smart Filtering**:
   - In "All Gifs": Searches all cached GIFs
   - In "My Gifs": Searches only user's GIFs
 - **Search Fields**: Matches against GIF description and URL
@@ -96,12 +102,12 @@ Users can upload their own GIFs to share with the Nostr community:
 
 1. User selects GIF file
 2. File is validated (type, size)
-3. File is uploaded via media upload service
-4. SHA-256 hash is calculated
-5. Kind 1063 event is created with tags
-6. Event is signed with user's Nostr key
-7. Event is published to relays
-8. GIF is added to local cache
+3. File is uploaded to user's configured media host (Blossom or NIP-96)
+4. SHA-256 hash is calculated from file contents
+5. Kind 1063 event is created with tags (url, mime type, hash, size, description)
+6. Event is signed using NostrProvider's signEvent method
+7. Event is published to gifbuddy.lol relay + big relays
+8. GIF is added to local cache immediately
 9. UI updates to show new GIF in "My Gifs"
 
 ## User Experience

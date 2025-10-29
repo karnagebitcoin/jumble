@@ -30,7 +30,7 @@ interface GifUploadDialogProps {
 
 export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUploadDialogProps) {
   const { t } = useTranslation()
-  const { pubkey, signer } = useNostr()
+  const { pubkey, signEvent } = useNostr()
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [description, setDescription] = useState('')
@@ -80,8 +80,13 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
     setError('')
     setSuccess('')
 
-    if (!file || !pubkey || !signer) {
-      setError(t('Please log in and select a file'))
+    if (!file) {
+      setError(t('Please select a file'))
+      return
+    }
+
+    if (!pubkey) {
+      setError(t('Please log in to upload GIFs'))
       return
     }
 
@@ -125,7 +130,7 @@ export default function GifUploadDialog({ open, onOpenChange, onSuccess }: GifUp
         })
       }
 
-      const event = await signer.signEvent({
+      const event = await signEvent({
         kind: 1063,
         content: description.trim(),
         created_at: Math.floor(Date.now() / 1000),
