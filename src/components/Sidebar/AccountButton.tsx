@@ -40,7 +40,7 @@ const ProfileButtonContent = React.forwardRef<HTMLButtonElement, { username: str
         variant="ghost"
         className={cn(
           "clickable shadow-none p-2 w-12 h-12 flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 font-medium transition-all duration-300",
-          compactSidebar ? "opacity-50 hover:opacity-100" : "xl:px-2 xl:py-2 xl:w-full xl:h-auto"
+          compactSidebar ? "[&_img]:opacity-50 hover:[&_img]:opacity-100" : "xl:px-2 xl:py-2 xl:w-full xl:h-auto xl:opacity-80 xl:hover:opacity-100 xl:[&_img]:opacity-50 xl:hover:[&_img]:opacity-100"
         )}
         style={{ fontSize: 'var(--font-size, 14px)' }}
         {...props}
