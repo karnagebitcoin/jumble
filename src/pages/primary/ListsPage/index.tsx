@@ -435,7 +435,7 @@ const ListsPage = forwardRef((_, ref) => {
                       <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
                         <span>By</span>
                         <UserAvatar userId={list.event.pubkey} size="xSmall" className="inline-block" />
-                        <Username pubkey={list.event.pubkey} className="font-medium inline" />
+                        <Username userId={list.event.pubkey} className="font-medium inline" />
                       </div>
                     </>
                   )}
@@ -623,7 +623,7 @@ const ListsPage = forwardRef((_, ref) => {
                 <div className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
                   <span>{t('By')}</span>
                   <UserAvatar userId={selectedList.event.pubkey} size="small" />
-                  <Username pubkey={selectedList.event.pubkey} className="font-medium" />
+                  <Username userId={selectedList.event.pubkey} className="font-medium" />
                 </div>
               )}
               <div className="text-sm text-muted-foreground mb-3">
