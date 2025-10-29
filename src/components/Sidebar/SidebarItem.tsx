@@ -18,8 +18,7 @@ const SidebarItem = forwardRef<
         compactSidebar
           ? '[&_svg]:size-full'
           : 'xl:w-full xl:h-auto xl:py-2 xl:px-3 xl:justify-start [&_svg]:size-full xl:[&_svg]:size-4',
-        !active && '[&_svg]:opacity-50 hover:[&_svg]:opacity-100',
-        !active && !compactSidebar && 'xl:opacity-80 xl:hover:opacity-100',
+        !active && '[&_svg]:opacity-70 hover:[&_svg]:opacity-100',
         active && 'text-primary hover:text-primary bg-primary/10 hover:bg-primary/10',
         className
       )}
