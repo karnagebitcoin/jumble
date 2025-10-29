@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { useAI } from '@/providers/AIProvider'
 import Image from '@/components/Image'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2, Upload } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import mediaUploadService from '@/services/media-upload.service'
 
 export type ImageCommandListProps = {
   command: (props: { text: string }) => void
@@ -21,6 +22,9 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
   const [submitted, setSubmitted] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadedUrl, setUploadedUrl] = useState<string>('')
 
   const handleSubmit = async () => {
     if (!props.query || props.query.trim().length === 0) {
@@ -41,6 +45,7 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
     setLoading(true)
     setError('')
     setImageUrl('')
+    setUploadedUrl('')
 
     console.log('=== ImageCommandList: Generating image ===')
     console.log('Query:', props.query)
@@ -73,10 +78,60 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
     }
   }
 
+  const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const response = await fetch(dataUrl)
+    const blob = await response.blob()
+    return new File([blob], filename, { type: blob.type })
+  }
+
+  const handleUploadAndInsert = async () => {
+    if (!imageUrl) return
+
+    // If it's already an HTTP URL, just insert it
+    if (imageUrl.startsWith('http')) {
+      props.command({ text: imageUrl })
+      return
+    }
+
+    // If it's a data URL, upload it first
+    if (imageUrl.startsWith('data:')) {
+      setUploading(true)
+      setError('')
+      setUploadProgress(0)
+
+      try {
+        console.log('Converting data URL to file...')
+        const file = await dataUrlToFile(imageUrl, 'generated-image.png')
+        console.log('File created:', file.name, file.type, file.size)
+
+        console.log('Uploading to media server...')
+        const result = await mediaUploadService.upload(file, {
+          onProgress: (percent) => {
+            console.log('Upload progress:', percent)
+            setUploadProgress(percent)
+          }
+        })
+
+        console.log('Upload complete! URL:', result.url)
+        setUploadedUrl(result.url)
+
+        // Insert the uploaded URL
+        props.command({ text: result.url })
+      } catch (err: any) {
+        console.error('Upload error:', err)
+        setError(err.message || t('Failed to upload image'))
+      } finally {
+        setUploading(false)
+      }
+    }
+  }
+
   // Reset submitted state when query changes
   useEffect(() => {
     setSubmitted(false)
     setImageUrl('')
+    setUploadedUrl('')
+    setUploading(false)
     setError('')
   }, [props.query])
 
@@ -84,9 +139,9 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
     onKeyDown: ({ event }: { event: KeyboardEvent }) => {
       if (event.key === 'Enter') {
         event.preventDefault()
-        if (imageUrl && !loading) {
-          // Insert the image URL
-          props.command({ text: imageUrl })
+        if (imageUrl && !loading && !uploading) {
+          // Upload and insert the image URL
+          handleUploadAndInsert()
         } else if (props.query && !loading && !submitted) {
           // Submit the query if we haven't submitted yet
           handleSubmit()
@@ -202,16 +257,39 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
           )}
         </div>
 
+        {uploading && (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Upload className="h-3 w-3 animate-pulse" />
+              <span>{t('Uploading...')} {uploadProgress}%</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-1.5">
+              <div
+                className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <Button
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
-              props.command({ text: imageUrl })
+              handleUploadAndInsert()
             }}
             className="flex-1"
+            disabled={uploading}
           >
-            {t('Insert Image')}
+            {uploading ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                {t('Uploading...')}
+              </>
+            ) : (
+              t('Insert Image')
+            )}
           </Button>
           <Button
             size="sm"
@@ -220,12 +298,15 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
               e.stopPropagation()
               navigator.clipboard.writeText(imageUrl)
             }}
+            disabled={uploading}
           >
-            {t('Copy URL')}
+            {t('Copy')}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          {t('Press Enter to insert image')}
+          {uploading
+            ? t('Uploading to media server...')
+            : t('Press Enter to upload and insert')}
         </p>
       </div>
     )
