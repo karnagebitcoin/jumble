@@ -6,7 +6,6 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Event } from 'nostr-tools'
-import aiService from '@/services/ai.service'
 
 export type AICommandListProps = {
   command: (props: { text: string }) => void
@@ -25,7 +24,6 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
   const [submitted, setSubmitted] = useState(false)
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
   // Extract URL from result if present (including base64 data URLs)
   const extractedUrl = useMemo(() => {
@@ -59,8 +57,8 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
     // Check for image file extensions
     const imageExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i
-    return imageExtensions.test(extractedUrl) || isGeneratingImage
-  }, [extractedUrl, isGeneratingImage])
+    return imageExtensions.test(extractedUrl)
+  }, [extractedUrl])
 
   // Fetch metadata if we have a URL
   const { title, description, image } = useFetchWebMetadata(extractedUrl || '')
@@ -90,10 +88,6 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
     setResult('')
 
     try {
-      // Check if the query is asking for an image
-      const isImageQuery = /\b(image|picture|photo|drawing|illustration|generate|create|make|draw|paint)\b/i.test(props.query) &&
-                          /\b(of|about|for|showing|depicting)\b/i.test(props.query)
-
       // Check if the query is asking for a link/URL
       const isLinkQuery = /\b(link|url|website|page|find|search|get|fetch)\b/i.test(props.query)
 
@@ -116,28 +110,18 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
         }
       }
 
-      // Handle image generation requests
-      if (isImageQuery) {
-        setIsGeneratingImage(true)
-
-        // Use the AI service's generateImage method
-        const imageUrl = await aiService.generateImage(userPrompt)
-        setResult(imageUrl)
-      } else {
-        setIsGeneratingImage(false)
-        // Use the regular chat function for non-image queries
-        const response = await chat([
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ])
-        setResult(response.trim())
-      }
+      // Use the regular chat function
+      const response = await chat([
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ])
+      setResult(response.trim())
     } catch (err: any) {
       console.error('AI Command Error:', err)
       setError(err.message || t('Failed to get AI response'))
@@ -151,7 +135,6 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
     setSubmitted(false)
     setResult('')
     setError('')
-    setIsGeneratingImage(false)
   }, [props.query])
 
   useImperativeHandle(ref, () => ({
@@ -223,7 +206,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       <div className="inline-flex items-center gap-2 bg-muted px-3 py-1.5 rounded-full z-50 pointer-events-auto">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
         <span className="text-xs text-muted-foreground">
-          {isGeneratingImage ? t('Generating...') : t('Thinking...')}
+          {t('Thinking...')}
         </span>
       </div>
     )
@@ -240,88 +223,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
   // Show result with insert options
   if (result) {
-    // If we generated an image but couldn't extract URL, show debug info
-    if (isGeneratingImage && !extractedUrl) {
-      return (
-        <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-2xl space-y-2">
-          <div className="text-xs text-muted-foreground mb-2">{t('Image Generation Result (Debug):')}</div>
-          <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words text-xs font-mono">
-            {result}
-          </div>
-          <p className="text-xs text-destructive">
-            Could not extract image URL from response. The model may have returned text instead of an image.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                props.command({ text: result })
-              }}
-              className="flex-1"
-            >
-              {t('Insert Anyway')}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation()
-                navigator.clipboard.writeText(result)
-              }}
-            >
-              {t('Copy')}
-            </Button>
-          </div>
-        </div>
-      )
-    }
-
-    // If we have an image URL, show the image preview
-    if (extractedUrl && isImageUrl) {
-      return (
-        <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-md space-y-2">
-          <div className="text-xs text-muted-foreground mb-2">{t('Generated Image:')}</div>
-
-          {/* Image Preview */}
-          <div className="w-full border rounded-lg overflow-hidden bg-muted">
-            <Image
-              image={{ url: extractedUrl }}
-              className="w-full h-auto max-h-96 object-contain"
-              hideIfError
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                props.command({ text: extractedUrl })
-              }}
-              className="flex-1"
-            >
-              {t('Insert Image')}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation()
-                navigator.clipboard.writeText(extractedUrl)
-              }}
-            >
-              {t('Copy URL')}
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {t('Press Enter to insert image')}
-          </p>
-        </div>
-      )
-    }
-
-    // If we have a URL and metadata (non-image), show link preview card
+    // If we have a URL and metadata, show link preview card
     if (extractedUrl && title) {
       return (
         <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-md space-y-2">

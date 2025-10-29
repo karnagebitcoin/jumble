@@ -24,6 +24,8 @@ import Gif from './Gif'
 import gifSuggestion from './Gif/suggestion'
 import AICommand from './AICommand'
 import aiCommandSuggestion from './AICommand/suggestion'
+import ImageCommand from './ImageCommand'
+import imageCommandSuggestion from './ImageCommand/suggestion'
 import Preview from './Preview'
 
 export type TPostTextareaHandle = {
@@ -84,6 +86,10 @@ const PostTextarea = forwardRef<
         }),
         AICommand.configure({
           suggestion: aiCommandSuggestion,
+          parentEvent
+        }),
+        ImageCommand.configure({
+          suggestion: imageCommandSuggestion,
           parentEvent
         }),
         ClipboardAndDropHandler.configure({
