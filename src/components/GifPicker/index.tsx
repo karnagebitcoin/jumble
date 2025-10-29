@@ -228,7 +228,11 @@ function GifPickerContent({
         className={`overflow-y-auto pr-3 ${isSmallScreen ? 'h-80' : 'h-96'}`}
         style={{
           scrollbarWidth: 'thin',
-          scrollbarColor: 'hsl(var(--border)) transparent'
+          scrollbarColor: 'hsl(var(--border)) transparent',
+          overscrollBehavior: 'contain'
+        }}
+        onWheel={(e) => {
+          e.stopPropagation()
         }}
       >
         {isLoading ? (
