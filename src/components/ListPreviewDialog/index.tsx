@@ -76,10 +76,12 @@ export default function ListPreviewDialog({
         listId,
         ownerPubkey,
         title,
+        description,
+        image,
         pubkeys
       }))
     }
-  }, [isStandalone, myPubkey, listId, ownerPubkey, title, pubkeys])
+  }, [isStandalone, myPubkey, listId, ownerPubkey, title, description, image, pubkeys])
 
   const handleSignInAndFollow = () => {
     // Mark that we want to follow after login
@@ -143,6 +145,14 @@ export default function ListPreviewDialog({
     }
   }, [pendingFollow, myPubkey, unfollowedUsers.length])
 
+  const currentProgress = autoFollowProgress?.isFollowing
+    ? autoFollowProgress.current
+    : followProgress
+  const totalProgress = autoFollowProgress?.isFollowing
+    ? autoFollowProgress.total
+    : unfollowedUsers.length
+  const isCurrentlyFollowing = isFollowingAll || autoFollowProgress?.isFollowing
+
   const content = (
     <div className="flex flex-col gap-4">
       {/* List Preview */}
@@ -190,26 +200,29 @@ export default function ListPreviewDialog({
           </>
         ) : (
           <>
-            {(isFollowingAll || autoFollowProgress?.isFollowing) ? (
-              <div className="space-y-3">
-                <div className="text-center">
-                  <div className="text-lg font-semibold">
-                    {t('Following {{current}}/{{total}}', {
-                      current: autoFollowProgress?.isFollowing
-                        ? autoFollowProgress.current
-                        : followProgress,
-                      total: autoFollowProgress?.isFollowing
-                        ? autoFollowProgress.total
-                        : unfollowedUsers.length
-                    })}
-                  </div>
+            {isCurrentlyFollowing ? (
+              <div className="space-y-2">
+                {/* Progress label and count */}
+                <div className="flex items-center justify-between text-sm font-mono">
+                  <span className="text-muted-foreground">Following</span>
+                  <span className="text-muted-foreground">
+                    {currentProgress}/{totalProgress}
+                  </span>
                 </div>
+                {/* Progress bar */}
                 <Progress
-                  value={autoFollowProgress?.isFollowing
-                    ? (autoFollowProgress.current / autoFollowProgress.total) * 100
-                    : (followProgress / unfollowedUsers.length) * 100}
+                  value={(currentProgress / totalProgress) * 100}
                   className="h-2"
                 />
+                {/* Skip button */}
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full mt-2"
+                  size="lg"
+                >
+                  {t('Skip for now')}
+                </Button>
               </div>
             ) : (
               <Button
@@ -243,7 +256,7 @@ export default function ListPreviewDialog({
         <Drawer open={open} onOpenChange={onOpenChange}>
           <DrawerContent className="px-4 pb-4">
             <DrawerHeader>
-              <DrawerTitle>{t('Join List')}</DrawerTitle>
+              <DrawerTitle>{t('Your Starter Pack')}</DrawerTitle>
             </DrawerHeader>
             {content}
           </DrawerContent>
@@ -258,7 +271,7 @@ export default function ListPreviewDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('Join List')}</DialogTitle>
+            <DialogTitle>{t('Your Starter Pack')}</DialogTitle>
             <DialogDescription>
               {t('Follow all members from this curated list')}
             </DialogDescription>
