@@ -26,8 +26,10 @@ const AICommand = Node.create<AICommandOptions>({
       suggestion: {
         char: '/ai',
         pluginKey: AICommandPluginKey,
+        allowSpaces: false,
+        startOfLine: false,
         command: ({ editor, range, props }: any) => {
-          // Delete the /ai trigger text and prompt
+          // Delete the /ai trigger text
           editor
             .chain()
             .focus()

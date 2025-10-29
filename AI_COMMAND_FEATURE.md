@@ -4,16 +4,23 @@ This feature adds an `/ai` command to the note composer that allows users to lev
 
 ## Usage
 
-1. **In the note composer, type `/ai` followed by your prompt**
-   - Example: `/ai find me the link to madonna die another day`
-   - Example: `/ai write a joke about bitcoin`
-   - Example: `/ai translate "hello world" to japanese`
+1. **In the note composer, type `/ai`**
+   - A dropdown panel will appear with a focused input field
 
-2. **Wait for the AI to process your request**
-   - A preview card will appear showing the AI's response
+2. **Enter your prompt in the input field**
+   - Example: `find me the link to madonna die another day`
+   - Example: `write a joke about bitcoin`
+   - Example: `translate "hello world" to japanese`
+
+3. **Submit your prompt**
+   - Click the arrow button (→) to submit
+   - Or press `Enter` to submit
+
+4. **Wait for the AI to process your request**
    - The AI will think for a moment before showing the result
+   - A preview of the response will appear below the input
 
-3. **Review and insert**
+5. **Review and insert**
    - Click the "Insert" button to add the AI's response to your note
    - Or press `Enter` to quickly insert it
    - You can also click "Copy" to copy the result to your clipboard
@@ -26,36 +33,40 @@ This feature adds an `/ai` command to the note composer that allows users to lev
 
 ## Features
 
-- **Debounced requests**: The AI waits 500ms after you stop typing before making a request
+- **Dedicated input field**: Type your prompt in a separate input to avoid accidentally posting it
+- **Auto-focus**: The input field is automatically focused when you type `/ai`
 - **Preview before insert**: You can see what the AI generated before adding it to your note
 - **Flexible prompts**: Ask for anything - links, jokes, translations, facts, etc.
-- **Keyboard shortcuts**: Press Enter to insert, Escape to close
+- **Keyboard shortcuts**: Press Enter to submit/insert, Escape to close
+- **Safe workflow**: Your prompt is never added to the note itself, preventing accidental posts
 
 ## Examples
 
 ### Finding Links
-```
-/ai find me the link to madonna die another day
-```
-The AI will search and provide a YouTube link (or other relevant link).
+1. Type `/ai` in the note composer
+2. In the input field that appears, type: `find me the link to madonna die another day`
+3. Click the arrow or press Enter
+4. Review the YouTube link the AI provides
+5. Click "Insert" to add it to your note
 
 ### Generating Content
-```
-/ai write a joke about bitcoin
-```
-The AI will generate a joke that you can insert into your note.
+1. Type `/ai` in the note composer
+2. In the input field, type: `write a joke about bitcoin`
+3. Submit and wait for the AI
+4. Review the joke
+5. Click "Insert" to add it to your note
 
 ### Translations
-```
-/ai translate "good morning" to spanish
-```
-The AI will provide the translation.
+1. Type `/ai` in the note composer
+2. In the input field, type: `translate "good morning" to spanish`
+3. Submit and get the translation
+4. Insert it into your note
 
 ### Facts and Information
-```
-/ai what is the current bitcoin block height
-```
-The AI will provide current information (note: accuracy depends on the AI model's knowledge cutoff).
+1. Type `/ai` in the note composer
+2. In the input field, type: `what is the current bitcoin block height`
+3. Get the AI's response (note: accuracy depends on the AI model's knowledge cutoff)
+4. Insert if desired
 
 ## Implementation Details
 

@@ -36,12 +36,9 @@ const suggestion = {
         }
         postEditor.addEventListener('closeSuggestionPopup', closePopup)
       },
-      onStart: (props: { editor: Editor; clientRect?: (() => DOMRect | null) | null; query?: string }) => {
+      onStart: (props: { editor: Editor; clientRect?: (() => DOMRect | null) | null }) => {
         component = new ReactRenderer(AICommandList, {
-          props: {
-            ...props,
-            query: props.query || ''
-          },
+          props,
           editor: props.editor
         })
 
@@ -68,11 +65,8 @@ const suggestion = {
         })
       },
 
-      onUpdate(props: { clientRect?: (() => DOMRect | null) | null | undefined; query?: string }) {
-        component?.updateProps({
-          ...props,
-          query: props.query || ''
-        })
+      onUpdate(props: { clientRect?: (() => DOMRect | null) | null | undefined }) {
+        component?.updateProps(props)
 
         if (!props.clientRect) {
           return

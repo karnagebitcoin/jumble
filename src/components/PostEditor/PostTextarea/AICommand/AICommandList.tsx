@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { useAI } from '@/providers/AIProvider'
-import { Loader2 } from 'lucide-react'
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export type AICommandListProps = {
   command: (props: { text: string }) => void
-  query: string
 }
 
 export type AICommandListHandle = {
@@ -17,138 +17,174 @@ export type AICommandListHandle = {
 const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props, ref) => {
   const { t } = useTranslation()
   const { chat, isConfigured } = useAI()
+  const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
+  // Auto-focus the input when the component mounts
   useEffect(() => {
-    const fetchResult = async () => {
-      if (!props.query || props.query.trim().length === 0) {
-        setResult('')
-        setError('')
-        return
-      }
+    // Small delay to ensure the popup is rendered
+    const timer = setTimeout(() => {
+      inputRef.current?.focus()
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [])
 
-      if (!isConfigured) {
-        setError(t('AI is not configured. Please configure it in settings.'))
-        return
-      }
-
-      setLoading(true)
-      setError('')
-      setResult('')
-
-      try {
-        const response = await chat([
-          {
-            role: 'user',
-            content: props.query
-          }
-        ])
-        setResult(response)
-      } catch (err: any) {
-        console.error('AI Command Error:', err)
-        setError(err.message || t('Failed to get AI response'))
-      } finally {
-        setLoading(false)
-      }
+  const handleSubmit = async () => {
+    if (!prompt || prompt.trim().length === 0) {
+      return
     }
 
-    // Debounce the AI call
-    const timer = setTimeout(() => {
-      fetchResult()
-    }, 500)
+    if (!isConfigured) {
+      setError(t('AI is not configured. Please configure it in settings.'))
+      return
+    }
 
-    return () => clearTimeout(timer)
-  }, [props.query, chat, isConfigured, t])
+    setLoading(true)
+    setError('')
+    setResult('')
+
+    try {
+      const response = await chat([
+        {
+          role: 'user',
+          content: prompt
+        }
+      ])
+      setResult(response)
+    } catch (err: any) {
+      console.error('AI Command Error:', err)
+      setError(err.message || t('Failed to get AI response'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (result && !loading) {
+        // Insert the result if we already have one
+        props.command({ text: result })
+      } else if (prompt && !loading) {
+        // Submit the prompt if we don't have a result yet
+        handleSubmit()
+      }
+    }
+  }
 
   useImperativeHandle(ref, () => ({
     onKeyDown: ({ event }: { event: KeyboardEvent }) => {
-      if (event.key === 'Enter' && result && !loading) {
+      // Always capture Enter key in this component
+      if (event.key === 'Enter') {
         event.preventDefault()
-        props.command({ text: result })
+        event.stopPropagation()
         return true
       }
       return false
     }
   }))
 
-  if (!props.query || props.query.trim().length === 0) {
-    return (
-      <Card className="p-3 max-w-md">
-        <p className="text-sm text-muted-foreground">
-          {t('Type your prompt after /ai. Examples:')}
-        </p>
-        <ul className="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
-          <li>{t('find me the link to madonna die another day')}</li>
-          <li>{t('write a joke about bitcoin')}</li>
-          <li>{t('translate "hello world" to japanese')}</li>
-        </ul>
-      </Card>
-    )
-  }
-
   if (!isConfigured) {
     return (
       <Card className="p-3 max-w-md">
-        <p className="text-sm text-destructive">{error}</p>
+        <p className="text-sm text-destructive">
+          {t('AI is not configured. Please configure it in settings.')}
+        </p>
       </Card>
     )
-  }
-
-  if (loading) {
-    return (
-      <Card className="p-3 max-w-md">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm text-muted-foreground">{t('Thinking...')}</span>
-        </div>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card className="p-3 max-w-md">
-        <p className="text-sm text-destructive">{error}</p>
-      </Card>
-    )
-  }
-
-  if (!result) {
-    return null
   }
 
   return (
-    <Card className="p-3 max-w-md space-y-2">
-      <div className="text-sm">
-        <div className="font-medium mb-1">{t('AI Result:')}</div>
-        <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
-          {result}
+    <Card className="p-3 max-w-md space-y-3">
+      {/* Input Section */}
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground">
+          {t('What would you like AI to help with?')}
+        </p>
+        <div className="flex gap-2">
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder={t('e.g., find me a link to a bitcoin song')}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+            className="flex-1"
+          />
+          <Button
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!prompt || loading}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowRight className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p className="font-medium">{t('Examples:')}</p>
+          <ul className="list-disc list-inside space-y-0.5">
+            <li>{t('find me the link to madonna die another day')}</li>
+            <li>{t('write a joke about bitcoin')}</li>
+            <li>{t('translate "hello world" to japanese')}</li>
+          </ul>
         </div>
       </div>
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => props.command({ text: result })}
-          className="flex-1"
-        >
-          {t('Insert')}
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            // Copy to clipboard
-            navigator.clipboard.writeText(result)
-          }}
-        >
-          {t('Copy')}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {t('Press Enter to insert or click Insert button')}
-      </p>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm text-muted-foreground">{t('Thinking...')}</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="p-2 bg-destructive/10 text-destructive rounded text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Result Section */}
+      {result && !loading && (
+        <div className="space-y-2">
+          <div className="text-sm">
+            <div className="font-medium mb-1">{t('AI Result:')}</div>
+            <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
+              {result}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() => props.command({ text: result })}
+              className="flex-1"
+            >
+              {t('Insert')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // Copy to clipboard
+                navigator.clipboard.writeText(result)
+              }}
+            >
+              {t('Copy')}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t('Press Enter to insert')}
+          </p>
+        </div>
+      )}
     </Card>
   )
 })
