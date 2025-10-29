@@ -27,11 +27,16 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   const [submitted, setSubmitted] = useState(false)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
-  // Extract URL from result if present
+  // Extract URL from result if present (including base64 data URLs)
   const extractedUrl = useMemo(() => {
     if (!result) return null
 
-    // Look for URLs in the result
+    // Check for base64 data URL first
+    if (result.startsWith('data:image/')) {
+      return result
+    }
+
+    // Look for regular URLs in the result
     const urlRegex = /(https?:\/\/[^\s]+)/gi
     const matches = result.match(urlRegex)
 
@@ -46,6 +51,13 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   // Check if the extracted URL is an image
   const isImageUrl = useMemo(() => {
     if (!extractedUrl) return false
+
+    // Check for base64 data URL
+    if (extractedUrl.startsWith('data:image/')) {
+      return true
+    }
+
+    // Check for image file extensions
     const imageExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i
     return imageExtensions.test(extractedUrl) || isGeneratingImage
   }, [extractedUrl, isGeneratingImage])
@@ -138,13 +150,64 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
         }
 
         const data = await response.json()
-        const content = data.choices?.[0]?.message?.content
+        console.log('Image generation response:', data)
 
-        if (!content) {
+        const message = data.choices?.[0]?.message
+        if (!message) {
           throw new Error('No response from AI')
         }
 
-        setResult(content.trim())
+        // Check if content is an array (multimodal response)
+        if (Array.isArray(message.content)) {
+          console.log('Content is array:', message.content)
+
+          // Look for image_url in the content array
+          const imageContent = message.content.find((item: any) =>
+            item.type === 'image_url' || item.image_url || item.type === 'image'
+          )
+
+          if (imageContent?.image_url?.url) {
+            console.log('Found image URL:', imageContent.image_url.url)
+            setResult(imageContent.image_url.url)
+          } else if (imageContent?.url) {
+            console.log('Found URL:', imageContent.url)
+            setResult(imageContent.url)
+          } else if (imageContent?.image_url) {
+            // Handle case where image_url might be a string
+            console.log('Found image_url string:', imageContent.image_url)
+            setResult(imageContent.image_url)
+          } else {
+            // Try to find any URL in text content
+            const textContent = message.content
+              .filter((item: any) => item.type === 'text')
+              .map((item: any) => item.text)
+              .join('\n')
+
+            console.log('Text content:', textContent)
+
+            // Try to extract URL from text
+            const urlMatch = textContent.match(/(https?:\/\/[^\s]+)/i)
+            if (urlMatch) {
+              console.log('Extracted URL from text:', urlMatch[1])
+              setResult(urlMatch[1])
+            } else {
+              setResult(textContent || JSON.stringify(message.content))
+            }
+          }
+        } else if (typeof message.content === 'string') {
+          // Simple string response - try to extract URL
+          console.log('Content is string:', message.content)
+          const urlMatch = message.content.match(/(https?:\/\/[^\s]+)/i)
+          if (urlMatch) {
+            console.log('Extracted URL from string:', urlMatch[1])
+            setResult(urlMatch[1])
+          } else {
+            setResult(message.content.trim())
+          }
+        } else {
+          console.error('Unexpected content format:', message.content)
+          setResult(JSON.stringify(message.content))
+        }
       } else {
         setIsGeneratingImage(false)
         // Use the regular chat function for non-image queries
@@ -262,6 +325,43 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
   // Show result with insert options
   if (result) {
+    // If we generated an image but couldn't extract URL, show debug info
+    if (isGeneratingImage && !extractedUrl) {
+      return (
+        <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-2xl space-y-2">
+          <div className="text-xs text-muted-foreground mb-2">{t('Image Generation Result (Debug):')}</div>
+          <div className="bg-muted p-2 rounded max-h-48 overflow-y-auto whitespace-pre-wrap break-words text-xs font-mono">
+            {result}
+          </div>
+          <p className="text-xs text-destructive">
+            Could not extract image URL from response. The model may have returned text instead of an image.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                props.command({ text: result })
+              }}
+              className="flex-1"
+            >
+              {t('Insert Anyway')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigator.clipboard.writeText(result)
+              }}
+            >
+              {t('Copy')}
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
     // If we have an image URL, show the image preview
     if (extractedUrl && isImageUrl) {
       return (
@@ -269,7 +369,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
           <div className="text-xs text-muted-foreground mb-2">{t('Generated Image:')}</div>
 
           {/* Image Preview */}
-          <div className="w-full border rounded-lg overflow-hidden">
+          <div className="w-full border rounded-lg overflow-hidden bg-muted">
             <Image
               image={{ url: extractedUrl }}
               className="w-full h-auto max-h-96 object-contain"
