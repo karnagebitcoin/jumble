@@ -3,12 +3,9 @@ import indexedDbService from './indexed-db.service'
 import { Event, Filter } from 'nostr-tools'
 
 // Relays that may have GIF/file metadata events
+// gifbuddy.lol is the primary source with 25k+ GIFs
 const GIF_RELAYS = [
-  'wss://relay.gifbuddy.lol',
-  'wss://relay.nostr.band',
-  'wss://nostr.wine',
-  'wss://relay.damus.io',
-  'wss://nos.lol'
+  'wss://relay.gifbuddy.lol'
 ]
 const BATCH_SIZE = 100 // Batch size for IndexedDB operations
 
@@ -52,24 +49,13 @@ class GifService {
     const url = urlTag[1]
     const mimeType = event.tags.find((tag) => tag[0] === 'm')?.[1]
 
-    // Accept GIFs, WebP, and animated images
-    // If no MIME type, check URL extension
+    // Only accept actual GIFs
     if (mimeType) {
-      const isAnimatedImage =
-        mimeType.includes('gif') ||
-        mimeType.includes('webp') ||
-        mimeType.includes('apng')
-
-      if (!isAnimatedImage) return null
+      if (!mimeType.includes('gif')) return null
     } else {
       // No MIME type - check URL extension
       const urlLower = url.toLowerCase()
-      const hasAnimatedExtension =
-        urlLower.endsWith('.gif') ||
-        urlLower.endsWith('.webp') ||
-        urlLower.endsWith('.apng')
-
-      if (!hasAnimatedExtension) return null
+      if (!urlLower.endsWith('.gif')) return null
     }
 
     const thumbTag = event.tags.find((tag) => tag[0] === 'thumb')
@@ -152,29 +138,39 @@ class GifService {
       console.log('[GifService] Initial batch fetched:', result.newGifs, 'GIFs from', result.totalEvents, 'events')
 
       // Continue fetching more batches
-      // Keep fetching as long as we're getting events from the relay (even if filtered out)
-      // or until we've done enough batches
       let batchNumber = 2
       const batchSize = 2000
-      const maxBatches = 20
+      const maxBatches = 50 // Increase to 50 batches to get more GIFs
+      let consecutiveEmptyBatches = 0
 
-      while (batchNumber <= maxBatches && result.totalEvents >= 100) {
+      while (batchNumber <= maxBatches) {
         // Small delay between batches to not overwhelm the relay
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        await new Promise(resolve => setTimeout(resolve, 1000))
 
         result = await this.fetchAndCacheGifs(batchSize)
 
         console.log('[GifService] Batch', batchNumber, 'complete. New GIFs:', result.newGifs, 'from', result.totalEvents, 'events. Total cache:', this.allGifsCache.size)
         batchNumber++
 
-        // If we got very few events, we've probably reached the end
-        if (result.totalEvents < 100) {
-          console.log('[GifService] Received fewer than 100 events, stopping.')
+        // Track consecutive batches with no events
+        if (result.totalEvents === 0) {
+          consecutiveEmptyBatches++
+          if (consecutiveEmptyBatches >= 3) {
+            console.log('[GifService] Received 3 consecutive empty batches, stopping.')
+            break
+          }
+        } else {
+          consecutiveEmptyBatches = 0
+        }
+
+        // Stop if we got absolutely no events at all
+        if (result.totalEvents === 0 && batchNumber > 5) {
+          console.log('[GifService] No more events available, stopping.')
           break
         }
       }
 
-      console.log('[GifService] Background fetch complete. Total cache:', this.allGifsCache.size, 'GIFs across', batchNumber, 'batches')
+      console.log('[GifService] Background fetch complete. Total cache:', this.allGifsCache.size, 'GIFs across', batchNumber - 1, 'batches')
     } catch (error) {
       console.error('[GifService] Background fetch error:', error)
     }
@@ -182,7 +178,7 @@ class GifService {
 
   private async fetchAndCacheGifs(limit: number = 2000): Promise<{ newGifs: number; totalEvents: number }> {
     try {
-      console.log('[GifService] Fetching up to', limit, 'GIFs from', GIF_RELAYS.length, 'relays')
+      console.log('[GifService] Fetching up to', limit, 'events from', GIF_RELAYS.length, 'relay(s):', GIF_RELAYS.join(', '))
 
       // Build filter - if we have cached GIFs, fetch older ones
       const filter: Filter = {
