@@ -236,6 +236,7 @@ export type TAIServiceConfig = {
   provider: 'openrouter'
   apiKey?: string
   model?: string
+  imageModel?: string
 }
 
 export type TAIToolsConfig = {

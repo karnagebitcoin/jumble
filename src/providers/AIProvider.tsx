@@ -11,6 +11,8 @@ type TAIContext = {
   updateToolsConfig: (config: TAIToolsConfig) => void
   summarizeArticle: (title: string, description: string, url: string) => Promise<TArticleSummary>
   chat: (messages: TAIMessage[], userPubkey?: string) => Promise<string>
+  generateImage: (prompt: string) => Promise<string>
+  getAvailableImageModels: () => Promise<Array<{ id: string; name: string }>>
   isConfigured: boolean
 }
 
@@ -66,6 +68,14 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     return await aiService.chat(messages, userPubkey)
   }
 
+  const generateImage = async (prompt: string): Promise<string> => {
+    return await aiService.generateImage(prompt)
+  }
+
+  const getAvailableImageModels = async (): Promise<Array<{ id: string; name: string }>> => {
+    return await aiService.getAvailableImageModels()
+  }
+
   const isConfigured = !!(serviceConfig.apiKey && serviceConfig.model)
 
   return (
@@ -77,6 +87,8 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
         updateToolsConfig,
         summarizeArticle,
         chat,
+        generateImage,
+        getAvailableImageModels,
         isConfigured
       }}
     >

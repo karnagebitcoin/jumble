@@ -1,5 +1,12 @@
 # AI Image Generation Testing Guide
 
+## Prerequisites
+
+Before testing, ensure:
+1. You have configured your OpenRouter API key in Settings → AI Tools
+2. Your Default Model is set (e.g., `x-ai/grok-4-fast`)
+3. Your Image Generation Model is set to `openai/gpt-5-image-mini` (default)
+
 ## How to Test the Feature
 
 1. **Open the Note Composer**
@@ -12,6 +19,7 @@
 3. **Submit the Request**
    - Press Enter or click the arrow button
    - You should see "Generating..." appear
+   - The system will use `openai/gpt-5-image-mini` (not your default model)
 
 4. **Open Browser Console**
    - Press F12 to open developer tools

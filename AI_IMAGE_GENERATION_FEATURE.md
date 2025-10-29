@@ -62,11 +62,29 @@ When both types of keywords are detected in your prompt, the system automaticall
 ```
 → Generates a realistic photo-style image
 
-## Requirements
+## Configuration
 
-- AI must be configured in settings with a valid OpenRouter API key
-- The `google/gemini-2.5-flash-image` model is now available in the model selection dropdown
-- You can use any configured model for regular `/ai` commands; the system will automatically switch to the image model only when needed
+### AI Settings
+
+In Settings → AI Tools, you now have two separate model configurations:
+
+1. **Default Model**: Used for text generation, summaries, and general AI tasks
+   - Default: `x-ai/grok-4-fast`
+   - Used for regular `/ai` commands (non-image)
+
+2. **Image Generation Model**: Used specifically for image generation requests
+   - Default: `openai/gpt-5-image-mini`
+   - Automatically used when you request images
+   - Available options:
+     - OpenAI GPT-5 Image Mini (default, fast and efficient)
+     - OpenAI GPT-5 Image (higher quality)
+     - Google Gemini 2.5 Flash Image
+
+### Requirements
+
+- Valid OpenRouter API key configured in AI Settings
+- Both default and image models will be pre-configured with sensible defaults
+- You can change either model independently
 
 ## Troubleshooting
 

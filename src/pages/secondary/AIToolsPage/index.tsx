@@ -19,17 +19,21 @@ import { toast } from 'sonner'
 
 const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
-  const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig } = useAI()
+  const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig, getAvailableImageModels } = useAI()
   const [apiKey, setApiKey] = useState(serviceConfig.apiKey || '')
   const [selectedModel, setSelectedModel] = useState(serviceConfig.model || '')
+  const [selectedImageModel, setSelectedImageModel] = useState(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
   const [availableModels, setAvailableModels] = useState<Array<{ id: string; name: string }>>([])
+  const [availableImageModels, setAvailableImageModels] = useState<Array<{ id: string; name: string }>>([])
   const [showApiKey, setShowApiKey] = useState(false)
 
   useEffect(() => {
     setApiKey(serviceConfig.apiKey || '')
     setSelectedModel(serviceConfig.model || '')
+    setSelectedImageModel(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
     // Load the handpicked models
     loadModels()
+    loadImageModels()
   }, [serviceConfig])
 
   const handleSaveApiKey = async () => {
@@ -61,10 +65,25 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     }
   }
 
+  const loadImageModels = async () => {
+    try {
+      const models = await getAvailableImageModels()
+      setAvailableImageModels(models)
+    } catch (error) {
+      console.error('Failed to load image models:', error)
+    }
+  }
+
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
     updateServiceConfig({ ...serviceConfig, model: modelId })
-    toast.success(t('Model selected successfully'))
+    toast.success(t('Default model selected successfully'))
+  }
+
+  const handleImageModelSelect = (modelId: string) => {
+    setSelectedImageModel(modelId)
+    updateServiceConfig({ ...serviceConfig, imageModel: modelId })
+    toast.success(t('Image model selected successfully'))
   }
 
   const handleToggleSummary = (enabled: boolean) => {
@@ -146,7 +165,39 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
             </Select>
             {availableModels.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                {t('Select the AI model to use for all AI features')}
+                {t('Model for text generation, summaries, and general AI tasks')}
+              </p>
+            )}
+          </div>
+
+          {/* Image Model Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="image-model-select">{t('Image Generation Model')}</Label>
+            <Select
+              value={selectedImageModel}
+              onValueChange={handleImageModelSelect}
+              disabled={availableImageModels.length === 0}
+            >
+              <SelectTrigger id="image-model-select">
+                <SelectValue
+                  placeholder={
+                    availableImageModels.length === 0
+                      ? t('No image models available')
+                      : t('Select an image model')
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {availableImageModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {availableImageModels.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('Model used when you request images via /ai command')}
               </p>
             )}
           </div>
