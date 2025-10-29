@@ -1,7 +1,14 @@
 import client from './client.service'
 import { Event, Filter } from 'nostr-tools'
 
-const GIFBUDDY_RELAY = 'wss://relay.gifbuddy.lol'
+// Relays that may have GIF/file metadata events
+const GIF_RELAYS = [
+  'wss://relay.gifbuddy.lol',
+  'wss://relay.nostr.band',
+  'wss://nostr.wine',
+  'wss://relay.damus.io',
+  'wss://nos.lol'
+]
 const GIF_CACHE_KEY = 'jumble-gif-cache'
 const CACHE_VERSION = 1
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000 // 24 hours
@@ -43,6 +50,7 @@ class GifService {
   private searchCache: GifSearchCache = {}
   private isInitialized = false
   private initializationPromise: Promise<void> | null = null
+  private updateCallbacks: Set<() => void> = new Set()
 
   private gifEventToData(event: GifEvent): GifData | null {
     const urlTag = event.tags.find((tag) => tag[0] === 'url')
@@ -169,7 +177,7 @@ class GifService {
 
   private async fetchAndCacheGifs(limit: number = 2000): Promise<number> {
     try {
-      console.log('[GifService] Fetching up to', limit, 'GIFs from relay')
+      console.log('[GifService] Fetching up to', limit, 'GIFs from', GIF_RELAYS.length, 'relays')
 
       // Build filter - if we have cached GIFs, fetch older ones
       const filter: Filter = {
@@ -189,22 +197,36 @@ class GifService {
         }
       }
 
-      const events = await client.pool.querySync([GIFBUDDY_RELAY], filter) as GifEvent[]
+      console.log('[GifService] Query filter:', JSON.stringify(filter))
+
+      const events = await client.pool.querySync(GIF_RELAYS, filter) as GifEvent[]
+
+      console.log('[GifService] Received', events.length, 'events from relay')
+
+      if (events.length > 0) {
+        console.log('[GifService] Sample event:', events[0])
+      }
 
       let newGifsCount = 0
+      let filteredOut = 0
       events.forEach((event) => {
         const gifData = this.gifEventToData(event)
-        if (gifData && gifData.eventId && !this.allGifsCache.has(gifData.eventId)) {
-          this.allGifsCache.set(gifData.eventId, gifData)
-          newGifsCount++
+        if (gifData) {
+          if (gifData.eventId && !this.allGifsCache.has(gifData.eventId)) {
+            this.allGifsCache.set(gifData.eventId, gifData)
+            newGifsCount++
+          }
+        } else {
+          filteredOut++
         }
       })
 
-      console.log('[GifService] Added', newGifsCount, 'new GIFs. Total cache:', this.allGifsCache.size)
+      console.log('[GifService] Processed:', newGifsCount, 'new GIFs,', filteredOut, 'filtered out. Total cache:', this.allGifsCache.size)
 
-      // Save to localStorage periodically
+      // Save to localStorage and notify subscribers if we got new GIFs
       if (newGifsCount > 0) {
         this.saveCacheToStorage()
+        this.notifyCacheUpdate()
       }
 
       return newGifsCount
@@ -294,6 +316,26 @@ class GifService {
   async fetchMoreGifs(): Promise<number> {
     await this.initialize()
     return this.fetchAndCacheGifs(2000)
+  }
+
+  // Subscribe to cache updates
+  onCacheUpdate(callback: () => void): () => void {
+    this.updateCallbacks.add(callback)
+    // Return unsubscribe function
+    return () => {
+      this.updateCallbacks.delete(callback)
+    }
+  }
+
+  // Notify all subscribers of cache update
+  private notifyCacheUpdate(): void {
+    this.updateCallbacks.forEach(callback => {
+      try {
+        callback()
+      } catch (error) {
+        console.error('[GifService] Error in update callback:', error)
+      }
+    })
   }
 }
 

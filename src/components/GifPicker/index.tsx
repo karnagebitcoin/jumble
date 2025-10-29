@@ -39,7 +39,20 @@ function GifPickerContent({
   // Load recent GIFs on mount
   useEffect(() => {
     loadRecentGifs()
-  }, [])
+
+    // Subscribe to cache updates
+    const unsubscribe = gifService.onCacheUpdate(() => {
+      console.log('[GifPicker] Cache updated, reloading GIFs...')
+      // If we're not searching and showing recent GIFs, reload to show new ones
+      if (!searchQuery && gifs.length < gifService.getCacheSize()) {
+        loadRecentGifs()
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [searchQuery])
 
   const loadRecentGifs = async () => {
     setIsLoading(true)
