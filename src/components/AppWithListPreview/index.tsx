@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { PageManager } from '@/PageManager'
 import ListPreviewDialog from '@/components/ListPreviewDialog'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
@@ -36,6 +36,7 @@ export function AppWithListPreview() {
     ownerPubkey: null,
     dTag: null
   })
+  const originalUrlRef = useRef<string | null>(null)
 
   // Check URL on mount for shared list preview
   useEffect(() => {
@@ -61,6 +62,12 @@ export function AppWithListPreview() {
         return
       }
 
+      // Save the original URL
+      originalUrlRef.current = window.location.href
+
+      // Temporarily change URL to root to prevent PageManager from loading the list
+      window.history.replaceState(null, '', '/')
+
       // Fetch the external list
       try {
         const events = await client.fetchEvents(BIG_RELAY_URLS.slice(0, 5), {
@@ -83,6 +90,10 @@ export function AppWithListPreview() {
         }
       } catch (error) {
         console.error('Failed to fetch list for preview:', error)
+        // Restore URL if fetch fails
+        if (originalUrlRef.current) {
+          window.history.replaceState(null, '', originalUrlRef.current)
+        }
       }
     }
 
@@ -114,21 +125,29 @@ export function AppWithListPreview() {
       dTag: null
     })
 
-    // Remove the preview parameter from URL to show the full list
-    const newUrl = window.location.pathname
-    window.history.replaceState(null, '', newUrl)
+    // Restore the original URL without the preview parameter
+    if (originalUrlRef.current) {
+      const url = new URL(originalUrlRef.current)
+      url.searchParams.delete('preview')
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash)
+      originalUrlRef.current = null
+
+      // Reload the page to properly load the list
+      window.location.reload()
+    }
   }
 
-  // When preview dialog is open, we don't want to show the PageManager content
-  // (which would try to load the ListPage). Instead, show a blank screen behind the dialog.
-  if (listPreview.isOpen) {
-    return (
-      <>
-        {/* Blank screen while preview dialog is shown */}
-        <div className="flex h-screen w-screen bg-background" />
+  return (
+    <>
+      <PageManager />
 
-        {/* List Preview Dialog - the only UI visible in preview mode */}
-        {listPreview.listData && listPreview.ownerPubkey && listPreview.dTag && (
+      {/* List Preview Dialog - shows on top when preview mode is active */}
+      {listPreview.isOpen && listPreview.listData && listPreview.ownerPubkey && listPreview.dTag && (
+        <>
+          {/* Blank screen behind the dialog to hide the home page */}
+          <div className="fixed inset-0 bg-background z-[9998]" />
+
+          {/* List Preview Dialog */}
           <ListPreviewDialog
             open={true}
             onOpenChange={(open) => {
@@ -143,11 +162,8 @@ export function AppWithListPreview() {
             image={listPreview.listData.image}
             pubkeys={listPreview.listData.pubkeys}
           />
-        )}
-      </>
-    )
-  }
-
-  // Normal mode - show the PageManager (full app)
-  return <PageManager />
+        </>
+      )}
+    </>
+  )
 }
