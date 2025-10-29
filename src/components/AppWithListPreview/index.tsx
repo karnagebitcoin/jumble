@@ -3,12 +3,10 @@ import { PageManager } from '@/PageManager'
 import ListPreviewDialog from '@/components/ListPreviewDialog'
 import { useLists, TStarterPack } from '@/providers/ListsProvider'
 import { useNostr } from '@/providers/NostrProvider'
-import { useFollowList } from '@/providers/FollowListProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import client from '@/services/client.service'
 import { Event } from 'nostr-tools'
 import { BIG_RELAY_URLS, ExtendedKind } from '@/constants'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -30,7 +28,6 @@ export function AppWithListPreview() {
   const { t } = useTranslation()
   const { pubkey: myPubkey } = useNostr()
   const { lists } = useLists()
-  const { followMultiple, followings } = useFollowList()
   const { switchFeed } = useFeed()
   const [listPreview, setListPreview] = useState<{
     isOpen: boolean
@@ -42,15 +39,6 @@ export function AppWithListPreview() {
     listData: null,
     ownerPubkey: null,
     dTag: null
-  })
-  const [followProgress, setFollowProgress] = useState<{
-    isFollowing: boolean
-    current: number
-    total: number
-  }>({
-    isFollowing: false,
-    current: 0,
-    total: 0
   })
   const originalUrlRef = useRef<string | null>(null)
   const hasAutoFollowedRef = useRef(false)
@@ -117,9 +105,9 @@ export function AppWithListPreview() {
     checkForListPreview()
   }, [lists, myPubkey])
 
-  // Auto-follow users after login/signup
+  // Show list preview dialog after login/signup
   useEffect(() => {
-    const autoFollowFromPending = async () => {
+    const showPendingList = async () => {
       // Only run once and only if user just logged in
       if (!myPubkey || hasAutoFollowedRef.current) return
 
@@ -130,19 +118,7 @@ export function AppWithListPreview() {
       try {
         const { listId, ownerPubkey, title, description, image, pubkeys } = JSON.parse(pendingData)
 
-        // Filter out already followed users
-        const unfollowedUsers = pubkeys.filter(
-          (pubkey: string) => pubkey !== myPubkey && !followings.includes(pubkey)
-        )
-
-        if (unfollowedUsers.length === 0) {
-          toast.info(t('You are already following everyone in this list'))
-          sessionStorage.removeItem('pendingListFollow')
-          hasAutoFollowedRef.current = true
-          return
-        }
-
-        // Show the list preview dialog with follow progress
+        // Show the list preview dialog (don't auto-follow)
         const listData: TStarterPack = {
           id: listId,
           title,
@@ -159,43 +135,17 @@ export function AppWithListPreview() {
           dTag: listId
         })
 
-        // Start following all users
-        setFollowProgress({
-          isFollowing: true,
-          current: 0,
-          total: unfollowedUsers.length
-        })
-
-        // Follow all users in a single operation
-        await followMultiple(unfollowedUsers)
-
-        const count = unfollowedUsers.length
-        const word = count === 1 ? t('user') : t('users')
-        toast.success(t('Followed {{count}} {{word}}', { count, word }))
-
-        // Clear the pending follow and hide progress
+        // Clear the flag and sessionStorage
         sessionStorage.removeItem('pendingListFollow')
         hasAutoFollowedRef.current = true
-
-        // Reset follow progress
-        setFollowProgress({
-          isFollowing: false,
-          current: 0,
-          total: 0
-        })
       } catch (error) {
-        console.error('Failed to auto-follow from pending list:', error)
+        console.error('Failed to show pending list:', error)
         sessionStorage.removeItem('pendingListFollow')
-        setFollowProgress({
-          isFollowing: false,
-          current: 0,
-          total: 0
-        })
       }
     }
 
-    autoFollowFromPending()
-  }, [myPubkey, followings, followMultiple, t])
+    showPendingList()
+  }, [myPubkey, t])
 
   const parseStarterPackEvent = (event: Event): TStarterPack => {
     const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
@@ -215,8 +165,8 @@ export function AppWithListPreview() {
   }
 
   const handleClosePreview = async () => {
-    // Switch to Following feed if user just followed people
-    if (myPubkey && followings.length > 0) {
+    // Switch to Following feed if user is logged in
+    if (myPubkey) {
       await switchFeed('following', { pubkey: myPubkey })
     }
 
@@ -244,7 +194,6 @@ export function AppWithListPreview() {
           image={listPreview.listData.image}
           pubkeys={listPreview.listData.pubkeys}
           isStandalone={true}
-          autoFollowProgress={followProgress}
         />
       </div>
     )
