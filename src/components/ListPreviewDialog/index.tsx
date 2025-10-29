@@ -34,6 +34,11 @@ interface ListPreviewDialogProps {
   image?: string
   pubkeys: string[]
   isStandalone?: boolean // When true, this is shown from a shared link (no view list button)
+  autoFollowProgress?: {
+    isFollowing: boolean
+    current: number
+    total: number
+  }
 }
 
 export default function ListPreviewDialog({
@@ -45,7 +50,8 @@ export default function ListPreviewDialog({
   description,
   image,
   pubkeys,
-  isStandalone = false
+  isStandalone = false,
+  autoFollowProgress
 }: ListPreviewDialogProps) {
   const { t } = useTranslation()
   const { isSmallScreen } = useScreenSize()
@@ -184,18 +190,24 @@ export default function ListPreviewDialog({
           </>
         ) : (
           <>
-            {isFollowingAll ? (
+            {(isFollowingAll || autoFollowProgress?.isFollowing) ? (
               <div className="space-y-3">
                 <div className="text-center">
                   <div className="text-lg font-semibold">
                     {t('Following {{current}}/{{total}}', {
-                      current: followProgress,
-                      total: unfollowedUsers.length
+                      current: autoFollowProgress?.isFollowing
+                        ? autoFollowProgress.current
+                        : followProgress,
+                      total: autoFollowProgress?.isFollowing
+                        ? autoFollowProgress.total
+                        : unfollowedUsers.length
                     })}
                   </div>
                 </div>
                 <Progress
-                  value={(followProgress / unfollowedUsers.length) * 100}
+                  value={autoFollowProgress?.isFollowing
+                    ? (autoFollowProgress.current / autoFollowProgress.total) * 100
+                    : (followProgress / unfollowedUsers.length) * 100}
                   className="h-2"
                 />
               </div>

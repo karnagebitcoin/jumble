@@ -41,6 +41,15 @@ export function AppWithListPreview() {
     ownerPubkey: null,
     dTag: null
   })
+  const [followProgress, setFollowProgress] = useState<{
+    isFollowing: boolean
+    current: number
+    total: number
+  }>({
+    isFollowing: false,
+    current: 0,
+    total: 0
+  })
   const originalUrlRef = useRef<string | null>(null)
   const hasAutoFollowedRef = useRef(false)
 
@@ -117,7 +126,7 @@ export function AppWithListPreview() {
       if (!pendingData) return
 
       try {
-        const { pubkeys } = JSON.parse(pendingData)
+        const { listId, ownerPubkey, title, description, image, pubkeys } = JSON.parse(pendingData)
 
         // Filter out already followed users
         const unfollowedUsers = pubkeys.filter(
@@ -131,12 +140,40 @@ export function AppWithListPreview() {
           return
         }
 
-        // Follow all users
+        // Show the list preview dialog with follow progress
+        const listData: TStarterPack = {
+          id: listId,
+          title,
+          description,
+          image,
+          pubkeys,
+          event: undefined as any // We don't have the event here, but it's not needed for display
+        }
+
+        setListPreview({
+          isOpen: true,
+          listData,
+          ownerPubkey,
+          dTag: listId
+        })
+
+        // Start following all users with progress tracking
+        setFollowProgress({
+          isFollowing: true,
+          current: 0,
+          total: unfollowedUsers.length
+        })
+
         let successCount = 0
         for (const pubkey of unfollowedUsers) {
           try {
             await follow(pubkey)
             successCount++
+            setFollowProgress({
+              isFollowing: true,
+              current: successCount,
+              total: unfollowedUsers.length
+            })
           } catch (error) {
             console.error(`Failed to follow ${pubkey}:`, error)
           }
@@ -145,12 +182,24 @@ export function AppWithListPreview() {
         const word = successCount === 1 ? t('user') : t('users')
         toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
 
-        // Clear the pending follow
+        // Clear the pending follow and hide progress
         sessionStorage.removeItem('pendingListFollow')
         hasAutoFollowedRef.current = true
+
+        // Reset follow progress
+        setFollowProgress({
+          isFollowing: false,
+          current: 0,
+          total: 0
+        })
       } catch (error) {
         console.error('Failed to auto-follow from pending list:', error)
         sessionStorage.removeItem('pendingListFollow')
+        setFollowProgress({
+          isFollowing: false,
+          current: 0,
+          total: 0
+        })
       }
     }
 
@@ -199,6 +248,7 @@ export function AppWithListPreview() {
           image={listPreview.listData.image}
           pubkeys={listPreview.listData.pubkeys}
           isStandalone={true}
+          autoFollowProgress={followProgress}
         />
       </div>
     )
