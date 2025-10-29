@@ -70,16 +70,22 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
       // Check if the query is asking for a link/URL
       const isLinkQuery = /\b(link|url|website|page|find|search|get|fetch)\b/i.test(props.query)
 
-      let prompt = props.query
+      let systemPrompt = 'Be concise and direct. Provide only the essential information without extra wording, explanations, or formatting.'
+      let userPrompt = props.query
+
       if (isLinkQuery) {
-        // Instruct AI to return only the URL without additional context
-        prompt = `${props.query}\n\nIMPORTANT: Return ONLY the URL/link without any additional text, explanation, or formatting. Just the plain URL.`
+        // For link queries, be extra strict about returning only the URL
+        systemPrompt = 'Return ONLY the URL/link without any additional text, explanation, markdown formatting, or commentary. Just the plain URL.'
       }
 
       const response = await chat([
         {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
           role: 'user',
-          content: prompt
+          content: userPrompt
         }
       ])
       setResult(response.trim())
