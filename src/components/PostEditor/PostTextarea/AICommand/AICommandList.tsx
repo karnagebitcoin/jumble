@@ -3,11 +3,12 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useAI } from '@/providers/AIProvider'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export type AICommandListProps = {
   command: (props: { text: string }) => void
+  clientRect?: (() => DOMRect | null) | null
 }
 
 export type AICommandListHandle = {
@@ -23,17 +24,8 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
   const [error, setError] = useState<string>('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-focus the input when the component mounts
-  useEffect(() => {
-    // Small delay to ensure the popup is rendered and input is ready
-    const timer = setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus()
-        inputRef.current.click() // Ensure it's focused
-      }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
+  // Calculate width from clientRect
+  const editorWidth = props.clientRect ? props.clientRect()?.width : undefined
 
   const handleSubmit = async () => {
     if (!prompt || prompt.trim().length === 0) {
@@ -95,16 +87,22 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
 
   if (!isConfigured) {
     return (
-      <Card className="p-3 max-w-md">
+      <div
+        className="border rounded-lg bg-background z-50 pointer-events-auto p-3"
+        style={{ width: editorWidth ? `${editorWidth}px` : '100%' }}
+      >
         <p className="text-sm text-destructive">
           {t('AI is not configured. Please configure it in settings.')}
         </p>
-      </Card>
+      </div>
     )
   }
 
   return (
-    <Card className="p-3 max-w-md space-y-3">
+    <div
+      className="border rounded-lg bg-background z-50 pointer-events-auto p-3 space-y-3"
+      style={{ width: editorWidth ? `${editorWidth}px` : '100%' }}
+    >
       {/* Input Section */}
       <div
         className="flex gap-2"
@@ -190,7 +188,7 @@ const AICommandList = forwardRef<AICommandListHandle, AICommandListProps>((props
           </p>
         </div>
       )}
-    </Card>
+    </div>
   )
 })
 

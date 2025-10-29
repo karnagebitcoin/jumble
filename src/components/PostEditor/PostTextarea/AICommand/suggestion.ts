@@ -56,8 +56,17 @@ const suggestion = {
           placement: 'bottom-start',
           hideOnClick: false,
           touch: true,
+          maxWidth: 'none',
+          zIndex: 9999,
           onShow() {
             postEditor.isSuggestionPopupOpen = true
+            // Focus the input after popup is shown
+            setTimeout(() => {
+              const input = component?.element?.querySelector('input')
+              if (input) {
+                input.focus()
+              }
+            }, 50)
           },
           onHide() {
             postEditor.isSuggestionPopupOpen = false
