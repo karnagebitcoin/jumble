@@ -106,7 +106,6 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
                 slide: ({ slide }) => {
                   // Use the slide's stored index to get the correct image data
                   const currentImage = visibleGallery[slide.index]
-                  console.log('Rendering slide:', slide.index, 'Image data:', currentImage)
                   return (
                     <div className="flex flex-col items-center justify-center h-full w-full p-4">
                       <div className="relative max-w-full max-h-full flex items-center justify-center">
@@ -130,7 +129,6 @@ export default function ProfileGallery({ gallery, maxImages = 8 }: ProfileGaller
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
-                              console.log('Opening link:', currentImage.link)
                               window.open(currentImage.link, '_blank', 'noopener,noreferrer')
                             }}
                             className="flex items-center gap-2"

@@ -86,7 +86,6 @@ const ProfileEditorPage = forwardRef(({ index }: { index?: number }, ref) => {
     // Add gallery if there are images, otherwise remove it
     if (gallery.length > 0) {
       newProfileContent.gallery = gallery
-      console.log('Saving gallery with', gallery.length, 'images:', gallery)
     } else {
       delete newProfileContent.gallery
     }

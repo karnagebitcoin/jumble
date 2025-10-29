@@ -263,10 +263,6 @@ Format your response as JSON with this exact structure:
 
     const imageModel = this.config.imageModel || 'openai/gpt-5-image-mini'
 
-    console.log('=== IMAGE GENERATION START ===')
-    console.log('Prompt:', prompt)
-    console.log('Image Model:', imageModel)
-
     try {
       const requestBody = {
         model: imageModel,
@@ -283,8 +279,6 @@ Format your response as JSON with this exact structure:
         ]
       }
 
-      console.log('Request Body:', JSON.stringify(requestBody, null, 2))
-
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -296,15 +290,10 @@ Format your response as JSON with this exact structure:
         body: JSON.stringify(requestBody)
       })
 
-      console.log('Response Status:', response.status)
-      console.log('Response OK:', response.ok)
-
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Error Response Text:', errorText)
         try {
           const error = JSON.parse(errorText)
-          console.error('Parsed Error:', error)
           throw new Error(error.error?.message || 'Failed to generate image')
         } catch (parseError) {
           throw new Error(`Failed to generate image: ${errorText}`)
@@ -312,104 +301,65 @@ Format your response as JSON with this exact structure:
       }
 
       const data = await response.json()
-      console.log('=== FULL RESPONSE DATA ===')
-      console.log(JSON.stringify(data, null, 2))
-      console.log('=== END FULL RESPONSE DATA ===')
-
       const message = data.choices?.[0]?.message
-      console.log('Message object:', message)
 
       if (!message) {
-        console.error('No message in response!')
         throw new Error('No response from AI')
       }
 
       // First check if there's an images array (new format)
       if (message.images && Array.isArray(message.images) && message.images.length > 0) {
-        console.log('Found images array with', message.images.length, 'images')
         const firstImage = message.images[0]
-        console.log('First image:', firstImage)
 
         if (firstImage.image_url?.url) {
-          console.log('✓ Found image URL in images array:', firstImage.image_url.url.substring(0, 100))
           return firstImage.image_url.url
         } else if (firstImage.url) {
-          console.log('✓ Found URL in images array:', firstImage.url.substring(0, 100))
           return firstImage.url
         }
       }
 
-      console.log('Message content type:', typeof message.content)
-      console.log('Message content is array:', Array.isArray(message.content))
-
       // Parse the response to extract image URL from content
       if (Array.isArray(message.content)) {
-        console.log('Processing array content...')
-        console.log('Content array length:', message.content.length)
-        console.log('Content array:', JSON.stringify(message.content, null, 2))
-
         // Look for image_url in the content array
         const imageContent = message.content.find(
           (item: any) => item.type === 'image_url' || item.image_url || item.type === 'image'
         )
 
-        console.log('Found image content:', imageContent)
-
         if (imageContent?.image_url?.url) {
-          console.log('✓ Found image URL at image_url.url:', imageContent.image_url.url)
           return imageContent.image_url.url
         } else if (imageContent?.url) {
-          console.log('✓ Found image URL at url:', imageContent.url)
           return imageContent.url
         } else if (imageContent?.image_url) {
-          console.log('✓ Found image_url string:', imageContent.image_url)
           return imageContent.image_url
         } else {
           // Try to find any URL in text content
-          console.log('No image_url found, looking in text content...')
           const textContent = message.content
             .filter((item: any) => item.type === 'text')
             .map((item: any) => item.text)
             .join('\n')
 
-          console.log('Text content:', textContent)
-
           // Try to extract URL from text
           const urlMatch = textContent.match(/(https?:\/\/[^\s]+)/i)
           if (urlMatch) {
-            console.log('✓ Extracted URL from text:', urlMatch[1])
             return urlMatch[1]
           }
 
-          console.log('! No URL found, returning text content or stringified array')
           return textContent || JSON.stringify(message.content)
         }
       } else if (typeof message.content === 'string') {
-        console.log('Processing string content...')
-        console.log('Content string:', message.content)
-
         // Try to extract URL from string
         const urlMatch = message.content.match(/(https?:\/\/[^\s]+)/i)
         if (urlMatch) {
-          console.log('✓ Extracted URL from string:', urlMatch[1])
           return urlMatch[1]
         }
 
-        console.log('! No URL found in string, returning trimmed content')
         return message.content.trim()
       } else {
-        console.error('! Unexpected content format!')
-        console.log('Content type:', typeof message.content)
-        console.log('Content value:', message.content)
         return JSON.stringify(message.content)
       }
     } catch (error) {
-      console.error('=== IMAGE GENERATION ERROR ===')
-      console.error('Error:', error)
-      console.error('Error stack:', (error as Error).stack)
+      console.error('Image generation error:', error)
       throw error
-    } finally {
-      console.log('=== IMAGE GENERATION END ===')
     }
   }
 }

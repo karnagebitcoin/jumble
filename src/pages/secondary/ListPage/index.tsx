@@ -256,7 +256,6 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
         </div>
       ) : (
         <>
-          {console.log('Rendering tabs for list with', displayList.pubkeys.length, 'members')}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-2 mx-4" style={{ width: 'calc(100% - 2rem)' }}>
             <TabsTrigger value="notes">{t('Notes')}</TabsTrigger>

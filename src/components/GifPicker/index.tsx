@@ -53,7 +53,6 @@ function GifPickerContent({
 
     // Subscribe to cache updates
     const unsubscribe = gifService.onCacheUpdate(() => {
-      console.log('[GifPicker] Cache updated, reloading GIFs...')
       // Reload when cache is updated
       if (activeTab === 'all' && !searchQuery) {
         loadRecentGifs()

@@ -32,7 +32,6 @@ export default function Image({
   const [tried, setTried] = useState(new Set())
 
   useEffect(() => {
-    console.log('Image component: Loading new URL:', url.substring(0, 100))
     setImageUrl(url)
     setIsLoading(true)
     setHasError(false)
@@ -45,7 +44,6 @@ export default function Image({
   const handleError = async () => {
     // If it's a data URL, we can't recover from the error
     if (imageUrl.startsWith('data:')) {
-      console.error('Data URL image failed to load')
       setIsLoading(false)
       setHasError(true)
       return
@@ -57,7 +55,7 @@ export default function Image({
       oldImageUrl = new URL(imageUrl)
       hash = getHashFromURL(oldImageUrl)
     } catch (error) {
-      console.error('Invalid image URL:', error)
+      // Invalid URL, can't retry
     }
     if (!pubkey || !hash || !oldImageUrl) {
       setIsLoading(false)
@@ -91,7 +89,6 @@ export default function Image({
   }
 
   const handleLoad = () => {
-    console.log('Image component: Image loaded successfully')
     setIsLoading(false)
     setHasError(false)
     setTimeout(() => setDisplaySkeleton(false), 600)

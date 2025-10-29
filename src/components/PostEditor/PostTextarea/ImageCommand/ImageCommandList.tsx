@@ -47,34 +47,14 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
     setImageUrl('')
     setUploadedUrl('')
 
-    console.log('=== ImageCommandList: Generating image ===')
-    console.log('Query:', props.query)
-
     try {
       const url = await generateImage(props.query)
-      console.log('=== ImageCommandList: Result ===')
-      console.log('URL type:', typeof url)
-      console.log('URL value:', url)
-      console.log('URL length:', url?.length)
-
-      // Check if it's a data URL
-      if (url.startsWith('data:')) {
-        console.log('✓ Result is a data URL (base64 encoded image)')
-      } else if (url.startsWith('http')) {
-        console.log('✓ Result is an HTTP URL')
-      } else {
-        console.log('⚠ Result is neither data URL nor HTTP URL')
-      }
-
       setImageUrl(url)
     } catch (err: any) {
-      console.error('=== ImageCommandList: Error ===')
-      console.error('Error:', err)
-      console.error('Error message:', err.message)
+      console.error('Image generation error:', err)
       setError(err.message || t('Failed to generate image'))
     } finally {
       setLoading(false)
-      console.log('=== ImageCommandList: Complete ===')
     }
   }
 
@@ -100,25 +80,20 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
       setUploadProgress(0)
 
       try {
-        console.log('Converting data URL to file...')
         const file = await dataUrlToFile(imageUrl, 'generated-image.png')
-        console.log('File created:', file.name, file.type, file.size)
 
-        console.log('Uploading to media server...')
         const result = await mediaUploadService.upload(file, {
           onProgress: (percent) => {
-            console.log('Upload progress:', percent)
             setUploadProgress(percent)
           }
         })
 
-        console.log('Upload complete! URL:', result.url)
         setUploadedUrl(result.url)
 
         // Insert the uploaded URL
         props.command({ text: result.url })
       } catch (err: any) {
-        console.error('Upload error:', err)
+        console.error('Image upload error:', err)
         setError(err.message || t('Failed to upload image'))
       } finally {
         setUploading(false)
@@ -230,10 +205,6 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
 
   // Show result with insert options
   if (imageUrl) {
-    console.log('=== Rendering image preview ===')
-    console.log('Image URL length:', imageUrl.length)
-    console.log('Is data URL:', imageUrl.startsWith('data:'))
-
     return (
       <div className="border rounded-lg bg-background z-50 pointer-events-auto p-3 max-w-md space-y-2">
         <div className="text-xs text-muted-foreground mb-2">{t('Generated Image:')}</div>
@@ -245,8 +216,6 @@ const ImageCommandList = forwardRef<ImageCommandListHandle, ImageCommandListProp
               src={imageUrl}
               alt="Generated"
               className="w-full h-auto max-h-96 object-contain"
-              onLoad={() => console.log('✓ Data URL image loaded successfully')}
-              onError={(e) => console.error('✗ Data URL image failed to load:', e)}
             />
           ) : (
             <Image
