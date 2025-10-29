@@ -6,10 +6,8 @@ import { toArticle } from '@/lib/link'
 import { NostrEvent } from 'nostr-tools'
 import { useMemo, useState, useEffect } from 'react'
 import { nip19 } from 'nostr-tools'
-import { useFetchProfile } from '@/hooks'
 
 export default function ArticleCard({ event }: { event: NostrEvent }) {
-  const { profile } = useFetchProfile(event.pubkey)
   const [shouldShowImage, setShouldShowImage] = useState(true)
 
   const { title, summary, image, publishedAt, identifier } = useMemo(() => {
@@ -81,8 +79,6 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
       : plainText
   }, [summary, event.content])
 
-  const displayName = profile?.username || event.pubkey.slice(0, 8) + '...'
-
   return (
     <SecondaryPageLink to={toArticle(naddr)}>
       <div className="py-4 px-4 hover:bg-accent/50 transition-colors cursor-pointer border-b border-border">
@@ -95,8 +91,9 @@ export default function ArticleCard({ event }: { event: NostrEvent }) {
               </p>
             )}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>By</span>
               <UserAvatar userId={event.pubkey} size="small" />
-              <span className="truncate">{displayName}</span>
+              <Username userId={event.pubkey} />
               <span>•</span>
               <FormattedTimestamp timestamp={publishedAt} />
             </div>
