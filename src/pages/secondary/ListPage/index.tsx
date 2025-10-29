@@ -175,53 +175,58 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
   const isLoading = isLoadingMyLists || isLoadingExternal
 
   // Check if we should show preview mode
+  // Preview mode should be shown when:
+  // 1. URL has ?preview=1 parameter (from shared links)
+  // 2. It's not the user's own list AND user is not logged in
   const params = new URLSearchParams(window.location.search)
   const hasPreviewParam = params.get('preview') === '1'
   const shouldShowPreviewMode = hasPreviewParam || (!isOwnList && !myPubkey)
 
-  // If in preview mode and still loading, show minimal loading state with dialog
-  if (shouldShowPreviewMode && isLoading) {
-    return (
-      <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">{t('Loading list...')}</div>
-        </div>
+  // Track whether the preview dialog should be open
+  useEffect(() => {
+    if (shouldShowPreviewMode && displayList && ownerPubkey) {
+      setPreviewDialogOpen(true)
+    }
+  }, [shouldShowPreviewMode, displayList, ownerPubkey])
 
-        {/* Show preview dialog as soon as we have the data */}
-        {displayList && ownerPubkey && (
-          <ListPreviewDialog
-            open={true}
-            onOpenChange={(open) => {
-              if (!open) {
-                setPreviewDialogOpen(false)
-                // If user closes the dialog, they probably want to see the full page
-              }
-            }}
-            listId={dTag}
-            ownerPubkey={ownerPubkey}
-            title={displayList.title}
-            description={displayList.description}
-            image={displayList.image}
-            pubkeys={displayList.pubkeys}
-          />
-        )}
-      </SecondaryPageLayout>
-    )
-  }
+  // PREVIEW MODE: Show only the dialog, not the full list
+  if (shouldShowPreviewMode) {
+    if (isLoading) {
+      return (
+        <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-muted-foreground">{t('Loading list...')}</div>
+          </div>
+        </SecondaryPageLayout>
+      )
+    }
 
-  // If in preview mode and list loaded, show the dialog directly
-  if (shouldShowPreviewMode && displayList && ownerPubkey) {
+    if (!displayList || !ownerPubkey) {
+      return (
+        <SecondaryPageLayout ref={ref} index={index} title={t('List Not Found')}>
+          <div className="flex flex-col items-center justify-center h-screen gap-4">
+            <Users className="w-16 h-16 text-muted-foreground opacity-50" />
+            <div className="text-muted-foreground">{t('List not found')}</div>
+          </div>
+        </SecondaryPageLayout>
+      )
+    }
+
+    // In preview mode, render a minimal page with just the dialog
     return (
       <SecondaryPageLayout ref={ref} index={index} title={displayList.title}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">{t('Loading preview...')}</div>
-        </div>
+        {/* Blank background - the dialog will be the main content */}
+        <div className="flex items-center justify-center h-screen" />
 
+        {/* Preview Dialog is the main UI in preview mode */}
         <ListPreviewDialog
-          open={true}
+          open={previewDialogOpen}
           onOpenChange={(open) => {
+            setPreviewDialogOpen(open)
             if (!open) {
-              setPreviewDialogOpen(false)
+              // If closing preview mode, remove the preview parameter from URL
+              const newUrl = window.location.pathname
+              window.history.replaceState(null, '', newUrl)
             }
           }}
           listId={dTag}
@@ -235,7 +240,7 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
     )
   }
 
-  // Regular loading state for non-preview mode
+  // NORMAL MODE: Regular loading and display logic
   if (isLoading) {
     return (
       <SecondaryPageLayout ref={ref} index={index} title={t('Loading...')}>
@@ -372,29 +377,16 @@ const ListPage = forwardRef<HTMLDivElement, ListPageProps>(({ index, listId }, r
 
       {/* Share List Dialog */}
       {displayList && ownerPubkey && (
-        <>
-          <ShareListDialog
-            open={shareDialogOpen}
-            onOpenChange={setShareDialogOpen}
-            listId={dTag}
-            ownerPubkey={ownerPubkey}
-            title={displayList.title}
-            description={displayList.description}
-            image={displayList.image}
-            memberCount={displayList.pubkeys.length}
-          />
-
-          <ListPreviewDialog
-            open={previewDialogOpen}
-            onOpenChange={setPreviewDialogOpen}
-            listId={dTag}
-            ownerPubkey={ownerPubkey}
-            title={displayList.title}
-            description={displayList.description}
-            image={displayList.image}
-            pubkeys={displayList.pubkeys}
-          />
-        </>
+        <ShareListDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          listId={dTag}
+          ownerPubkey={ownerPubkey}
+          title={displayList.title}
+          description={displayList.description}
+          image={displayList.image}
+          memberCount={displayList.pubkeys.length}
+        />
       )}
     </SecondaryPageLayout>
   )

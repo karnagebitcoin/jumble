@@ -114,7 +114,9 @@ export default function ListPreviewDialog({
 
   const handleViewList = () => {
     onOpenChange(false)
-    // The URL will already have changed to the list page, so just close the dialog
+    // Remove the preview parameter from URL to show the full list view
+    const newUrl = window.location.pathname
+    window.history.replaceState(null, '', newUrl)
   }
 
   const content = (
