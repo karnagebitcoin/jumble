@@ -26,13 +26,15 @@ function GifPickerContent({
   const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [gifs, setGifs] = useState<GifData[]>([])
-  const [totalGifCount, setTotalGifCount] = useState<number>(0)
+  const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const offsetRef = useRef(0)
 
   // Determine how many GIFs to show based on screen size
   const gridCols = isSmallScreen ? 2 : 3
-  const gifsToShow = isSmallScreen ? 6 : 12
+  const gifsPerPage = isSmallScreen ? 12 : 24
 
   // Load recent GIFs on mount
   useEffect(() => {
@@ -41,14 +43,35 @@ function GifPickerContent({
 
   const loadRecentGifs = async () => {
     setIsLoading(true)
+    offsetRef.current = 0
     try {
-      const { gifs: recentGifs, total } = await gifService.fetchRecentGifs(gifsToShow)
+      const { gifs: recentGifs, hasMore: more } = await gifService.fetchRecentGifs(gifsPerPage, 0)
       setGifs(recentGifs)
-      setTotalGifCount(total)
+      setHasMore(more)
+      offsetRef.current = recentGifs.length
     } catch (error) {
       console.error('Error loading recent GIFs:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMoreGifs = async () => {
+    if (isLoadingMore) return
+
+    setIsLoadingMore(true)
+    try {
+      const { gifs: moreGifs, hasMore: more } = searchQuery
+        ? await gifService.searchGifs(searchQuery, gifsPerPage, offsetRef.current)
+        : await gifService.fetchRecentGifs(gifsPerPage, offsetRef.current)
+
+      setGifs((prev) => [...prev, ...moreGifs])
+      setHasMore(more)
+      offsetRef.current += moreGifs.length
+    } catch (error) {
+      console.error('Error loading more GIFs:', error)
+    } finally {
+      setIsLoadingMore(false)
     }
   }
 
@@ -63,10 +86,12 @@ function GifPickerContent({
     // Debounce search
     searchTimeoutRef.current = setTimeout(async () => {
       setIsLoading(true)
+      offsetRef.current = 0
       try {
-        const { gifs: results, total } = await gifService.searchGifs(query, gifsToShow)
+        const { gifs: results, hasMore: more } = await gifService.searchGifs(query, gifsPerPage, 0)
         setGifs(results)
-        setTotalGifCount(total)
+        setHasMore(more)
+        offsetRef.current = results.length
       } catch (error) {
         console.error('Error searching GIFs:', error)
       } finally {
@@ -91,38 +116,68 @@ function GifPickerContent({
           </Button>
         )}
       </div>
-      {totalGifCount > 0 && (
-        <div className="text-xs text-muted-foreground">
-          {t('Found {{count}} GIFs', { count: totalGifCount })}
-        </div>
-      )}
-      <ScrollArea className={isSmallScreen ? 'h-80' : 'h-64'}>
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>
+          {gifs.length > 0 && (
+            <>
+              {t('Showing {{count}} GIFs', { count: gifs.length })}
+              {hasMore && ' • ' + t('More available')}
+            </>
+          )}
+        </span>
+        <span className="text-xs">
+          {t('Cache: {{count}}', { count: gifService.getCacheSize() })}
+        </span>
+      </div>
+      <ScrollArea className={isSmallScreen ? 'h-80' : 'h-96'}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : gifs.length > 0 ? (
-          <div
-            className="grid gap-2 pr-3"
-            style={{
-              gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
-            }}
-          >
-            {gifs.map((gif, index) => (
-              <button
-                key={gif.eventId || `${gif.url}-${index}`}
-                onClick={() => onGifClick(gif)}
-                className="relative aspect-square overflow-hidden rounded-md border border-border hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                title={gif.alt}
-              >
-                <img
-                  src={gif.previewUrl || gif.url}
-                  alt={gif.alt || 'GIF'}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            ))}
+          <div className="space-y-3 pr-3">
+            <div
+              className="grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
+              }}
+            >
+              {gifs.map((gif, index) => (
+                <button
+                  key={gif.eventId || `${gif.url}-${index}`}
+                  onClick={() => onGifClick(gif)}
+                  className="relative aspect-square overflow-hidden rounded-md border border-border hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  title={gif.alt}
+                >
+                  <img
+                    src={gif.previewUrl || gif.url}
+                    alt={gif.alt || 'GIF'}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadMoreGifs}
+                  disabled={isLoadingMore}
+                  className="w-full"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('Loading...')}
+                    </>
+                  ) : (
+                    t('Load More')
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
