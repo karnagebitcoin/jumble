@@ -141,7 +141,13 @@ function GifPickerContent({
           {t('Cache: {{count}}', { count: gifService.getCacheSize() })}
         </span>
       </div>
-      <div className={`overflow-y-auto ${isSmallScreen ? 'h-80' : 'h-96'}`}>
+      <div
+        className={`overflow-y-auto pr-3 ${isSmallScreen ? 'h-80' : 'h-96'}`}
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'hsl(var(--border)) transparent'
+        }}
+      >
         {isLoading ? (
           <div className="flex items-center justify-center" style={{ minHeight: isSmallScreen ? '20rem' : '24rem' }}>
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

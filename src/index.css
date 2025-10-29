@@ -64,6 +64,25 @@
     display: none; /* Safari and Chrome */
   }
 
+  /* Custom scrollbar styling for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .clickable:hover {
       background-color: hsl(var(--muted) / 0.5);
