@@ -175,12 +175,8 @@ export function AppWithListPreview() {
   }
 
   const handleClosePreview = () => {
-    // Restore the original URL without the preview parameter
-    if (originalUrlRef.current) {
-      const url = new URL(originalUrlRef.current)
-      url.searchParams.delete('preview')
-      window.location.href = url.pathname + url.search + url.hash
-    }
+    // Navigate to home instead of showing the list
+    window.location.href = '/'
   }
 
   // If preview mode is active, DON'T render PageManager at all

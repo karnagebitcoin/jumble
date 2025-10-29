@@ -12,10 +12,11 @@ import {
   DrawerHeader,
   DrawerTitle
 } from '@/components/ui/drawer'
+import { Progress } from '@/components/ui/progress'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useNostr } from '@/providers/NostrProvider'
 import { useFollowList } from '@/providers/FollowListProvider'
-import { UserPlus, Loader } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -51,6 +52,7 @@ export default function ListPreviewDialog({
   const { pubkey: myPubkey } = useNostr()
   const { followings, follow } = useFollowList()
   const [isFollowingAll, setIsFollowingAll] = useState(false)
+  const [followProgress, setFollowProgress] = useState(0)
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [pendingFollow, setPendingFollow] = useState(false)
 
@@ -99,16 +101,23 @@ export default function ListPreviewDialog({
     }
 
     setIsFollowingAll(true)
+    setFollowProgress(0)
+
     try {
       let successCount = 0
-      for (const pubkey of unfollowedUsers) {
+      const total = unfollowedUsers.length
+
+      for (let i = 0; i < unfollowedUsers.length; i++) {
+        const pubkey = unfollowedUsers[i]
         try {
           await follow(pubkey)
           successCount++
+          setFollowProgress(successCount)
         } catch (error) {
           console.error(`Failed to follow ${pubkey}:`, error)
         }
       }
+
       const word = successCount === 1 ? t('user') : t('users')
       toast.success(t('Followed {{count}} {{word}}', { count: successCount, word }))
     } catch (error) {
@@ -116,6 +125,7 @@ export default function ListPreviewDialog({
       toast.error(t('Failed to follow all users'))
     } finally {
       setIsFollowingAll(false)
+      setFollowProgress(0)
     }
   }
 
@@ -126,13 +136,6 @@ export default function ListPreviewDialog({
       handleFollowAll()
     }
   }, [pendingFollow, myPubkey, unfollowedUsers.length])
-
-  const handleViewList = () => {
-    onOpenChange(false)
-    // Remove the preview parameter from URL to show the full list view
-    const newUrl = window.location.pathname
-    window.history.replaceState(null, '', newUrl)
-  }
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -181,32 +184,39 @@ export default function ListPreviewDialog({
           </>
         ) : (
           <>
-            <Button
-              onClick={handleFollowAll}
-              disabled={isFollowingAll || unfollowedUsers.length === 0}
-              className="w-full"
-              size="lg"
-            >
-              {isFollowingAll ? (
-                <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" />
-                  {t('Following...')}
-                </>
-              ) : unfollowedUsers.length === 0 ? (
-                <>
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  {t('Already Following All')}
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  {t('Follow All ({{count}})', { count: unfollowedUsers.length })}
-                </>
-              )}
-            </Button>
-            {!isStandalone && (
-              <Button onClick={handleViewList} variant="outline" className="w-full">
-                {t('View List')}
+            {isFollowingAll ? (
+              <div className="space-y-3">
+                <div className="text-center">
+                  <div className="text-lg font-semibold">
+                    {t('Following {{current}}/{{total}}', {
+                      current: followProgress,
+                      total: unfollowedUsers.length
+                    })}
+                  </div>
+                </div>
+                <Progress
+                  value={(followProgress / unfollowedUsers.length) * 100}
+                  className="h-2"
+                />
+              </div>
+            ) : (
+              <Button
+                onClick={handleFollowAll}
+                disabled={unfollowedUsers.length === 0}
+                className="w-full"
+                size="lg"
+              >
+                {unfollowedUsers.length === 0 ? (
+                  <>
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    {t('Already Following All')}
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    {t('Follow All ({{count}})', { count: unfollowedUsers.length })}
+                  </>
+                )}
               </Button>
             )}
           </>
