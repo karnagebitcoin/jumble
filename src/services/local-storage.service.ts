@@ -910,7 +910,9 @@ class LocalStorageService {
   getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {
     return this.aiServiceConfigMap[pubkey ?? '_'] ?? {
       provider: 'openrouter',
-      model: 'x-ai/grok-4-fast'
+      model: 'x-ai/grok-4-fast',
+      imageModel: 'google/gemini-2.5-flash-image',
+      webSearchModel: 'openai/gpt-4o-search-preview'
     }
   }
 

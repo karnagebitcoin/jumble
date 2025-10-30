@@ -25,8 +25,8 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig, getAvailableImageModels, getAvailableWebSearchModels } = useAI()
   const [selectedProvider, setSelectedProvider] = useState<TAIProvider>(serviceConfig.provider || 'openrouter')
   const [apiKey, setApiKey] = useState(serviceConfig.apiKey || '')
-  const [selectedModel, setSelectedModel] = useState(serviceConfig.model || '')
-  const [selectedImageModel, setSelectedImageModel] = useState(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
+  const [selectedModel, setSelectedModel] = useState(serviceConfig.model || 'x-ai/grok-4-fast')
+  const [selectedImageModel, setSelectedImageModel] = useState(serviceConfig.imageModel || 'google/gemini-2.5-flash-image')
   const [selectedWebSearchModel, setSelectedWebSearchModel] = useState(serviceConfig.webSearchModel || 'openai/gpt-4o-search-preview')
   const [availableModels, setAvailableModels] = useState<Array<{ id: string; name: string }>>([])
   const [availableImageModels, setAvailableImageModels] = useState<Array<{ id: string; name: string }>>([])
@@ -36,8 +36,8 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   useEffect(() => {
     setSelectedProvider(serviceConfig.provider || 'openrouter')
     setApiKey(serviceConfig.apiKey || '')
-    setSelectedModel(serviceConfig.model || '')
-    setSelectedImageModel(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
+    setSelectedModel(serviceConfig.model || 'x-ai/grok-4-fast')
+    setSelectedImageModel(serviceConfig.imageModel || 'google/gemini-2.5-flash-image')
     setSelectedWebSearchModel(serviceConfig.webSearchModel || 'openai/gpt-4o-search-preview')
     // Load the handpicked models
     loadModels()
@@ -290,7 +290,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
             </Select>
             {availableModels.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                {t('Model for text generation, summaries, and general AI tasks')}
+                {t('Model for text generation, summaries, and general AI tasks. Use /ai command to access.')}
               </p>
             )}
           </div>
@@ -322,7 +322,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
             </Select>
             {availableImageModels.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                {t('Model used when you request images via /ai command')}
+                {t('Model used for image generation. Use /image command to access.')}
               </p>
             )}
           </div>
@@ -354,7 +354,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
             </Select>
             {availableWebSearchModels.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                {t('Model used for web searches and real-time information queries')}
+                {t('Model used for web searches and real-time information. Use /web command to access.')}
               </p>
             )}
           </div>
