@@ -194,7 +194,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
             <div
               key={index}
               className={cn(
-                'p-3 rounded-lg text-sm',
+                'p-3 rounded-lg text-sm max-h-[400px] overflow-y-auto',
                 message.role === 'user'
                   ? 'bg-primary text-primary-foreground ml-8'
                   : 'bg-muted mr-8'
@@ -307,7 +307,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
           <div
             key={index}
             className={cn(
-              'p-3 rounded-lg text-sm',
+              'p-3 rounded-lg text-sm max-h-[400px] overflow-y-auto',
               message.role === 'user'
                 ? 'bg-primary text-primary-foreground ml-8'
                 : 'bg-muted mr-8'
