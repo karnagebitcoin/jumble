@@ -5,6 +5,9 @@ import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import { useListsVisibility } from '@/providers/ListsVisibilityProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { cn } from '@/lib/utils'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
+import { useUserPreferences } from '@/providers/UserPreferencesProvider'
+import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import AccountButton from './AccountButton'
 import RelaysButton from './ExploreButton'
 import HomeButton from './HomeButton'
@@ -26,10 +29,12 @@ export default function PrimaryPageSidebar() {
   if (isSmallScreen) return null
 
   return (
-    <div className={cn(
-      "flex flex-col pb-2 pt-4 px-2 justify-between h-full shrink-0 transition-all duration-300",
-      compactSidebar ? "w-16" : "w-16 xl:w-52 xl:px-4"
-    )}>
+    <div
+      className={cn(
+        'relative flex flex-col pb-2 pt-3 justify-between h-full shrink-0',
+        sidebarCollapse ? 'px-2 w-16' : 'px-4 w-52'
+      )}
+    >
       <div className="space-y-2">
         <div className={cn(
           "px-3 mb-6 w-full transition-all duration-300",

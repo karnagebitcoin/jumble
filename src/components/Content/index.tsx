@@ -20,11 +20,11 @@ import {
   EmbeddedHashtag,
   EmbeddedLNInvoice,
   EmbeddedMention,
-  EmbeddedNormalUrl,
   EmbeddedNote,
   EmbeddedWebsocketUrl
 } from '../Embedded'
 import Emoji from '../Emoji'
+import ExternalLink from '../ExternalLink'
 import ImageGallery from '../ImageGallery'
 import MediaPlayer from '../MediaPlayer'
 import WebPreview from '../WebPreview'
@@ -168,7 +168,7 @@ export default function Content({
           )
         }
         if (node.type === 'url') {
-          return <EmbeddedNormalUrl url={node.data} key={index} />
+          return <ExternalLink url={node.data} key={index} />
         }
         if (node.type === 'invoice') {
           return <EmbeddedLNInvoice invoice={node.data} key={index} className="mt-2" />

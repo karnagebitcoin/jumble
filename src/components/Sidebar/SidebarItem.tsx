@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next'
 
 const SidebarItem = forwardRef<
   HTMLButtonElement,
-  ButtonProps & { title: string; description?: string; active?: boolean }
->(({ children, title, description, className, active, ...props }, ref) => {
+  ButtonProps & { title: string; collapse: boolean; description?: string; active?: boolean }
+>(({ children, title, description, className, active, collapse, ...props }, ref) => {
   const { t } = useTranslation()
   const { compactSidebar } = useCompactSidebar()
 
@@ -29,7 +29,7 @@ const SidebarItem = forwardRef<
       {...props}
     >
       {children}
-      <div className={cn(compactSidebar ? "hidden" : "max-xl:hidden")}>{t(description ?? title)}</div>
+      {!collapse && <div>{t(description ?? title)}</div>}
     </Button>
   )
 })

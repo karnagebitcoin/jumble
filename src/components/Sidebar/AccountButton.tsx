@@ -10,6 +10,7 @@ import {
 import { cn } from '@/lib/utils'
 import { toWallet } from '@/lib/link'
 import { formatPubkey, generateImageByPubkey } from '@/lib/pubkey'
+import { cn } from '@/lib/utils'
 import { usePrimaryPage, useSecondaryPage } from '@/PageManager'
 import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
 import { useNostr } from '@/providers/NostrProvider'
@@ -20,13 +21,13 @@ import LoginDialog from '../LoginDialog'
 import LogoutDialog from '../LogoutDialog'
 import SidebarItem from './SidebarItem'
 
-export default function AccountButton() {
+export default function AccountButton({ collapse }: { collapse: boolean }) {
   const { pubkey } = useNostr()
 
   if (pubkey) {
-    return <ProfileButton />
+    return <ProfileButton collapse={collapse} />
   } else {
-    return <LoginButton />
+    return <LoginButton collapse={collapse} />
   }
 }
 
@@ -75,7 +76,23 @@ function ProfileButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ProfileButtonContent username={username} avatar={avatar} defaultAvatar={defaultAvatar} />
+        <Button
+          variant="ghost"
+          className={cn(
+            'clickable shadow-none p-2 flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 text-lg font-semibold',
+            collapse ? 'w-12 h-12' : 'w-full h-auto'
+          )}
+        >
+          <div className="flex gap-2 items-center flex-1 w-0">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={avatar} />
+              <AvatarFallback>
+                <img src={defaultAvatar} />
+              </AvatarFallback>
+            </Avatar>
+            {!collapse && <div className="truncate font-semibold text-lg">{username}</div>}
+          </div>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top">
         <DropdownMenuItem onClick={() => navigate('profile')}>
@@ -106,12 +123,12 @@ function ProfileButton() {
   )
 }
 
-function LoginButton() {
+function LoginButton({ collapse }: { collapse: boolean }) {
   const { checkLogin } = useNostr()
 
   return (
-    <SidebarItem onClick={() => checkLogin()} title="Login">
-      <LogIn strokeWidth={1.3} />
+    <SidebarItem onClick={() => checkLogin()} title="Login" collapse={collapse}>
+      <LogIn />
     </SidebarItem>
   )
 }

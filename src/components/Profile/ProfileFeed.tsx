@@ -2,7 +2,7 @@ import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
 import ArticleList, { TArticleListRef } from '@/components/ArticleList'
 import Tabs from '@/components/Tabs'
-import { BIG_RELAY_URLS, MAX_PINNED_NOTES } from '@/constants'
+import { BIG_RELAY_URLS, MAX_PINNED_NOTES, SEARCHABLE_RELAY_URLS } from '@/constants'
 import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
@@ -10,6 +10,7 @@ import { useNostr } from '@/providers/NostrProvider'
 import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
+import relayInfoService from '@/services/relay-info.service'
 import { TFeedSubRequest, TNoteListMode } from '@/types'
 import { NostrEvent } from 'nostr-tools'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -18,11 +19,11 @@ import { RefreshButton } from '../RefreshButton'
 export default function ProfileFeed({
   pubkey,
   topSpace = 0,
-  isInDeckView = false
+  search = ''
 }: {
   pubkey: string
   topSpace?: number
-  isInDeckView?: boolean
+  search?: string
 }) {
   const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
   const { showKinds } = useKindFilter()
@@ -123,17 +124,32 @@ export default function ProfileFeed({
       }
 
       const relayList = await client.fetchRelayList(pubkey)
-      setSubRequests([
-        {
-          urls: relayList.write.concat(BIG_RELAY_URLS).slice(0, 8),
-          filter: {
-            authors: [pubkey]
+
+      if (search) {
+        const writeRelays = relayList.write.slice(0, 8)
+        const relayInfos = await relayInfoService.getRelayInfos(writeRelays)
+        const searchableRelays = writeRelays.filter((_, index) =>
+          relayInfos[index]?.supported_nips?.includes(50)
+        )
+        setSubRequests([
+          {
+            urls: searchableRelays.concat(SEARCHABLE_RELAY_URLS).slice(0, 8),
+            filter: { authors: [pubkey], search }
           }
-        }
-      ])
+        ])
+      } else {
+        setSubRequests([
+          {
+            urls: relayList.write.concat(BIG_RELAY_URLS).slice(0, 8),
+            filter: {
+              authors: [pubkey]
+            }
+          }
+        ])
+      }
     }
     init()
-  }, [pubkey, listMode])
+  }, [pubkey, listMode, search])
 
   const handleListModeChange = (mode: TNoteListMode) => {
     setListMode(mode)
@@ -164,21 +180,14 @@ export default function ProfileFeed({
         }
         isInDeckView={isInDeckView}
       />
-      {listMode === 'reads' ? (
-        <ArticleList
-          ref={articleListRef}
-          subRequests={subRequests}
-        />
-      ) : (
-        <NoteList
-          ref={noteListRef}
-          subRequests={subRequests}
-          showKinds={temporaryShowKinds}
-          hideReplies={listMode === 'posts'}
-          filterMutedNotes={false}
-          pinnedEventIds={listMode === 'you' ? [] : pinnedEventIds}
-        />
-      )}
+      <NoteList
+        ref={noteListRef}
+        subRequests={subRequests}
+        showKinds={temporaryShowKinds}
+        hideReplies={listMode === 'posts'}
+        filterMutedNotes={false}
+        pinnedEventIds={listMode === 'you' || !!search ? [] : pinnedEventIds}
+      />
     </>
   )
 }

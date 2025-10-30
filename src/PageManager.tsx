@@ -393,11 +393,13 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
       >
         <CurrentRelaysProvider>
           <NotificationProvider>
-            <div className="flex h-[var(--vh)] overflow-hidden bg-surface-background justify-center">
-              <div className={cn(
-                "shrink-0",
-                pageTheme === 'pure-black' && "border-r border-neutral-900"
-              )}>
+            <div className="flex flex-col items-center bg-surface-background">
+              <div
+                className="flex h-[var(--vh)] w-full bg-surface-background"
+                style={{
+                  maxWidth: '1920px'
+                }}
+              >
                 <Sidebar />
               </div>
               {layoutMode === LAYOUT_MODE.FULL_WIDTH && deckViewMode === DECK_VIEW_MODE.MULTI_COLUMN ? (
@@ -425,6 +427,24 @@ export function PageManager({ maxStackSize = 5 }: { maxStackSize?: number }) {
                         {props ? cloneElement(element as React.ReactElement, props) : element}
                       </div>
                     ))}
+                  </div>
+                  <div className="rounded-lg shadow-lg bg-background overflow-hidden">
+                    {secondaryStack.map((item, index) => (
+                      <div
+                        key={item.index}
+                        className="flex flex-col h-full w-full"
+                        style={{ display: index === secondaryStack.length - 1 ? 'block' : 'none' }}
+                      >
+                        {item.component}
+                      </div>
+                    ))}
+                    <div
+                      key="home"
+                      className="w-full"
+                      style={{ display: secondaryStack.length === 0 ? 'block' : 'none' }}
+                    >
+                      <HomePage />
+                    </div>
                   </div>
                   <HomePageWrapper secondaryStackLength={secondaryStack.length} widgetSidebarDismissed={widgetSidebarDismissed}>
                     {secondaryStack.map((item, index) => (

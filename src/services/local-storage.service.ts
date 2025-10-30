@@ -708,7 +708,7 @@ class LocalStorageService {
     )
   }
 
-  getFontSize() {
+    getFontSize() {
     return this.fontSize
   }
 
@@ -902,9 +902,9 @@ class LocalStorageService {
     return this.onlyZapsMode
   }
 
-  setOnlyZapsMode(enabled: boolean) {
-    this.onlyZapsMode = enabled
-    window.localStorage.setItem(StorageKey.ONLY_ZAPS_MODE, enabled.toString())
+  setSidebarCollapse(collapse: boolean) {
+    this.sidebarCollapse = collapse
+    window.localStorage.setItem(StorageKey.SIDEBAR_COLLAPSE, collapse.toString())
   }
 
   getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {

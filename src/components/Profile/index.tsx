@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next'
 import Lightbox from 'yet-another-react-lightbox'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import NotFound from '../NotFound'
-import ProfileGallery from '../ProfileGallery'
+import SearchInput from '../SearchInput'
 import FollowedBy from './FollowedBy'
 import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
@@ -40,6 +40,8 @@ export default function Profile({ id, isInDeckView = false }: { id?: string; isI
   const { profile, isFetching } = useFetchProfile(id)
   const { pubkey: accountPubkey } = useNostr()
   const { mutePubkeySet } = useMuteList()
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedInput, setDebouncedInput] = useState(searchInput)
   const { followings } = useFetchFollowings(profile?.pubkey)
   const isFollowingYou = useMemo(() => {
     return (
@@ -62,6 +64,16 @@ export default function Profile({ id, isInDeckView = false }: { id?: string; isI
   const [avatarLightboxIndex, setAvatarLightboxIndex] = useState(-1)
   const bannerLightboxId = useMemo(() => `profile-banner-lightbox-${randomString()}`, [])
   const [bannerLightboxIndex, setBannerLightboxIndex] = useState(-1)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedInput(searchInput.trim())
+    }, 1000)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchInput])
 
   useEffect(() => {
     if (!profile?.pubkey) return
@@ -246,6 +258,13 @@ export default function Profile({ id, isInDeckView = false }: { id?: string; isI
             </div>
             {gallery && gallery.length > 0 && <ProfileGallery gallery={gallery} maxImages={8} />}
           </div>
+        </div>
+        <div className="px-4 pt-2 pb-0.5">
+          <SearchInput
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t('Search')}
+          />
         </div>
       </div>
       <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} isInDeckView={isInDeckView} />
