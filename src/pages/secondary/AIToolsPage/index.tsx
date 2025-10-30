@@ -123,7 +123,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
       case 'ppq':
         return {
           name: 'PPQ.ai',
-          description: 'Fast and reliable AI API service',
+          description: 'Pay with bitcoin and lightning',
           apiKeyUrl: 'https://ppq.ai'
         }
       default:
@@ -187,7 +187,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
                   )}
                 </div>
                 <CardDescription className="text-xs">
-                  Fast and reliable AI API service
+                  Pay with bitcoin and lightning
                 </CardDescription>
               </CardHeader>
             </Card>
