@@ -90,7 +90,7 @@ Be sure to include only the most relevant and authoritative sources.`
       // Use the web search model from config
       const tempConfig = { ...serviceConfig, model: serviceConfig.webSearchModel }
       const previousConfig = { ...serviceConfig }
-      
+
       // Temporarily set the web search model
       const aiService = (await import('@/services/ai.service')).default
       aiService.setConfig(tempConfig)
@@ -109,16 +109,46 @@ Be sure to include only the most relevant and authoritative sources.`
       // Restore previous config
       aiService.setConfig(previousConfig)
 
-      // Parse the JSON response
-      const jsonMatch = response.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
+      console.log('Web search raw response:', response)
+
+      // Parse the JSON response - try to find JSON block
+      let parsed: WebSearchResult | null = null
+
+      // First, try to parse the entire response as JSON
+      try {
+        parsed = JSON.parse(response) as WebSearchResult
+      } catch {
+        // If that fails, try to extract JSON from markdown code blocks
+        const codeBlockMatch = response.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
+        if (codeBlockMatch) {
+          try {
+            parsed = JSON.parse(codeBlockMatch[1]) as WebSearchResult
+          } catch {
+            // Continue to next attempt
+          }
+        }
+
+        // If still no match, try to find any JSON object in the response
+        if (!parsed) {
+          const jsonMatch = response.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            try {
+              parsed = JSON.parse(jsonMatch[0]) as WebSearchResult
+            } catch {
+              // Continue to error
+            }
+          }
+        }
+      }
+
+      if (!parsed) {
+        console.error('Failed to parse web search response:', response)
         throw new Error('Invalid response format from web search')
       }
 
-      const parsed = JSON.parse(jsonMatch[0]) as WebSearchResult
-      
       // Validate the response
       if (!parsed.answer || !Array.isArray(parsed.urls)) {
+        console.error('Invalid web search result structure:', parsed)
         throw new Error('Invalid web search result structure')
       }
 
