@@ -311,30 +311,25 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
         {/* AI Features Card */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('Article Summaries')}</CardTitle>
-            <CardDescription>
-              {t('Show summarize button on article previews')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">
-                  {toolsConfig.enableSummary ? t('Enabled') : t('Disabled')}
-                </p>
-              </div>
+              <CardTitle>{t('Article Summaries')}</CardTitle>
               <Switch
                 checked={toolsConfig.enableSummary}
                 onCheckedChange={handleToggleSummary}
                 disabled={!serviceConfig.apiKey || !serviceConfig.model}
               />
             </div>
-            {(!serviceConfig.apiKey || !serviceConfig.model) && (
-              <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg mt-4">
+            <CardDescription>
+              {t('Show summarize button on article previews')}
+            </CardDescription>
+          </CardHeader>
+          {(!serviceConfig.apiKey || !serviceConfig.model) && (
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
                 ⚠️ {t('Please configure your API key and select a model to enable AI features')}
               </p>
-            )}
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
     </SecondaryPageLayout>
