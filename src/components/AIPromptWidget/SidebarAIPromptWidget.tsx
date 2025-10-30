@@ -1,72 +1,24 @@
-import { useWidgets } from '@/providers/WidgetsProvider'
 import { useAI } from '@/providers/AIProvider'
-import { useFetchEvent } from '@/hooks/useFetchEvent'
-import { Loader2, MessageSquare, Send, AlertCircle, Settings, X } from 'lucide-react'
+import { Loader2, Sparkles, Send, AlertCircle, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useTranslation } from 'react-i18next'
 import React, { useState, useRef, useEffect } from 'react'
-import { Event } from 'nostr-tools'
 import { cn } from '@/lib/utils'
-import { getImetaInfosFromEvent } from '@/lib/event'
 import { useNostr } from '@/providers/NostrProvider'
 import { Link } from '@tanstack/react-router'
+import { TAIMessage } from '@/types'
 
-interface SidebarAIPromptWidgetProps {
-  widgetId?: string
-  eventId?: string
-}
-
-function NotePreview({ event }: { event: Event }) {
+export default function SidebarAIPromptWidget() {
   const { t } = useTranslation()
-  const imetaInfos = getImetaInfosFromEvent(event)
-
-  // Check if note has images
-  if (imetaInfos && imetaInfos.length > 0) {
-    const imageUrls = imetaInfos.map(info => info.url).filter(Boolean)
-    if (imageUrls.length > 0) {
-      return (
-        <div className="p-2 bg-muted/50 rounded-md space-y-1">
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {event.content.substring(0, 100) || t('Image note')}
-          </p>
-          <div className="text-xs text-muted-foreground/70">
-            📷 {imageUrls.length} {imageUrls.length === 1 ? 'image' : 'images'}
-          </div>
-        </div>
-      )
-    }
-  }
-
-  // Text-only note - show first line
-  const firstLine = event.content.split('\n')[0].substring(0, 100)
-  return (
-    <div className="p-2 bg-muted/50 rounded-md">
-      <p className="text-xs text-muted-foreground line-clamp-2">
-        {firstLine || t('Empty note')}
-      </p>
-    </div>
-  )
-}
-
-export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPromptWidgetProps) {
-  const { t } = useTranslation()
-  const { getAIPromptWidget, updateAIPromptMessages, aiPromptWidgets } = useWidgets()
   const { chat, isConfigured } = useAI()
   const { pubkey } = useNostr()
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [messages, setMessages] = useState<TAIMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  // Get the current AI prompt widget (there should only be one for sidebar)
-  const widget = widgetId ? getAIPromptWidget(widgetId) : aiPromptWidgets[0]
-  const currentEventId = eventId || widget?.eventId
-  const currentWidgetId = widgetId || widget?.id
-  
-  const { event, isFetching } = useFetchEvent(currentEventId || '')
-  const messages = widget?.messages || []
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -77,8 +29,7 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
   }, [messages])
 
   const handleSubmit = async () => {
-    if (!prompt.trim() || isLoading || !isConfigured || !currentWidgetId) return
-    if (!event) return
+    if (!prompt.trim() || isLoading || !isConfigured) return
 
     const userMessage = prompt.trim()
     setPrompt('')
@@ -86,18 +37,11 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
     setIsLoading(true)
 
     try {
-      // Build the context from the note
-      const noteContext = `Here is a Nostr note:\n\n${event.content}`
-
       // Build messages array
       const conversationMessages = [
         {
           role: 'system' as const,
-          content: 'You are a helpful assistant analyzing Nostr notes. The user will ask questions about a specific note.'
-        },
-        {
-          role: 'user' as const,
-          content: noteContext
+          content: 'You are a helpful AI assistant.'
         },
         ...messages,
         {
@@ -110,12 +54,11 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
       const response = await chat(conversationMessages, pubkey)
 
       // Update messages
-      const newMessages = [
+      setMessages([
         ...messages,
         { role: 'user' as const, content: userMessage },
         { role: 'assistant' as const, content: response }
-      ]
-      updateAIPromptMessages(currentWidgetId, newMessages)
+      ])
     } catch (err: any) {
       console.error('AI Prompt Error:', err)
       setError(err.message || t('Failed to get AI response'))
@@ -132,16 +75,26 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
     }
   }
 
-  // If no AI prompt widget exists or no event is selected
-  if (!currentEventId || !currentWidgetId) {
-    return (
-      <div className="p-4 space-y-3">
-        <div className="flex items-center gap-2 mb-2">
-          <MessageSquare className="h-4 w-4" />
+  return (
+    <div className="flex flex-col h-full max-h-[600px]">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4" />
           <h3 className="font-semibold text-sm">{t('AI Prompt')}</h3>
         </div>
-        
-        {!isConfigured ? (
+        {!isConfigured && (
+          <Link to="/settings/ai-tools">
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
+              <Settings className="h-3 w-3" />
+            </Button>
+          </Link>
+        )}
+      </div>
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
+        {!isConfigured && (
           <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
             <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -156,56 +109,12 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
               </Link>
             </div>
           </div>
-        ) : (
+        )}
+
+        {messages.length === 0 && isConfigured && (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>{t('Click "Prompt Note" on any note to start chatting with AI')}</p>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col h-full max-h-[600px]">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4" />
-          <h3 className="font-semibold text-sm">{t('AI Prompt')}</h3>
-        </div>
-        {!isConfigured && (
-          <Link to="/settings/ai-tools">
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-              <Settings className="h-3 w-3" />
-            </Button>
-          </Link>
-        )}
-      </div>
-
-      {/* Note Preview */}
-      <div className="px-4 pt-4 pb-2 border-b">
-        {isFetching && (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
-        {!isFetching && !event && (
-          <div className="text-center text-sm text-muted-foreground py-4">
-            {t('Note not found')}
-          </div>
-        )}
-        {event && <NotePreview event={event} />}
-      </div>
-
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 min-h-0">
-        {!isConfigured && (
-          <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-            <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-yellow-600 dark:text-yellow-500">
-              {t('Please configure AI in settings to use this feature')}
-            </div>
+            <Sparkles className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p>{t('Start a conversation with AI')}</p>
           </div>
         )}
 
@@ -252,7 +161,7 @@ export default function SidebarAIPromptWidget({ widgetId, eventId }: SidebarAIPr
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('Ask about this note...')}
+            placeholder={t('Ask me anything...')}
             className="resize-none min-h-[60px] max-h-[120px]"
             disabled={isLoading || !isConfigured}
           />
