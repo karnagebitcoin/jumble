@@ -1,10 +1,10 @@
 import { StorageKey } from '@/constants'
 import localStorageService from '@/services/local-storage.service'
-import { TrendingUp, Bitcoin, Pin, MessageSquare, Compass } from 'lucide-react'
+import { TrendingUp, Bitcoin, Pin, MessageSquare, Compass, Sparkles } from 'lucide-react'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { TAIMessage } from '@/types'
 
-export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | string // Allow dynamic pinned-note-* and ai-prompt-* IDs
+export type TWidgetId = 'trending-notes' | 'bitcoin-ticker' | 'ai-prompt' | string // Allow dynamic pinned-note-* and ai-prompt-* IDs
 
 export type TTrendingNotesHeight = 'short' | 'medium' | 'tall' | 'remaining'
 
@@ -51,6 +51,13 @@ export const AVAILABLE_WIDGETS: TWidget[] = [
     description: 'Display trending notes from across Nostr',
     defaultEnabled: true,
     icon: <TrendingUp className="h-5 w-5" />
+  },
+  {
+    id: 'ai-prompt',
+    name: 'AI Prompt',
+    description: 'Chat with AI about notes in your sidebar',
+    defaultEnabled: false,
+    icon: <Sparkles className="h-5 w-5" />
   }
 ]
 

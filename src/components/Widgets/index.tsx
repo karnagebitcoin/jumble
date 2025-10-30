@@ -4,6 +4,7 @@ import TrendingNotesWidget from '@/components/TrendingNotes/TrendingNotesWidget'
 import BitcoinTickerWidget from '@/components/BitcoinTicker/BitcoinTickerWidget'
 import PinnedNoteWidget from '@/components/PinnedNoteWidget'
 import AIPromptWidget from '@/components/AIPromptWidget'
+import SidebarAIPromptWidget from '@/components/AIPromptWidget/SidebarAIPromptWidget'
 import { TourWelcomeWidget } from '@/components/TourWidget'
 import { cn } from '@/lib/utils'
 import { createPortal } from 'react-dom'
@@ -11,7 +12,8 @@ import { createPortal } from 'react-dom'
 const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   'bitcoin-ticker': BitcoinTickerWidget,
   'trending-notes': TrendingNotesWidget,
-  'tour': TourWelcomeWidget
+  'tour': TourWelcomeWidget,
+  'ai-prompt': SidebarAIPromptWidget
 }
 
 export default function Widgets() {
@@ -25,17 +27,12 @@ export default function Widgets() {
     pageTheme === 'white' ? "border border-border" : "shadow-lg"
   )
 
-  // Filter out AI prompt widgets from the regular widget list
-  const regularWidgets = enabledWidgets.filter((widgetId) => {
-    return !aiPromptWidgets.find((w) => w.id === widgetId)
-  })
-
   return (
     <>
-      {/* Regular widgets in the sidebar */}
-      {regularWidgets.length > 0 && (
+      {/* Widgets in the sidebar */}
+      {enabledWidgets.length > 0 && (
         <div className="space-y-4">
-          {regularWidgets.map((widgetId) => {
+          {enabledWidgets.map((widgetId) => {
             // Check if this is a pinned note widget
             const pinnedNote = pinnedNoteWidgets.find((w) => w.id === widgetId)
             if (pinnedNote) {
@@ -43,6 +40,16 @@ export default function Widgets() {
                 <div key={widgetId} className={widgetClassName}>
                   <PinnedNoteWidget widgetId={widgetId} eventId={pinnedNote.eventId} />
                 </div>
+              )
+            }
+
+            // Check if this is a floating AI prompt widget (from "Prompt Note" button)
+            const floatingAIPrompt = aiPromptWidgets.find((w) => w.id === widgetId)
+            if (floatingAIPrompt && widgetId !== 'ai-prompt') {
+              // Render floating AI prompts via portal
+              return createPortal(
+                <AIPromptWidget key={widgetId} widgetId={widgetId} eventId={floatingAIPrompt.eventId} />,
+                document.body
               )
             }
 
@@ -58,16 +65,6 @@ export default function Widgets() {
           })}
         </div>
       )}
-
-      {/* AI prompt widgets as floating windows (rendered via portal) */}
-      {aiPromptWidgets.map((aiPrompt) => {
-        if (!enabledWidgets.includes(aiPrompt.id)) return null
-
-        return createPortal(
-          <AIPromptWidget key={aiPrompt.id} widgetId={aiPrompt.id} eventId={aiPrompt.eventId} />,
-          document.body
-        )
-      })}
     </>
   )
 }
