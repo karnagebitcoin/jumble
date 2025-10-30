@@ -280,8 +280,7 @@ Format your response as JSON with this exact structure:
     // Handpicked web search models
     const webSearchModels = [
       { id: 'openai/gpt-4o-search-preview', name: 'OpenAI GPT-4o Search Preview' },
-      { id: 'google/gemini-2.5-flash-search', name: 'Google Gemini 2.5 Flash Search' },
-      { id: 'perplexity/llama-3.1-sonar-large-128k-online', name: 'Perplexity Sonar Large' }
+      { id: 'openai/gpt-4o-mini-search-preview', name: 'OpenAI GPT-4o Mini Search Preview' }
     ]
 
     return webSearchModels
