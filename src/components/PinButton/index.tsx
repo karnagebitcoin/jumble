@@ -11,7 +11,7 @@ type PinButtonProps = {
   column: Omit<TPinnedColumn, 'id'>
   className?: string
   variant?: 'default' | 'ghost' | 'outline'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+  size?: 'default' | 'sm' | 'lg' | 'icon' | 'titlebar-icon'
 }
 
 export default function PinButton({ column, className, variant = 'ghost', size = 'sm' }: PinButtonProps) {

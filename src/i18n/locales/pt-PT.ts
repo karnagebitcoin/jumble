@@ -465,6 +465,12 @@ export default {
     'Unpinned!': 'Desafixado!',
     'Failed to unpin: {{error}}': 'Falha ao desafixar: {{error}}',
     'Unpin from profile': 'Desafixar do perfil',
-    'Pin to profile': 'Fixar no perfil'
+    'Pin to profile': 'Fixar no perfil',
+    'Skip Tour': 'Saltar tour',
+    'Get Started': 'Começar',
+    'Welcome to Nostr': 'Bem-vindo ao Nostr',
+    'New to Nostr?': 'Novo no Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Faça um tour rápido para aprender sobre redes sociais descentralizadas, relays e como o Nostr funciona.',
+    'Start Tour': 'Iniciar tour'
   }
 }

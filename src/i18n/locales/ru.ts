@@ -467,6 +467,12 @@ export default {
     'Unpinned!': 'Откреплено!',
     'Failed to unpin: {{error}}': 'Не удалось открепить: {{error}}',
     'Unpin from profile': 'Открепить из профиля',
-    'Pin to profile': 'Закрепить в профиле'
+    'Pin to profile': 'Закрепить в профиле',
+    'Skip Tour': 'Пропустить тур',
+    'Get Started': 'Начать',
+    'Welcome to Nostr': 'Добро пожаловать в Nostr',
+    'New to Nostr?': 'Новичок в Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Пройдите краткий тур, чтобы узнать о децентрализованных социальных сетях, релеях и том, как работает Nostr.',
+    'Start Tour': 'Начать тур'
   }
 }

@@ -76,6 +76,10 @@ export const StorageKey = {
   DISTRACTION_FREE_MODE: 'distractionFreeMode',
   AI_SERVICE_CONFIG_MAP: 'aiServiceConfigMap',
   AI_TOOLS_CONFIG_MAP: 'aiToolsConfigMap',
+  HIDE_READS_IN_NAVIGATION: 'hideReadsInNavigation',
+  HIDE_READS_IN_PROFILES: 'hideReadsInProfiles',
+  HIDE_LISTS_IN_NAVIGATION: 'hideListsInNavigation',
+  FAVORITE_LISTS: 'favoriteLists',
   MEDIA_UPLOAD_SERVICE: 'mediaUploadService', // deprecated
   HIDE_UNTRUSTED_EVENTS: 'hideUntrustedEvents', // deprecated
   ACCOUNT_RELAY_LIST_EVENT_MAP: 'accountRelayListEventMap', // deprecated
@@ -114,7 +118,8 @@ export const ExtendedKind = {
   FAVORITE_RELAYS: 10012,
   BLOSSOM_SERVER_LIST: 10063,
   RELAY_REVIEW: 31987,
-  GROUP_METADATA: 39000
+  GROUP_METADATA: 39000,
+  STARTER_PACK: 39089
 }
 
 export const SUPPORTED_KINDS = [

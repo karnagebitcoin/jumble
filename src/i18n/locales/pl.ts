@@ -465,6 +465,12 @@ export default {
     'Unpinned!': 'Odpięte!',
     'Failed to unpin: {{error}}': 'Nie udało się przypiąć: {{error}}',
     'Unpin from profile': 'Odpiń z profilu',
-    'Pin to profile': 'Przypnij do profilu'
+    'Pin to profile': 'Przypnij do profilu',
+    'Skip Tour': 'Pomiń przewodnik',
+    'Get Started': 'Rozpocznij',
+    'Welcome to Nostr': 'Witamy w Nostr',
+    'New to Nostr?': 'Nowy w Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Przejdź szybki przewodnik, aby dowiedzieć się więcej o zdecentralizowanych sieciach społecznościowych, przekaźnikach i działaniu Nostr.',
+    'Start Tour': 'Rozpocznij przewodnik'
   }
 }

@@ -11,6 +11,7 @@ export default {
     Refresh: '새로고침',
     Profile: '프로필',
     Logout: '로그아웃',
+    Deck: '덱',
     Following: '팔로잉',
     followings: '팔로잉',
     reposted: '리포스트',
@@ -461,6 +462,12 @@ export default {
     'Unpinned!': '고정 해제됨!',
     'Failed to unpin: {{error}}': '고정 해제 실패: {{error}}',
     'Unpin from profile': '프로필에서 고정 해제',
-    'Pin to profile': '프로필에 고정'
+    'Pin to profile': '프로필에 고정',
+    'Skip Tour': '둘러보기 건너뛰기',
+    'Get Started': '시작하기',
+    'Welcome to Nostr': 'Nostr에 오신 것을 환영합니다',
+    'New to Nostr?': 'Nostr가 처음이신가요?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': '탈중앙화 소셜 네트워킹, 릴레이 및 Nostr의 작동 방식에 대해 배우려면 간단한 둘러보기를 시작하세요.',
+    'Start Tour': '둘러보기 시작'
   }
 }

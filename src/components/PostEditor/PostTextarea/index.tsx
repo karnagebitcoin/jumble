@@ -20,6 +20,14 @@ import Emoji from './Emoji'
 import emojiSuggestion from './Emoji/suggestion'
 import Mention from './Mention'
 import mentionSuggestion from './Mention/suggestion'
+import Gif from './Gif'
+import gifSuggestion from './Gif/suggestion'
+import AICommand from './AICommand'
+import aiCommandSuggestion from './AICommand/suggestion'
+import ImageCommand from './ImageCommand'
+import imageCommandSuggestion from './ImageCommand/suggestion'
+import WebCommand from './WebCommand'
+import webCommandSuggestion from './WebCommand/suggestion'
 import Preview from './Preview'
 
 export type TPostTextareaHandle = {
@@ -74,6 +82,21 @@ const PostTextarea = forwardRef<
         }),
         Mention.configure({
           suggestion: mentionSuggestion
+        }),
+        Gif.configure({
+          suggestion: gifSuggestion
+        }),
+        AICommand.configure({
+          suggestion: aiCommandSuggestion,
+          parentEvent
+        }),
+        ImageCommand.configure({
+          suggestion: imageCommandSuggestion,
+          parentEvent
+        }),
+        WebCommand.configure({
+          suggestion: webCommandSuggestion,
+          parentEvent
         }),
         ClipboardAndDropHandler.configure({
           onUploadStart: (file, cancel) => {

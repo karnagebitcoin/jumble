@@ -11,13 +11,14 @@ import FollowingBadge from '../FollowingBadge'
 export default function UserItem({
   userId,
   hideFollowButton,
-  showFollowingBadge = false,
-  className
+  className,
+  compactFollowButton
 }: {
   userId: string
   hideFollowButton?: boolean
   showFollowingBadge?: boolean
   className?: string
+  compactFollowButton?: boolean
 }) {
   const pubkey = useMemo(() => userIdToPubkey(userId), [userId])
 
@@ -35,7 +36,7 @@ export default function UserItem({
         </div>
         <Nip05 pubkey={userId} />
       </div>
-      {!hideFollowButton && <FollowButton pubkey={userId} />}
+      {!hideFollowButton && <FollowButton pubkey={pubkey} size={compactFollowButton ? 'sm' : 'default'} />}
     </div>
   )
 }

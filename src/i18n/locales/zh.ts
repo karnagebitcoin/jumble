@@ -11,6 +11,7 @@ export default {
     Refresh: '刷新列表',
     Profile: '个人资料',
     Logout: '退出登录',
+    Deck: '多列视图',
     Following: '关注',
     followings: '关注',
     reposted: '转发',
@@ -453,6 +454,12 @@ export default {
     'Unpinned!': '已取消置顶！',
     'Failed to unpin: {{error}}': '取消置顶失败: {{error}}',
     'Unpin from profile': '从个人资料取消置顶',
-    'Pin to profile': '置顶到个人资料'
+    'Pin to profile': '置顶到个人资料',
+    'Skip Tour': '跳过导览',
+    'Get Started': '开始使用',
+    'Welcome to Nostr': '欢迎来到 Nostr',
+    'New to Nostr?': 'Nostr 新手？',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': '快速了解去中心化社交网络、中继器以及 Nostr 的工作原理。',
+    'Start Tour': '开始导览'
   }
 }

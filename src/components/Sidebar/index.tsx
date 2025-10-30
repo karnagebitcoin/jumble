@@ -1,5 +1,9 @@
 import Icon from '@/assets/Icon'
 import Logo from '@/assets/Logo'
+import { useCompactSidebar } from '@/providers/CompactSidebarProvider'
+import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
+import { useListsVisibility } from '@/providers/ListsVisibilityProvider'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { cn } from '@/lib/utils'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { useUserPreferences } from '@/providers/UserPreferencesProvider'
@@ -10,12 +14,17 @@ import HomeButton from './HomeButton'
 import NotificationsButton from './NotificationButton'
 import PostButton from './PostButton'
 import ProfileButton from './ProfileButton'
+import ReadsButton from './ReadsButton'
+import ListsButton from './ListsButton'
 import SearchButton from './SearchButton'
 import SettingsButton from './SettingsButton'
+import MultiColumnToggle from './MultiColumnToggle'
 
 export default function PrimaryPageSidebar() {
   const { isSmallScreen } = useScreenSize()
-  const { sidebarCollapse, updateSidebarCollapse } = useUserPreferences()
+  const { compactSidebar } = useCompactSidebar()
+  const { hideReadsInNavigation } = useReadsVisibility()
+  const { hideListsInNavigation } = useListsVisibility()
 
   if (isSmallScreen) return null
 
@@ -27,33 +36,27 @@ export default function PrimaryPageSidebar() {
       )}
     >
       <div className="space-y-2">
-        {sidebarCollapse ? (
-          <div className="px-3 py-1 mb-6 w-full">
-            <Icon />
-          </div>
-        ) : (
-          <div className="px-4 mb-6 w-full">
-            <Logo />
-          </div>
-        )}
-        <HomeButton collapse={sidebarCollapse} />
-        <RelaysButton collapse={sidebarCollapse} />
-        <NotificationsButton collapse={sidebarCollapse} />
-        <SearchButton collapse={sidebarCollapse} />
-        <ProfileButton collapse={sidebarCollapse} />
-        <SettingsButton collapse={sidebarCollapse} />
-        <PostButton collapse={sidebarCollapse} />
+        <div className={cn(
+          "px-3 mb-6 w-full transition-all duration-300",
+          compactSidebar ? "" : "xl:px-4"
+        )}>
+          <Icon className={cn(compactSidebar ? "" : "xl:hidden")} />
+          <Logo className={cn(compactSidebar ? "hidden" : "max-xl:hidden")} />
+        </div>
+        <HomeButton />
+        {!hideReadsInNavigation && <ReadsButton />}
+        {!hideListsInNavigation && <ListsButton />}
+        <RelaysButton />
+        <NotificationsButton />
+        <SearchButton />
+        <ProfileButton />
+        <SettingsButton />
+        <PostButton />
       </div>
-      <AccountButton collapse={sidebarCollapse} />
-      <button
-        className="absolute flex flex-col justify-center items-center top-5 right-0 w-5 h-6 p-0 rounded-l-md hover:shadow-md text-muted-foreground hover:text-foreground hover:bg-background transition-colors [&_svg]:size-4"
-        onClick={(e) => {
-          e.stopPropagation()
-          updateSidebarCollapse(!sidebarCollapse)
-        }}
-      >
-        {sidebarCollapse ? <ChevronsRight /> : <ChevronsLeft />}
-      </button>
+      <div className="space-y-2">
+        <MultiColumnToggle />
+        <AccountButton />
+      </div>
     </div>
   )
 }

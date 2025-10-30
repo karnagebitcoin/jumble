@@ -81,7 +81,7 @@ export type TConfig = {
 export type TThemeSetting = 'light' | 'dark' | 'system'
 export type TTheme = 'light' | 'dark'
 
-export type TPageTheme = 'default' | 'pure-black'
+export type TPageTheme = 'default' | 'pure-black' | 'white'
 
 export type TPrimaryColor = 'RED' | 'ORANGE' | 'AMBER' | 'YELLOW' | 'LIME' | 'GREEN' | 'EMERALD' | 'TEAL' | 'CYAN' | 'SKY' | 'BLUE' | 'INDIGO' | 'VIOLET' | 'PURPLE' | 'FUCHSIA' | 'PINK' | 'ROSE'
 
@@ -91,7 +91,7 @@ export type TLayoutMode = 'boxed' | 'full-width'
 
 export type TDeckViewMode = 'standard' | 'multi-column'
 
-export type TPinnedColumnType = 'explore' | 'notifications' | 'profile' | 'search' | 'relay' | 'relays' | 'custom' | 'bookmarks'
+export type TPinnedColumnType = 'explore' | 'notifications' | 'profile' | 'search' | 'relay' | 'relays' | 'custom' | 'bookmarks' | 'reads' | 'lists' | 'list'
 
 export type TPinnedColumn = {
   id: string
@@ -155,7 +155,7 @@ export type TPublishOptions = {
   minPow?: number
 }
 
-export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you'
+export type TNoteListMode = 'posts' | 'postsAndReplies' | 'you' | 'reads'
 
 export type TNotificationType = 'all' | 'mentions' | 'reactions' | 'zaps'
 
@@ -175,11 +175,19 @@ export type TTranslationAccount = {
 export type TTranslationServiceConfig =
   | {
       service: 'jumble'
+      auto_translate?: boolean
     }
   | {
       service: 'libre_translate'
       server?: string
       api_key?: string
+      auto_translate?: boolean
+    }
+  | {
+      service: 'openrouter'
+      api_key?: string
+      model?: string
+      auto_translate?: boolean
     }
 
 export type TMediaUploadServiceConfig =
@@ -224,10 +232,14 @@ export type TMediaAutoLoadPolicy =
 export type TDistractionFreeMode =
   (typeof DISTRACTION_FREE_MODE)[keyof typeof DISTRACTION_FREE_MODE]
 
+export type TAIProvider = 'openrouter' | 'ppq'
+
 export type TAIServiceConfig = {
-  provider: 'openrouter'
+  provider: TAIProvider
   apiKey?: string
   model?: string
+  imageModel?: string
+  webSearchModel?: string
 }
 
 export type TAIToolsConfig = {

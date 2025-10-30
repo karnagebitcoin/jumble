@@ -31,7 +31,36 @@ export default function AccountButton({ collapse }: { collapse: boolean }) {
   }
 }
 
-function ProfileButton({ collapse }: { collapse: boolean }) {
+const ProfileButtonContent = React.forwardRef<HTMLButtonElement, { username: string, avatar: string, defaultAvatar: string }>(
+  ({ username, avatar, defaultAvatar, ...props }, ref) => {
+    const { compactSidebar } = useCompactSidebar()
+
+    return (
+      <Button
+        ref={ref}
+        variant="ghost"
+        className={cn(
+          "clickable shadow-none p-2 w-12 h-12 flex items-center bg-transparent text-foreground hover:text-accent-foreground rounded-lg justify-start gap-4 font-medium transition-all duration-300",
+          compactSidebar ? "" : "xl:px-2 xl:py-2 xl:w-full xl:h-auto xl:opacity-80 xl:hover:opacity-100"
+        )}
+        style={{ fontSize: 'var(--font-size, 14px)' }}
+        {...props}
+      >
+        <div className="flex gap-2 items-center flex-1 w-0">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={avatar} />
+            <AvatarFallback>
+              <img src={defaultAvatar} />
+            </AvatarFallback>
+          </Avatar>
+          <div className={cn("truncate font-medium", compactSidebar ? "hidden" : "max-xl:hidden")}>{username}</div>
+        </div>
+      </Button>
+    )
+  }
+)
+
+function ProfileButton() {
   const { t } = useTranslation()
   const { account, profile } = useNostr()
   const pubkey = account?.pubkey

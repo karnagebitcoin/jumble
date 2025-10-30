@@ -14,10 +14,11 @@ const SidebarItem = forwardRef<
   return (
     <Button
       className={cn(
-        'flex shadow-none items-center transition-colors duration-500 bg-transparent m-0 rounded-lg gap-4 text-lg font-semibold',
-        collapse
-          ? 'w-12 h-12 p-3 [&_svg]:size-full'
-          : 'justify-start w-full h-auto py-2 px-3 [&_svg]:size-5',
+        'flex shadow-none items-center transition-colors duration-500 bg-transparent w-12 h-12 p-3 m-0 rounded-lg gap-4 font-medium [&_svg]:stroke-[1.3]',
+        compactSidebar
+          ? '[&_svg]:size-full'
+          : 'xl:w-full xl:h-auto xl:py-2 xl:px-3 xl:justify-start [&_svg]:size-full xl:[&_svg]:size-4',
+        !active && '[&_svg]:opacity-70 hover:[&_svg]:opacity-100',
         active && 'text-primary hover:text-primary bg-primary/10 hover:bg-primary/10',
         className
       )}

@@ -1,16 +1,17 @@
 import aiService from '@/services/ai.service'
 import storage from '@/services/local-storage.service'
-import { TAIServiceConfig, TAIToolsConfig, TArticleSummary, TAIMessage } from '@/types'
+import { TAIServiceConfig, TArticleSummary, TAIMessage } from '@/types'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNostr } from './NostrProvider'
 
 type TAIContext = {
   serviceConfig: TAIServiceConfig
-  toolsConfig: TAIToolsConfig
   updateServiceConfig: (config: TAIServiceConfig) => void
-  updateToolsConfig: (config: TAIToolsConfig) => void
   summarizeArticle: (title: string, description: string, url: string) => Promise<TArticleSummary>
-  chat: (messages: TAIMessage[]) => Promise<string>
+  chat: (messages: TAIMessage[], userPubkey?: string) => Promise<string>
+  generateImage: (prompt: string) => Promise<string>
+  getAvailableImageModels: () => Promise<Array<{ id: string; name: string }>>
+  getAvailableWebSearchModels: () => Promise<Array<{ id: string; name: string }>>
   isConfigured: boolean
 }
 
@@ -29,16 +30,11 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
   const [serviceConfig, setServiceConfig] = useState<TAIServiceConfig>({
     provider: 'openrouter'
   })
-  const [toolsConfig, setToolsConfig] = useState<TAIToolsConfig>({
-    enableSummary: false
-  })
 
   useEffect(() => {
     const savedServiceConfig = storage.getAIServiceConfig(pubkey)
-    const savedToolsConfig = storage.getAIToolsConfig(pubkey)
 
     setServiceConfig(savedServiceConfig)
-    setToolsConfig(savedToolsConfig)
 
     aiService.setConfig(savedServiceConfig)
   }, [pubkey])
@@ -49,11 +45,6 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     aiService.setConfig(config)
   }
 
-  const updateToolsConfig = (config: TAIToolsConfig) => {
-    setToolsConfig(config)
-    storage.setAIToolsConfig(config, pubkey)
-  }
-
   const summarizeArticle = async (
     title: string,
     description: string,
@@ -62,8 +53,20 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     return await aiService.summarizeArticle(title, description, url)
   }
 
-  const chat = async (messages: TAIMessage[]): Promise<string> => {
-    return await aiService.chat(messages)
+  const chat = async (messages: TAIMessage[], userPubkey?: string): Promise<string> => {
+    return await aiService.chat(messages, userPubkey)
+  }
+
+  const generateImage = async (prompt: string): Promise<string> => {
+    return await aiService.generateImage(prompt)
+  }
+
+  const getAvailableImageModels = async (): Promise<Array<{ id: string; name: string }>> => {
+    return await aiService.getAvailableImageModels()
+  }
+
+  const getAvailableWebSearchModels = async (): Promise<Array<{ id: string; name: string }>> => {
+    return await aiService.getAvailableWebSearchModels()
   }
 
   const isConfigured = !!(serviceConfig.apiKey && serviceConfig.model)
@@ -72,11 +75,12 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     <AIContext.Provider
       value={{
         serviceConfig,
-        toolsConfig,
         updateServiceConfig,
-        updateToolsConfig,
         summarizeArticle,
         chat,
+        generateImage,
+        getAvailableImageModels,
+        getAvailableWebSearchModels,
         isConfigured
       }}
     >

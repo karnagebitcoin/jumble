@@ -11,13 +11,15 @@ export default function Username({
   showAt = false,
   className,
   skeletonClassName,
-  withoutSkeleton = false
+  withoutSkeleton = false,
+  noLink = false
 }: {
   userId: string
   showAt?: boolean
   className?: string
   skeletonClassName?: string
   withoutSkeleton?: boolean
+  noLink?: boolean
 }) {
   const { profile } = useFetchProfile(userId)
   if (!profile && !withoutSkeleton) {
@@ -30,6 +32,24 @@ export default function Username({
   if (!profile) return null
 
   const { username, pubkey } = profile
+
+  if (noLink) {
+    return (
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <div className={className}>
+            <span className="truncate">
+              {showAt && '@'}
+              {username}
+            </span>
+          </div>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80">
+          <ProfileCard pubkey={pubkey} />
+        </HoverCardContent>
+      </HoverCard>
+    )
+  }
 
   return (
     <HoverCard>

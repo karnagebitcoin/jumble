@@ -12,6 +12,7 @@ export default {
     Refresh: 'Rafraîchir',
     Profile: 'Profil',
     Logout: 'Déconnexion',
+    Deck: 'Vue en colonnes',
     Following: 'Abonnements',
     followings: 'abonnements',
     reposted: 'republié',
@@ -470,6 +471,12 @@ export default {
     'Unpinned!': 'Retrait de l’épingle effectué !',
     'Failed to unpin: {{error}}': 'Échec du retrait de l’épingle : {{error}}',
     'Unpin from profile': 'Retirer l’épingle du profil',
-    'Pin to profile': 'Épingler au profil'
+    'Pin to profile': 'Épingler au profil',
+    'Skip Tour': 'Passer la visite',
+    'Get Started': 'Commencer',
+    'Welcome to Nostr': 'Bienvenue sur Nostr',
+    'New to Nostr?': 'Nouveau sur Nostr ?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Faites une visite rapide pour en savoir plus sur les réseaux sociaux décentralisés, les relais et le fonctionnement de Nostr.',
+    'Start Tour': 'Démarrer la visite'
   }
 }

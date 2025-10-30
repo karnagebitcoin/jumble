@@ -42,13 +42,20 @@ export default function Image({
   if (hideIfError && hasError) return null
 
   const handleError = async () => {
+    // If it's a data URL, we can't recover from the error
+    if (imageUrl.startsWith('data:')) {
+      setIsLoading(false)
+      setHasError(true)
+      return
+    }
+
     let oldImageUrl: URL | undefined
     let hash: string | null = null
     try {
       oldImageUrl = new URL(imageUrl)
       hash = getHashFromURL(oldImageUrl)
     } catch (error) {
-      console.error('Invalid image URL:', error)
+      // Invalid URL, can't retry
     }
     if (!pubkey || !hash || !oldImageUrl) {
       setIsLoading(false)

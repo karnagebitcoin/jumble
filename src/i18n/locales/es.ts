@@ -12,6 +12,7 @@ export default {
     Refresh: 'Actualizar',
     Profile: 'Perfil',
     Logout: 'Cerrar sesión',
+    Deck: 'Tablero',
     Following: 'Siguiendo',
     followings: 'siguiendo',
     reposted: 'retransmitido',
@@ -465,6 +466,12 @@ export default {
     'Unpinned!': '¡Desfijado!',
     'Failed to unpin: {{error}}': 'Error al desfijar: {{error}}',
     'Unpin from profile': 'Desfijar del perfil',
-    'Pin to profile': 'Fijar al perfil'
+    'Pin to profile': 'Fijar al perfil',
+    'Skip Tour': 'Saltar recorrido',
+    'Get Started': 'Comenzar',
+    'Welcome to Nostr': 'Bienvenido a Nostr',
+    'New to Nostr?': '¿Nuevo en Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Realiza un recorrido rápido para aprender sobre redes sociales descentralizadas, relays y cómo funciona Nostr.',
+    'Start Tour': 'Iniciar recorrido'
   }
 }

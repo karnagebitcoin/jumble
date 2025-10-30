@@ -67,21 +67,12 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
       const newGallery = [...gallery]
       const normalizedLink = editingImage.link ? normalizeUrl(editingImage.link) : undefined
 
-      console.log('Saving gallery image edit:', {
-        index: editingIndex,
-        url: editingImage.url,
-        description: editingImage.description,
-        originalLink: editingImage.link,
-        normalizedLink: normalizedLink
-      })
-
       // Normalize the link URL before saving
       newGallery[editingIndex] = {
         ...editingImage,
         link: normalizedLink
       }
 
-      console.log('Updated gallery:', newGallery)
       onChange(newGallery)
       setEditingIndex(null)
       setEditingImage(null)
@@ -240,7 +231,6 @@ export default function ProfileGalleryManager({ gallery, onChange }: ProfileGall
                   placeholder={t('https://example.com')}
                   value={editingImage.link || ''}
                   onChange={(e) => {
-                    console.log('Link input changed to:', e.target.value)
                     setEditingImage({ ...editingImage, link: e.target.value })
                   }}
                 />

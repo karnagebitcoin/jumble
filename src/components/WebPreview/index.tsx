@@ -9,7 +9,7 @@ import Image from '../Image'
 
 export default function WebPreview({ url, className }: { url: string; className?: string }) {
   const { autoLoadMedia } = useContentPolicy()
-  const { toolsConfig, isConfigured } = useAI()
+  const { isConfigured } = useAI()
   const { title, description, image } = useFetchWebMetadata(url)
   const [showSummary, setShowSummary] = useState(false)
 
@@ -21,7 +21,7 @@ export default function WebPreview({ url, className }: { url: string; className?
     }
   }, [url])
 
-  const showSummarizeButton = toolsConfig.enableSummary && isConfigured
+  const showSummarizeButton = isConfigured
 
   // Don't show preview if auto-load media is disabled
   if (!autoLoadMedia) {

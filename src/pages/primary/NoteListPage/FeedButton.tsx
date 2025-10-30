@@ -7,7 +7,7 @@ import { useCustomFeeds } from '@/providers/CustomFeedsProvider'
 import { useFavoriteRelays } from '@/providers/FavoriteRelaysProvider'
 import { useFeed } from '@/providers/FeedProvider'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
-import { BookmarkIcon, ChevronDown, Hash, Search, Server, UsersRound } from 'lucide-react'
+import { BookmarkIcon, Box, ChevronDown, Hash, Search, UsersRound } from 'lucide-react'
 import { forwardRef, HTMLAttributes, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -98,12 +98,12 @@ const FeedSwitcherTrigger = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEle
         }
         return <Search />
       }
-      return <Server />
+      return <Box />
     }, [feedInfo, activeCustomFeed])
 
     return (
       <div
-        className={cn('flex items-center gap-2 clickable px-3 h-full rounded-lg', className)}
+        className={cn('flex items-center gap-2 clickable px-3 h-full rounded-lg [&_svg]:text-muted-foreground', className)}
         ref={ref}
         {...props}
       >

@@ -40,12 +40,12 @@ function ExplorePageTitlebar() {
 
   return (
     <div className="flex gap-2 justify-between h-full">
-      <div className="flex gap-2 items-center h-full pl-3">
+      <div className="flex gap-2 items-center h-full pl-3 [&_svg]:text-muted-foreground">
         <Compass />
         <div className="text-lg font-semibold" style={{ fontSize: `calc(var(--font-size, 14px) * 1.286)` }}>{t('Explore')}</div>
       </div>
       <div className="flex gap-1 items-center">
-        <PinButton column={{ type: 'explore' }} />
+        <PinButton column={{ type: 'explore' }} size="titlebar-icon" />
         <Button
           variant="ghost"
           size="titlebar-icon"

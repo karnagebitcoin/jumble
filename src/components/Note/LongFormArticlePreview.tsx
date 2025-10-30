@@ -6,6 +6,8 @@ import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { Event, kinds } from 'nostr-tools'
 import { useMemo } from 'react'
 import Image from '../Image'
+import UserAvatar from '../UserAvatar'
+import Username from '../Username'
 
 export default function LongFormArticlePreview({
   event,
@@ -40,6 +42,14 @@ export default function LongFormArticlePreview({
 
   const summaryComponent = metadata.summary && (
     <div className="text-sm text-muted-foreground line-clamp-4">{metadata.summary}</div>
+  )
+
+  const authorComponent = (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span>by</span>
+      <UserAvatar userId={event.pubkey} size="small" />
+      <Username userId={event.pubkey} className="truncate" />
+    </div>
   )
 
   if (isSmallScreen) {

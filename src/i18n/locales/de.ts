@@ -12,6 +12,7 @@ export default {
     Refresh: 'Aktualisieren',
     Profile: 'Profil',
     Logout: 'Abmelden',
+    Deck: 'Deck-Ansicht',
     Following: 'Folgende',
     followings: 'Folgekonten',
     reposted: 'erneut gepostet',
@@ -471,6 +472,12 @@ export default {
     'Unpinned!': 'Anheften aufgehoben!',
     'Failed to unpin: {{error}}': 'Fehler beim Anheften aufheben: {{error}}',
     'Unpin from profile': 'Vom Profil lösen',
-    'Pin to profile': 'An Profil anheften'
+    'Pin to profile': 'An Profil anheften',
+    'Skip Tour': 'Tour überspringen',
+    'Get Started': 'Loslegen',
+    'Welcome to Nostr': 'Willkommen bei Nostr',
+    'New to Nostr?': 'Neu bei Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'Machen Sie eine kurze Tour, um mehr über dezentrale soziale Netzwerke, Relays und die Funktionsweise von Nostr zu erfahren.',
+    'Start Tour': 'Tour starten'
   }
 }

@@ -78,8 +78,13 @@ export const toRelay = (url: string) => `/relays/${encodeURIComponent(url)}`
 export const toRelayReviews = (url: string) => `/relays/${encodeURIComponent(url)}/reviews`
 export const toMuteList = () => '/mutes'
 export const toRizful = () => '/rizful'
+export const toListsIndex = () => '/lists'
+export const toList = (id: string) => `/lists/${id}`
+export const toCreateList = () => '/lists/create'
+export const toEditList = (id: string) => `/lists/${id}/edit`
 
 export const toChachiChat = (relay: string, d: string) => {
   return `https://chachi.chat/${relay.replace(/^wss?:\/\//, '').replace(/\/$/, '')}/${d}`
 }
 export const toNjump = (id: string) => `https://njump.me/${id}`
+export const toArticle = (naddr: string) => `/articles/${naddr}`

@@ -24,6 +24,9 @@ import { NostrProvider } from '@/providers/NostrProvider'
 import { PageThemeProvider } from '@/providers/PageThemeProvider'
 import { PinListProvider } from '@/providers/PinListProvider'
 import { PrimaryColorProvider } from '@/providers/PrimaryColorProvider'
+import { ReadsVisibilityProvider } from '@/providers/ReadsVisibilityProvider'
+import { ListsVisibilityProvider } from '@/providers/ListsVisibilityProvider'
+import { ListsProvider } from '@/providers/ListsProvider'
 import { ReplyProvider } from '@/providers/ReplyProvider'
 import { ScreenSizeProvider } from '@/providers/ScreenSizeProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
@@ -35,6 +38,7 @@ import { WidgetsProvider } from '@/providers/WidgetsProvider'
 import { WidgetSidebarDismissedProvider } from '@/providers/WidgetSidebarDismissedProvider'
 import { ZapProvider } from '@/providers/ZapProvider'
 import { PageManager } from './PageManager'
+import { AppWithListPreview } from './components/AppWithListPreview'
 
 export default function App(): JSX.Element {
   return (
@@ -49,50 +53,56 @@ export default function App(): JSX.Element {
                     <CompactSidebarProvider>
                       <DistractionFreeModeProvider>
                         <ContentPolicyProvider>
-                        <ScreenSizeProvider>
-                          <DeletedEventProvider>
-                            <NostrProvider>
-                              <ZapProvider>
-                                <TranslationServiceProvider>
-                                  <AIProvider>
-                                      <FavoriteRelaysProvider>
-                                        <FollowListProvider>
-                                          <MuteListProvider>
-                                            <UserTrustProvider>
-                                              <BookmarksProvider>
-                                                <PinListProvider>
-                                                  <CustomFeedsProvider>
-                                                    <FeedProvider>
-                                                      <ReplyProvider>
-                                                        <MediaUploadServiceProvider>
-                                                          <KindFilterProvider>
-                                                            <UserPreferencesProvider>
-                                                              <TrendingNotesDismissedProvider>
-                                                                <WidgetsProvider>
-                                                                  <WidgetSidebarDismissedProvider>
-                                                                    <PageManager />
-                                                                    <Toaster />
-                                                                  </WidgetSidebarDismissedProvider>
-                                                                </WidgetsProvider>
-                                                              </TrendingNotesDismissedProvider>
-                                                            </UserPreferencesProvider>
-                                                          </KindFilterProvider>
-                                                        </MediaUploadServiceProvider>
-                                                      </ReplyProvider>
-                                                    </FeedProvider>
-                                                  </CustomFeedsProvider>
-                                                </PinListProvider>
-                                              </BookmarksProvider>
-                                            </UserTrustProvider>
-                                          </MuteListProvider>
-                                        </FollowListProvider>
-                                      </FavoriteRelaysProvider>
-                                    </AIProvider>
-                                  </TranslationServiceProvider>
-                              </ZapProvider>
-                            </NostrProvider>
-                          </DeletedEventProvider>
-                          </ScreenSizeProvider>
+                          <ReadsVisibilityProvider>
+                            <ListsVisibilityProvider>
+                              <ScreenSizeProvider>
+                                <DeletedEventProvider>
+                              <NostrProvider>
+                                <ListsProvider>
+                                  <ZapProvider>
+                                    <TranslationServiceProvider>
+                                      <AIProvider>
+                                        <FavoriteRelaysProvider>
+                                          <FollowListProvider>
+                                            <MuteListProvider>
+                                              <UserTrustProvider>
+                                                <BookmarksProvider>
+                                                  <PinListProvider>
+                                                    <CustomFeedsProvider>
+                                                      <FeedProvider>
+                                                        <ReplyProvider>
+                                                          <MediaUploadServiceProvider>
+                                                            <KindFilterProvider>
+                                                              <UserPreferencesProvider>
+                                                                <TrendingNotesDismissedProvider>
+                                                                  <WidgetsProvider>
+                                                                    <WidgetSidebarDismissedProvider>
+                                                                      <AppWithListPreview />
+                                                                      <Toaster />
+                                                                    </WidgetSidebarDismissedProvider>
+                                                                  </WidgetsProvider>
+                                                                </TrendingNotesDismissedProvider>
+                                                              </UserPreferencesProvider>
+                                                            </KindFilterProvider>
+                                                          </MediaUploadServiceProvider>
+                                                        </ReplyProvider>
+                                                      </FeedProvider>
+                                                    </CustomFeedsProvider>
+                                                  </PinListProvider>
+                                                </BookmarksProvider>
+                                              </UserTrustProvider>
+                                            </MuteListProvider>
+                                          </FollowListProvider>
+                                        </FavoriteRelaysProvider>
+                                      </AIProvider>
+                                    </TranslationServiceProvider>
+                                  </ZapProvider>
+                                </ListsProvider>
+                              </NostrProvider>
+                                </DeletedEventProvider>
+                              </ScreenSizeProvider>
+                            </ListsVisibilityProvider>
+                          </ReadsVisibilityProvider>
                         </ContentPolicyProvider>
                       </DistractionFreeModeProvider>
                     </CompactSidebarProvider>

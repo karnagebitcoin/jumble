@@ -91,6 +91,9 @@ class LocalStorageService {
   private zapOnReactions: boolean = false
   private onlyZapsMode: boolean = false
   private distractionFreeMode: TDistractionFreeMode = DISTRACTION_FREE_MODE.DRAIN_MY_TIME
+  private hideReadsInNavigation: boolean = false
+  private hideReadsInProfiles: boolean = false
+  private favoriteListsMap: Record<string, string[]> = {}
 
   constructor() {
     if (!LocalStorageService.instance) {
@@ -293,8 +296,8 @@ class LocalStorageService {
     if (enabledWidgetsStr) {
       this.enabledWidgets = JSON.parse(enabledWidgetsStr)
     } else {
-      // Default to trending notes enabled
-      this.enabledWidgets = ['trending-notes']
+      // Default to tour and trending notes enabled for new users
+      this.enabledWidgets = ['tour', 'trending-notes']
       window.localStorage.setItem(StorageKey.ENABLED_WIDGETS, JSON.stringify(this.enabledWidgets))
     }
 
@@ -353,6 +356,27 @@ class LocalStorageService {
       Object.values(DISTRACTION_FREE_MODE).includes(distractionFreeMode as TDistractionFreeMode)
     ) {
       this.distractionFreeMode = distractionFreeMode as TDistractionFreeMode
+    }
+
+    this.hideReadsInNavigation =
+      window.localStorage.getItem(StorageKey.HIDE_READS_IN_NAVIGATION) === 'true'
+
+    this.hideReadsInProfiles =
+      window.localStorage.getItem(StorageKey.HIDE_READS_IN_PROFILES) === 'true'
+
+    const favoriteListsMapStr = window.localStorage.getItem(StorageKey.FAVORITE_LISTS)
+    if (favoriteListsMapStr) {
+      try {
+        const parsed = JSON.parse(favoriteListsMapStr)
+        // Handle migration from old array format to new map format
+        if (Array.isArray(parsed)) {
+          this.favoriteListsMap = { _global: parsed }
+        } else {
+          this.favoriteListsMap = parsed
+        }
+      } catch {
+        this.favoriteListsMap = {}
+      }
     }
 
     // Clean up deprecated data
@@ -884,7 +908,9 @@ class LocalStorageService {
   }
 
   getAIServiceConfig(pubkey?: string | null): TAIServiceConfig {
-    return this.aiServiceConfigMap[pubkey ?? '_'] ?? { provider: 'openrouter' }
+    return this.aiServiceConfigMap[pubkey ?? '_'] ?? {
+      provider: 'openrouter'
+    }
   }
 
   setAIServiceConfig(config: TAIServiceConfig, pubkey?: string | null) {
@@ -899,6 +925,51 @@ class LocalStorageService {
   setAIToolsConfig(config: TAIToolsConfig, pubkey?: string | null) {
     this.aiToolsConfigMap[pubkey ?? '_'] = config
     window.localStorage.setItem(StorageKey.AI_TOOLS_CONFIG_MAP, JSON.stringify(this.aiToolsConfigMap))
+  }
+
+  getHideReadsInNavigation() {
+    return this.hideReadsInNavigation
+  }
+
+  setHideReadsInNavigation(hide: boolean) {
+    this.hideReadsInNavigation = hide
+    window.localStorage.setItem(StorageKey.HIDE_READS_IN_NAVIGATION, hide.toString())
+  }
+
+  getHideReadsInProfiles() {
+    return this.hideReadsInProfiles
+  }
+
+  setHideReadsInProfiles(hide: boolean) {
+    this.hideReadsInProfiles = hide
+    window.localStorage.setItem(StorageKey.HIDE_READS_IN_PROFILES, hide.toString())
+  }
+
+  getFavoriteLists(pubkey?: string | null) {
+    const key = pubkey || '_global'
+    return this.favoriteListsMap[key] || []
+  }
+
+  addFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    if (!currentFavorites.includes(listKey)) {
+      this.favoriteListsMap[key] = [...currentFavorites, listKey]
+      window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteListsMap))
+    }
+  }
+
+  removeFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    this.favoriteListsMap[key] = currentFavorites.filter((k) => k !== listKey)
+    window.localStorage.setItem(StorageKey.FAVORITE_LISTS, JSON.stringify(this.favoriteListsMap))
+  }
+
+  isFavoriteList(listKey: string, pubkey?: string | null) {
+    const key = pubkey || '_global'
+    const currentFavorites = this.favoriteListsMap[key] || []
+    return currentFavorites.includes(listKey)
   }
 }
 

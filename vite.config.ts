@@ -48,8 +48,8 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'Jumble',
-        short_name: 'Jumble',
+        name: 'JumbleKat',
+        short_name: 'JumbleKat',
         icons: [
           {
             src: '/pwa-512x512.png',

@@ -1,11 +1,13 @@
 import KindFilter from '@/components/KindFilter'
 import NoteList, { TNoteListRef } from '@/components/NoteList'
+import ArticleList, { TArticleListRef } from '@/components/ArticleList'
 import Tabs from '@/components/Tabs'
 import { BIG_RELAY_URLS, MAX_PINNED_NOTES, SEARCHABLE_RELAY_URLS } from '@/constants'
 import { generateBech32IdFromETag } from '@/lib/tag'
 import { isTouchDevice } from '@/lib/utils'
 import { useKindFilter } from '@/providers/KindFilterProvider'
 import { useNostr } from '@/providers/NostrProvider'
+import { useReadsVisibility } from '@/providers/ReadsVisibilityProvider'
 import client from '@/services/client.service'
 import storage from '@/services/local-storage.service'
 import relayInfoService from '@/services/relay-info.service'
@@ -25,6 +27,7 @@ export default function ProfileFeed({
 }) {
   const { pubkey: myPubkey, pinListEvent: myPinListEvent } = useNostr()
   const { showKinds } = useKindFilter()
+  const { hideReadsInProfiles } = useReadsVisibility()
   const [temporaryShowKinds, setTemporaryShowKinds] = useState(showKinds)
   const [listMode, setListMode] = useState<TNoteListMode>(() => storage.getNoteListMode())
   const [subRequests, setSubRequests] = useState<TFeedSubRequest[]>([])
@@ -35,14 +38,26 @@ export default function ProfileFeed({
       { value: 'postsAndReplies', label: 'Replies' }
     ]
 
+    if (!hideReadsInProfiles) {
+      _tabs.push({ value: 'reads', label: 'Reads' })
+    }
+
     if (myPubkey && myPubkey !== pubkey) {
       _tabs.push({ value: 'you', label: 'YouTabName' })
     }
 
     return _tabs
-  }, [myPubkey, pubkey])
+  }, [myPubkey, pubkey, hideReadsInProfiles])
   const supportTouch = useMemo(() => isTouchDevice(), [])
   const noteListRef = useRef<TNoteListRef>(null)
+  const articleListRef = useRef<TArticleListRef>(null)
+
+  useEffect(() => {
+    // If user is on reads tab and it gets hidden, switch to posts
+    if (listMode === 'reads' && hideReadsInProfiles) {
+      setListMode('posts')
+    }
+  }, [hideReadsInProfiles, listMode])
 
   useEffect(() => {
     const initPinnedEventIds = async () => {
@@ -139,6 +154,7 @@ export default function ProfileFeed({
   const handleListModeChange = (mode: TNoteListMode) => {
     setListMode(mode)
     noteListRef.current?.scrollToTop('smooth')
+    articleListRef.current?.scrollToTop('smooth')
   }
 
   const handleShowKindsChange = (newShowKinds: number[]) => {
@@ -157,10 +173,12 @@ export default function ProfileFeed({
         threshold={Math.max(800, topSpace)}
         options={
           <>
-            {!supportTouch && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
-            <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />
+            {!supportTouch && listMode !== 'reads' && <RefreshButton onClick={() => noteListRef.current?.refresh()} />}
+            {!supportTouch && listMode === 'reads' && <RefreshButton onClick={() => articleListRef.current?.refresh()} />}
+            {listMode !== 'reads' && <KindFilter showKinds={temporaryShowKinds} onShowKindsChange={handleShowKindsChange} />}
           </>
         }
+        isInDeckView={isInDeckView}
       />
       <NoteList
         ref={noteListRef}

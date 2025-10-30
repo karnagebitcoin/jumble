@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useDeepBrowsing } from '@/providers/DeepBrowsingProvider'
+import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '../ui/scroll-area'
@@ -14,16 +15,30 @@ export default function Tabs({
   value,
   onTabChange,
   threshold = 800,
-  options = null
+  options = null,
+  isInDeckView = false
 }: {
   tabs: TabDefinition[]
   value: string
   onTabChange?: (tab: string) => void
   threshold?: number
   options?: ReactNode
+  isInDeckView?: boolean
 }) {
   const { t } = useTranslation()
-  const { deepBrowsing, lastScrollTop } = useDeepBrowsing()
+  const { isSmallScreen } = useScreenSize()
+
+  // Make useDeepBrowsing optional - use default values if not available
+  let deepBrowsing = false
+  let lastScrollTop = 0
+  try {
+    const deepBrowsingContext = useDeepBrowsing()
+    deepBrowsing = deepBrowsingContext.deepBrowsing
+    lastScrollTop = deepBrowsingContext.lastScrollTop
+  } catch (error) {
+    // DeepBrowsingProvider not available, use default values
+  }
+
   const tabRefs = useRef<(HTMLDivElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 })
@@ -87,8 +102,12 @@ export default function Tabs({
     <div
       ref={containerRef}
       className={cn(
-        'sticky flex justify-between top-12 bg-background z-30 px-1 w-full transition-transform border-b',
-        deepBrowsing && lastScrollTop > threshold ? '-translate-y-[calc(100%+12rem)]' : ''
+        'sticky flex justify-between bg-background/80 backdrop-blur-xl z-30 px-1 w-full transition-transform',
+        !isSmallScreen && 'border-b',
+        isInDeckView ? 'top-0' : 'top-12',
+        deepBrowsing && lastScrollTop > threshold
+          ? (isInDeckView ? '-translate-y-full' : '-translate-y-[calc(100%+12rem)]')
+          : ''
       )}
     >
       <ScrollArea className="flex-1 w-0">

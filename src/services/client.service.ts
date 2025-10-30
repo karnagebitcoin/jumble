@@ -1326,6 +1326,18 @@ class ClientService extends EventTarget {
     return this.fetchReplaceableEvent(pubkey, kinds.Pinlist)
   }
 
+  async fetchStarterPackEvents(pubkey: string) {
+    const events = await this.pool.querySync(BIG_RELAY_URLS, {
+      kinds: [ExtendedKind.STARTER_PACK],
+      authors: [pubkey]
+    })
+    return events.sort((a, b) => b.created_at - a.created_at)
+  }
+
+  async fetchStarterPackEvent(pubkey: string, dTag: string) {
+    return await this.fetchReplaceableEvent(pubkey, ExtendedKind.STARTER_PACK, dTag)
+  }
+
   async updateBlossomServerListEventCache(evt: NEvent) {
     await this.updateReplaceableEventCache(evt)
   }

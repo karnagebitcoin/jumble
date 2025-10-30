@@ -55,10 +55,6 @@ export function getProfileFromEvent(event: Event) {
       profileObj.name?.trim() ||
       profileObj.nip05?.split('@')[0]?.trim()
 
-    if (profileObj.gallery) {
-      console.log('Profile has gallery with', profileObj.gallery.length, 'images:', profileObj.gallery)
-    }
-
     return {
       pubkey: event.pubkey,
       npub: pubkeyToNpub(event.pubkey) ?? '',

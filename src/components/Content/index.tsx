@@ -11,11 +11,11 @@ import {
 } from '@/lib/content-parser'
 import { getImetaInfosFromEvent } from '@/lib/event'
 import { getEmojiInfosFromEmojiTags, getImetaInfoFromImetaTag } from '@/lib/tag'
-import { cn } from '@/lib/utils'
+import { cn, detectLanguage } from '@/lib/utils'
 import mediaUpload from '@/services/media-upload.service'
 import { TImetaInfo } from '@/types'
 import { Event } from 'nostr-tools'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import {
   EmbeddedHashtag,
   EmbeddedLNInvoice,
@@ -29,6 +29,12 @@ import ImageGallery from '../ImageGallery'
 import MediaPlayer from '../MediaPlayer'
 import WebPreview from '../WebPreview'
 import YoutubeEmbeddedPlayer from '../YoutubeEmbeddedPlayer'
+import TranslationIndicator from '../TranslationIndicator'
+import ShowTranslatedButton from '../ShowTranslatedButton'
+import { useTranslationService } from '@/providers/TranslationServiceProvider'
+import { useTranslation } from 'react-i18next'
+import { ExtendedKind } from '@/constants'
+import { kinds } from 'nostr-tools'
 
 export default function Content({
   event,
@@ -44,6 +50,41 @@ export default function Content({
   compactMedia?: boolean
 }) {
   const translatedEvent = useTranslatedEvent(event?.id)
+  const { autoTranslateEvent, shouldAutoTranslate } = useTranslationService()
+  const { i18n } = useTranslation()
+
+  // Auto-translate effect
+  useEffect(() => {
+    if (!event || !shouldAutoTranslate()) {
+      return
+    }
+
+    // Check if content needs translation
+    const supported = [
+      kinds.ShortTextNote,
+      kinds.Highlights,
+      ExtendedKind.COMMENT,
+      ExtendedKind.PICTURE,
+      ExtendedKind.POLL,
+      ExtendedKind.RELAY_REVIEW
+    ].includes(event.kind)
+
+    if (!supported) {
+      return
+    }
+
+    const detected = detectLanguage(event.content)
+    if (!detected) return
+
+    // Don't translate if already in target language
+    if (detected !== 'und' && i18n.language.startsWith(detected)) {
+      return
+    }
+
+    // Trigger auto-translation
+    autoTranslateEvent(event)
+  }, [event, shouldAutoTranslate, autoTranslateEvent, i18n.language])
+
   const { nodes, allImages, lastNormalUrl, emojiInfos } = useMemo(() => {
     const _content = translatedEvent?.content ?? event?.content ?? content
     if (!_content) return {}
@@ -99,6 +140,8 @@ export default function Content({
   let imageIndex = 0
   return (
     <div className={cn('text-wrap break-words whitespace-pre-wrap', className)}>
+      {event && translatedEvent && <TranslationIndicator event={event} className="mb-2" />}
+      {event && !translatedEvent && <ShowTranslatedButton event={event} className="mb-2" />}
       {nodes.map((node, index) => {
         if (node.type === 'text') {
           return node.data

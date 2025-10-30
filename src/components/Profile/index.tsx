@@ -34,7 +34,7 @@ import Followings from './Followings'
 import ProfileFeed from './ProfileFeed'
 import Relays from './Relays'
 
-export default function Profile({ id }: { id?: string }) {
+export default function Profile({ id, isInDeckView = false }: { id?: string; isInDeckView?: boolean }) {
   const { t } = useTranslation()
   const { push } = useSecondaryPage()
   const { profile, isFetching } = useFetchProfile(id)
@@ -267,7 +267,51 @@ export default function Profile({ id }: { id?: string }) {
           />
         </div>
       </div>
-      <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} search={debouncedInput} />
+      <ProfileFeed pubkey={pubkey} topSpace={topContainerHeight + 100} isInDeckView={isInDeckView} />
+      {avatarLightboxIndex >= 0 &&
+        avatar &&
+        createPortal(
+          <div onClick={(e) => e.stopPropagation()}>
+            <Lightbox
+              index={avatarLightboxIndex}
+              slides={[{ src: avatar }]}
+              plugins={[Zoom]}
+              open={avatarLightboxIndex >= 0}
+              close={() => setAvatarLightboxIndex(-1)}
+              controller={{
+                closeOnBackdropClick: true,
+                closeOnPullUp: true,
+                closeOnPullDown: true
+              }}
+              styles={{
+                toolbar: { paddingTop: '2.25rem' }
+              }}
+            />
+          </div>,
+          document.body
+        )}
+      {bannerLightboxIndex >= 0 &&
+        banner &&
+        createPortal(
+          <div onClick={(e) => e.stopPropagation()}>
+            <Lightbox
+              index={bannerLightboxIndex}
+              slides={[{ src: banner }]}
+              plugins={[Zoom]}
+              open={bannerLightboxIndex >= 0}
+              close={() => setBannerLightboxIndex(-1)}
+              controller={{
+                closeOnBackdropClick: true,
+                closeOnPullUp: true,
+                closeOnPullDown: true
+              }}
+              styles={{
+                toolbar: { paddingTop: '2.25rem' }
+              }}
+            />
+          </div>,
+          document.body
+        )}
     </>
   )
 }

@@ -454,6 +454,12 @@ export default {
     'Unpinned!': 'ยกเลิกปักหมุดแล้ว!',
     'Failed to unpin: {{error}}': 'ไม่สามารถยกเลิกปักหมุดได้: {{error}}',
     'Unpin from profile': 'ยกเลิกปักหมุดจากโปรไฟล์',
-    'Pin to profile': 'ปักหมุดไปที่โปรไฟล์'
+    'Pin to profile': 'ปักหมุดไปที่โปรไฟล์',
+    'Skip Tour': 'ข้ามทัวร์',
+    'Get Started': 'เริ่มต้น',
+    'Welcome to Nostr': 'ยินดีต้อนรับสู่ Nostr',
+    'New to Nostr?': 'ใหม่กับ Nostr?',
+    'Take a quick tour to learn about decentralized social networking, relays, and how Nostr works.': 'ทำทัวร์สั้นๆ เพื่อเรียนรู้เกี่ยวกับโซเชียลเน็ตเวิร์กแบบกระจายอำนาจ รีเลย์ และวิธีการทำงานของ Nostr',
+    'Start Tour': 'เริ่มทัวร์'
   }
 }

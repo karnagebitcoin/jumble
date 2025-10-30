@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { getImetaInfosFromEvent } from '@/lib/event'
 import { useScreenSize } from '@/providers/ScreenSizeProvider'
 import { usePageTheme } from '@/providers/PageThemeProvider'
+import { useNostr } from '@/providers/NostrProvider'
 
 interface AIPromptWidgetProps {
   widgetId: string
@@ -65,6 +66,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
   const { event, isFetching } = useFetchEvent(eventId)
   const { isSmallScreen } = useScreenSize()
   const { pageTheme } = usePageTheme()
+  const { pubkey } = useNostr()
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -117,7 +119,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
       ]
 
       // Get AI response
-      const response = await chat(conversationMessages)
+      const response = await chat(conversationMessages, pubkey)
 
       // Update messages
       const newMessages = [
@@ -192,7 +194,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
             <div
               key={index}
               className={cn(
-                'p-3 rounded-lg text-sm',
+                'p-3 rounded-lg text-sm max-h-[400px] overflow-y-auto',
                 message.role === 'user'
                   ? 'bg-primary text-primary-foreground ml-8'
                   : 'bg-muted mr-8'
@@ -254,7 +256,8 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
     <div
       className={cn(
         'fixed bottom-4 right-4 w-[420px] max-h-[600px] rounded-xl shadow-2xl bg-card flex flex-col z-50',
-        pageTheme === 'pure-black' ? 'border border-neutral-900' : 'border'
+        pageTheme === 'pure-black' ? 'border border-neutral-900' :
+        pageTheme === 'white' ? 'border border-border shadow-xl' : 'border'
       )}
     >
       {/* Header */}
@@ -304,7 +307,7 @@ export default function AIPromptWidget({ widgetId, eventId }: AIPromptWidgetProp
           <div
             key={index}
             className={cn(
-              'p-3 rounded-lg text-sm',
+              'p-3 rounded-lg text-sm max-h-[400px] overflow-y-auto',
               message.role === 'user'
                 ? 'bg-primary text-primary-foreground ml-8'
                 : 'bg-muted mr-8'
