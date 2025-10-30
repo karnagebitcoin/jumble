@@ -232,8 +232,10 @@ export type TMediaAutoLoadPolicy =
 export type TDistractionFreeMode =
   (typeof DISTRACTION_FREE_MODE)[keyof typeof DISTRACTION_FREE_MODE]
 
+export type TAIProvider = 'openrouter' | 'ppq'
+
 export type TAIServiceConfig = {
-  provider: 'openrouter'
+  provider: TAIProvider
   apiKey?: string
   model?: string
   imageModel?: string

@@ -18,6 +18,31 @@ class AIService {
   /**
    * Enhanced chat with support for Nostr search capabilities
    */
+  private getEndpoint(): string {
+    switch (this.config.provider) {
+      case 'ppq':
+        return 'https://api.ppq.ai/chat/completions'
+      case 'openrouter':
+      default:
+        return 'https://openrouter.ai/api/v1/chat/completions'
+    }
+  }
+
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.config.apiKey}`,
+      'Content-Type': 'application/json'
+    }
+
+    // OpenRouter specific headers
+    if (this.config.provider === 'openrouter') {
+      headers['HTTP-Referer'] = window.location.origin
+      headers['X-Title'] = 'Jumble'
+    }
+
+    return headers
+  }
+
   async chat(messages: TAIMessage[], userPubkey?: string): Promise<string> {
     if (!this.config.apiKey) {
       throw new Error('API key not configured')
@@ -31,14 +56,9 @@ class AIService {
       // Add system context about Nostr search capabilities
       const enhancedMessages = this.enhanceMessagesWithSearchContext(messages, userPubkey)
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(this.getEndpoint(), {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Jumble'
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           model: this.config.model,
           messages: enhancedMessages,
@@ -162,14 +182,9 @@ Format your response as JSON with this exact structure:
 }`
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(this.getEndpoint(), {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Jumble'
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           model: this.config.model,
           messages: [
@@ -220,10 +235,15 @@ Format your response as JSON with this exact structure:
     }
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`
-        }
+      // Test with a simple chat completion request
+      const response = await fetch(this.getEndpoint(), {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          model: this.config.model || (this.config.provider === 'ppq' ? 'gpt-4o-mini' : 'meta-llama/llama-3.3-8b-instruct:free'),
+          messages: [{ role: 'user', content: 'test' }],
+          max_tokens: 1
+        })
       })
       return response.ok
     } catch {
@@ -279,14 +299,9 @@ Format your response as JSON with this exact structure:
         ]
       }
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(this.getEndpoint(), {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Jumble'
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(requestBody)
       })
 
