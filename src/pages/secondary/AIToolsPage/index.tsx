@@ -158,7 +158,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
               )}
               onClick={() => handleProviderSelect('openrouter')}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 pt-4">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base">OpenRouter</CardTitle>
                   {selectedProvider === 'openrouter' && (
@@ -179,7 +179,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
               )}
               onClick={() => handleProviderSelect('ppq')}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 pt-4">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base">PPQ.ai</CardTitle>
                   {selectedProvider === 'ppq' && (
