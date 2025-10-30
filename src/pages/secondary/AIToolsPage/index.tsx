@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +14,7 @@ import { useAI } from '@/providers/AIProvider'
 import { TAIProvider } from '@/types'
 import aiService from '@/services/ai.service'
 import { Check, Eye, EyeOff } from 'lucide-react'
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -32,6 +31,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const [availableImageModels, setAvailableImageModels] = useState<Array<{ id: string; name: string }>>([])
   const [availableWebSearchModels, setAvailableWebSearchModels] = useState<Array<{ id: string; name: string }>>([])
   const [showApiKey, setShowApiKey] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setSelectedProvider(serviceConfig.provider || 'openrouter')
@@ -65,14 +65,15 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     loadWebSearchModels()
   }
 
-  const handleSaveApiKey = async () => {
-    if (!apiKey.trim()) {
-      toast.error(t('Please enter an API key'))
+  const saveApiKey = useCallback(async (key: string) => {
+    if (!key.trim()) {
+      // If empty, just update the config without validation
+      updateServiceConfig({ ...serviceConfig, provider: selectedProvider, apiKey: '' })
       return
     }
 
     // Test the API key
-    const tempConfig = { ...serviceConfig, provider: selectedProvider, apiKey: apiKey.trim() }
+    const tempConfig = { ...serviceConfig, provider: selectedProvider, apiKey: key.trim() }
     aiService.setConfig(tempConfig)
     const isValid = await aiService.testConnection()
 
@@ -83,7 +84,30 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
 
     updateServiceConfig(tempConfig)
     toast.success(t('API key saved successfully'))
-  }
+  }, [serviceConfig, selectedProvider, updateServiceConfig, t])
+
+  const handleApiKeyChange = useCallback((value: string) => {
+    setApiKey(value)
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout to auto-save after 1 second of no typing
+    saveTimeoutRef.current = setTimeout(() => {
+      saveApiKey(value)
+    }, 1000)
+  }, [saveApiKey])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const loadModels = async () => {
     try {
@@ -228,25 +252,22 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
           {/* API Key */}
           <div className="space-y-2">
             <Label htmlFor="api-key">{t('API Key')}</Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  id="api-key"
-                  type={showApiKey ? 'text' : 'password'}
-                  placeholder={t('Enter your API key')}
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              <Button onClick={handleSaveApiKey}>{t('Save')}</Button>
+            <div className="relative">
+              <Input
+                id="api-key"
+                type={showApiKey ? 'text' : 'password'}
+                placeholder={t('Enter your API key')}
+                value={apiKey}
+                onChange={(e) => handleApiKeyChange(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {providerInfo.apiKeyUrl && (
               <p className="text-xs text-muted-foreground">
