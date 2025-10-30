@@ -26,6 +26,8 @@ import AICommand from './AICommand'
 import aiCommandSuggestion from './AICommand/suggestion'
 import ImageCommand from './ImageCommand'
 import imageCommandSuggestion from './ImageCommand/suggestion'
+import WebCommand from './WebCommand'
+import webCommandSuggestion from './WebCommand/suggestion'
 import Preview from './Preview'
 
 export type TPostTextareaHandle = {
@@ -90,6 +92,10 @@ const PostTextarea = forwardRef<
         }),
         ImageCommand.configure({
           suggestion: imageCommandSuggestion,
+          parentEvent
+        }),
+        WebCommand.configure({
+          suggestion: webCommandSuggestion,
           parentEvent
         }),
         ClipboardAndDropHandler.configure({
