@@ -239,6 +239,7 @@ export type TAIServiceConfig = {
   apiKey?: string
   model?: string
   imageModel?: string
+  webSearchModel?: string
 }
 
 export type TAIToolsConfig = {

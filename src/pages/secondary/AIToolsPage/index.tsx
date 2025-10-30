@@ -22,13 +22,15 @@ import { cn } from '@/lib/utils'
 
 const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
-  const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig, getAvailableImageModels } = useAI()
+  const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig, getAvailableImageModels, getAvailableWebSearchModels } = useAI()
   const [selectedProvider, setSelectedProvider] = useState<TAIProvider>(serviceConfig.provider || 'openrouter')
   const [apiKey, setApiKey] = useState(serviceConfig.apiKey || '')
   const [selectedModel, setSelectedModel] = useState(serviceConfig.model || '')
   const [selectedImageModel, setSelectedImageModel] = useState(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
+  const [selectedWebSearchModel, setSelectedWebSearchModel] = useState(serviceConfig.webSearchModel || 'openai/gpt-4o-search-preview')
   const [availableModels, setAvailableModels] = useState<Array<{ id: string; name: string }>>([])
   const [availableImageModels, setAvailableImageModels] = useState<Array<{ id: string; name: string }>>([])
+  const [availableWebSearchModels, setAvailableWebSearchModels] = useState<Array<{ id: string; name: string }>>([])
   const [showApiKey, setShowApiKey] = useState(false)
 
   useEffect(() => {
@@ -36,9 +38,11 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setApiKey(serviceConfig.apiKey || '')
     setSelectedModel(serviceConfig.model || '')
     setSelectedImageModel(serviceConfig.imageModel || 'openai/gpt-5-image-mini')
+    setSelectedWebSearchModel(serviceConfig.webSearchModel || 'openai/gpt-4o-search-preview')
     // Load the handpicked models
     loadModels()
     loadImageModels()
+    loadWebSearchModels()
   }, [serviceConfig])
 
   const handleProviderSelect = (provider: TAIProvider) => {
@@ -48,14 +52,17 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
       provider,
       apiKey: '',
       model: '',
-      imageModel: ''
+      imageModel: '',
+      webSearchModel: ''
     }
     setApiKey('')
     setSelectedModel('')
     setSelectedImageModel('')
+    setSelectedWebSearchModel('')
     updateServiceConfig(newConfig)
     loadModels()
     loadImageModels()
+    loadWebSearchModels()
   }
 
   const handleSaveApiKey = async () => {
@@ -96,6 +103,15 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     }
   }
 
+  const loadWebSearchModels = async () => {
+    try {
+      const models = await getAvailableWebSearchModels()
+      setAvailableWebSearchModels(models)
+    } catch (error) {
+      console.error('Failed to load web search models:', error)
+    }
+  }
+
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
     updateServiceConfig({ ...serviceConfig, provider: selectedProvider, model: modelId })
@@ -106,6 +122,12 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setSelectedImageModel(modelId)
     updateServiceConfig({ ...serviceConfig, provider: selectedProvider, imageModel: modelId })
     toast.success(t('Image model selected successfully'))
+  }
+
+  const handleWebSearchModelSelect = (modelId: string) => {
+    setSelectedWebSearchModel(modelId)
+    updateServiceConfig({ ...serviceConfig, provider: selectedProvider, webSearchModel: modelId })
+    toast.success(t('Web search model selected successfully'))
   }
 
   const handleToggleSummary = (enabled: boolean) => {
@@ -273,39 +295,69 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
             )}
           </div>
 
-          {/* Image Model Selection - Only for OpenRouter */}
-          {selectedProvider === 'openrouter' && (
-            <div className="space-y-2">
-              <Label htmlFor="image-model-select">{t('Image Generation Model')}</Label>
-              <Select
-                value={selectedImageModel}
-                onValueChange={handleImageModelSelect}
-                disabled={availableImageModels.length === 0}
-              >
-                <SelectTrigger id="image-model-select">
-                  <SelectValue
-                    placeholder={
-                      availableImageModels.length === 0
-                        ? t('No image models available')
-                        : t('Select an image model')
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {availableImageModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {availableImageModels.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {t('Model used when you request images via /ai command')}
-                </p>
-              )}
-            </div>
-          )}
+          {/* Image Model Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="image-model-select">{t('Image Generation Model')}</Label>
+            <Select
+              value={selectedImageModel}
+              onValueChange={handleImageModelSelect}
+              disabled={availableImageModels.length === 0}
+            >
+              <SelectTrigger id="image-model-select">
+                <SelectValue
+                  placeholder={
+                    availableImageModels.length === 0
+                      ? t('No image models available')
+                      : t('Select an image model')
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {availableImageModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {availableImageModels.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('Model used when you request images via /ai command')}
+              </p>
+            )}
+          </div>
+
+          {/* Web Search Model Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="web-search-model-select">{t('Web Search Model')}</Label>
+            <Select
+              value={selectedWebSearchModel}
+              onValueChange={handleWebSearchModelSelect}
+              disabled={availableWebSearchModels.length === 0}
+            >
+              <SelectTrigger id="web-search-model-select">
+                <SelectValue
+                  placeholder={
+                    availableWebSearchModels.length === 0
+                      ? t('No web search models available')
+                      : t('Select a web search model')
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {availableWebSearchModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {availableWebSearchModels.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('Model used for web searches and real-time information queries')}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* AI Features Card */}
