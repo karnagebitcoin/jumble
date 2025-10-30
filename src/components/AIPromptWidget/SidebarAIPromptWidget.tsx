@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next'
 import React, { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
-import { Link } from '@tanstack/react-router'
 import { TAIMessage } from '@/types'
+import modalManagerService from '@/services/modal-manager.service'
 
 export default function SidebarAIPromptWidget() {
   const { t } = useTranslation()
@@ -75,6 +75,10 @@ export default function SidebarAIPromptWidget() {
     }
   }
 
+  const handleConfigureAI = () => {
+    modalManagerService.open('/settings/ai-tools')
+  }
+
   return (
     <div className="flex flex-col h-full max-h-[600px]">
       {/* Header */}
@@ -84,11 +88,14 @@ export default function SidebarAIPromptWidget() {
           <h3 className="font-semibold text-sm">{t('AI Prompt')}</h3>
         </div>
         {!isConfigured && (
-          <Link to="/settings/ai-tools">
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-              <Settings className="h-3 w-3" />
-            </Button>
-          </Link>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 w-7 p-0"
+            onClick={handleConfigureAI}
+          >
+            <Settings className="h-3 w-3" />
+          </Button>
         )}
       </div>
 
@@ -101,12 +108,15 @@ export default function SidebarAIPromptWidget() {
               <p className="text-sm text-yellow-600 dark:text-yellow-500 mb-2">
                 {t('AI is not configured')}
               </p>
-              <Link to="/settings/ai-tools">
-                <Button size="sm" variant="outline" className="h-8">
-                  <Settings className="h-3 w-3 mr-2" />
-                  {t('Configure AI Settings')}
-                </Button>
-              </Link>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8"
+                onClick={handleConfigureAI}
+              >
+                <Settings className="h-3 w-3 mr-2" />
+                {t('Configure AI Settings')}
+              </Button>
             </div>
           </div>
         )}
