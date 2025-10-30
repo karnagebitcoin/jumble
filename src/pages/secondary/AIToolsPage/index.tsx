@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import SecondaryPageLayout from '@/layouts/SecondaryPageLayout'
 import { useAI } from '@/providers/AIProvider'
 import { TAIProvider } from '@/types'
@@ -21,7 +20,7 @@ import { cn } from '@/lib/utils'
 
 const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
   const { t } = useTranslation()
-  const { serviceConfig, toolsConfig, updateServiceConfig, updateToolsConfig, getAvailableImageModels, getAvailableWebSearchModels } = useAI()
+  const { serviceConfig, updateServiceConfig, getAvailableImageModels, getAvailableWebSearchModels } = useAI()
   const [selectedProvider, setSelectedProvider] = useState<TAIProvider>(serviceConfig.provider || 'openrouter')
   const [apiKey, setApiKey] = useState(serviceConfig.apiKey || '')
   const [selectedModel, setSelectedModel] = useState(serviceConfig.model || '')
@@ -152,10 +151,6 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
     setSelectedWebSearchModel(modelId)
     updateServiceConfig({ ...serviceConfig, provider: selectedProvider, webSearchModel: modelId })
     toast.success(t('Web search model selected successfully'))
-  }
-
-  const handleToggleSummary = (enabled: boolean) => {
-    updateToolsConfig({ ...toolsConfig, enableSummary: enabled })
   }
 
   const getProviderInfo = (provider: TAIProvider) => {
@@ -381,29 +376,7 @@ const AIToolsPage = forwardRef(({ index }: { index?: number }, ref) => {
           </div>
         </div>
 
-        {/* AI Features Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>{t('Article Summaries')}</CardTitle>
-              <Switch
-                checked={toolsConfig.enableSummary}
-                onCheckedChange={handleToggleSummary}
-                disabled={!serviceConfig.apiKey || !serviceConfig.model}
-              />
-            </div>
-            <CardDescription>
-              {t('Show summarize button on article previews')}
-            </CardDescription>
-          </CardHeader>
-          {(!serviceConfig.apiKey || !serviceConfig.model) && (
-            <CardContent className="pt-0">
-              <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                ⚠️ {t('Please configure your API key and select a model to enable AI features')}
-              </p>
-            </CardContent>
-          )}
-        </Card>
+
       </div>
     </SecondaryPageLayout>
   )
