@@ -196,9 +196,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     // Update title - hide count if in distraction-free mode
     if (newNotificationCount > 0 && !isDistractionFree) {
-      document.title = `(${newNotificationCount >= 10 ? '9+' : newNotificationCount}) Jumble`
+      document.title = `(${newNotificationCount >= 10 ? '9+' : newNotificationCount}) JumbleKat`
     } else {
-      document.title = 'Jumble'
+      document.title = 'JumbleKat'
     }
 
     // Update favicons - hide notification badge if in distraction-free mode
