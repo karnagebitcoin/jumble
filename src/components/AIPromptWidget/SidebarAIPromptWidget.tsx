@@ -1,5 +1,5 @@
 import { useAI } from '@/providers/AIProvider'
-import { Loader2, Sparkles, Send, AlertCircle, Settings } from 'lucide-react'
+import { Loader2, Sparkles, Send, AlertCircle, Settings, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useTranslation } from 'react-i18next'
@@ -8,15 +8,18 @@ import { cn } from '@/lib/utils'
 import { useNostr } from '@/providers/NostrProvider'
 import { TAIMessage } from '@/types'
 import modalManagerService from '@/services/modal-manager.service'
+import { useWidgets, AVAILABLE_WIDGETS } from '@/providers/WidgetsProvider'
 
 export default function SidebarAIPromptWidget() {
   const { t } = useTranslation()
   const { chat, isConfigured } = useAI()
   const { pubkey } = useNostr()
+  const { toggleWidget } = useWidgets()
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [messages, setMessages] = useState<TAIMessage[]>([])
+  const [isHovered, setIsHovered] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -79,24 +82,42 @@ export default function SidebarAIPromptWidget() {
     modalManagerService.open('/settings/ai-tools')
   }
 
+  // Get the widget name from AVAILABLE_WIDGETS
+  const widgetName = AVAILABLE_WIDGETS.find(w => w.id === 'ai-prompt')?.name || 'AI Prompt'
+
   return (
     <div className="flex flex-col h-full max-h-[600px]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div
+        className="flex items-center justify-between p-4 border-b group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
-          <h3 className="font-semibold text-sm">{t('AI Prompt')}</h3>
+          <h3 className="font-semibold text-muted-foreground" style={{ fontSize: '14px' }}>{widgetName}</h3>
         </div>
-        {!isConfigured && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 w-7 p-0"
-            onClick={handleConfigureAI}
-          >
-            <Settings className="h-3 w-3" />
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {isHovered && (
+            <button
+              className="shrink-0 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+              onClick={() => toggleWidget('ai-prompt')}
+              title={t('Hide widget')}
+            >
+              <EyeOff className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {!isConfigured && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0"
+              onClick={handleConfigureAI}
+            >
+              <Settings className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Chat Messages */}
